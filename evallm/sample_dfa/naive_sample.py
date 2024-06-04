@@ -1,6 +1,6 @@
-from .dfa import DFA
-
 import numpy as np
+
+from .dfa import DFA
 
 
 def naively_sample_dfa(
