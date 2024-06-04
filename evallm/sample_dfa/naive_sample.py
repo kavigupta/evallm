@@ -1,6 +1,7 @@
+import string
 import numpy as np
 
-from .dfa import DFA
+from automata.fa.dfa import DFA
 
 
 def naively_sample_dfa(
@@ -22,10 +23,18 @@ def naively_sample_dfa(
     transitions = rng.randint(0, n_states, size=(n_states, n_symbols))
     start_state = rng.randint(0, n_states)
     accept_states = rng.choice([True, False], size=n_states)
+
+    symbols = string.ascii_letters[:n_symbols]
+    states = [str(i) for i in range(n_states)]
+    assert len(symbols) == n_symbols
+
     return DFA(
-        n_states=n_states,
-        n_symbols=n_symbols,
-        transitions=transitions,
-        start_state=start_state,
-        accept_states=accept_states,
+        states=set(states),
+        input_symbols=set(symbols),
+        transitions={
+            states[i]: {symbols[j]: states[transitions[i, j]] for j in range(n_symbols)}
+            for i in range(n_states)
+        },
+        initial_state=states[start_state],
+        final_states={states[i] for i in range(n_states) if accept_states[i]},
     )
