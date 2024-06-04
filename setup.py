@@ -19,5 +19,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.10",
-    install_requires=["numpy==1.26.3", "automata-lib[visual]==8.3.0"],
+    install_requires=["numpy==1.26.3", "automata-lib==8.3.0"],
+    # optional visual dependencies
+    extras_require={
+        "visual": ["automata-lib[visual]==8.3.0"],
+    },
 )
