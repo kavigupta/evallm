@@ -1,6 +1,6 @@
+import itertools
 from dataclasses import dataclass
 from functools import cached_property
-import itertools
 
 import numpy as np
 import tqdm.auto as tqdm

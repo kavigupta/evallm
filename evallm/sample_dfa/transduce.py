@@ -1,4 +1,5 @@
 from typing import List
+
 from automata.fa.dfa import DFA
 
 

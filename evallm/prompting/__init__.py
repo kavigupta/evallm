@@ -1,1 +1,4 @@
-from .transducer_prompt import CleanTransducerPrompter, BasicInstructionTransducerPrompter
+from .transducer_prompt import (
+    BasicInstructionTransducerPrompter,
+    CleanTransducerPrompter,
+)

@@ -1,6 +1,6 @@
 from typing import List
-from openai import OpenAI
 
+from openai import OpenAI
 from permacache import permacache
 
 # Modify OpenAI's API key and API base to use vLLM's API server.
