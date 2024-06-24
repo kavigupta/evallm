@@ -7,7 +7,6 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
-from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
 from evallm.sample_dfa.naive_sample import naively_sample_dfa
 
 
