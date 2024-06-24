@@ -25,6 +25,13 @@ class Prompter(ABC):
         """
 
     @abstractmethod
+    def display(self) -> str:
+        """
+        Return a unique string representation of the prompter. This should be
+        a valid Python expression that can be used to reconstruct the prompter.
+        """
+
+    @abstractmethod
     def score_completion(self, output, choice) -> np.ndarray:
         """
         Produce a confusion matrix of the completion's likelihood of each output.
@@ -54,6 +61,9 @@ class Prompter(ABC):
             for answer, choice in zip(answers, completions.choices)
         ]
         return metas, prompts, scores
+
+    def __repr__(self):
+        return self.display()
 
 
 class TrivialProblemError(Exception):

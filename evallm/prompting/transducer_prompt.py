@@ -55,9 +55,12 @@ class CleanTransducerPrompter(TransducerPrompter):
 
 class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
 
+    def display(self):
+        return f"BasicInstructionTransducerPrompter({self.num_symbols})"
+
     def display_prompt(self, inp, out):
         pattern = super().display_prompt(inp, out)
         return (
-            "Find the final output, which alternates between"
-            f" inputs and outputs. The pattern is created via a DFA:\n{pattern}"
+            "A DFA was used to create these outputs given a random sequence of inputs. "
+            f"Your job is to fill in the last output:\n{pattern}"
         )

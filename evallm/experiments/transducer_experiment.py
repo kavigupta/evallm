@@ -4,6 +4,7 @@ from functools import cached_property
 
 import numpy as np
 import tqdm.auto as tqdm
+from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
@@ -32,20 +33,25 @@ class TransducerExperimentResult:
         return np.sum(np.diag(self.confusion))
 
 
+@permacache("evallm/experiments/transducer_experiment_2", key_function=dict(prompter=repr))
 def run_transducer_experiment(
     model,
     num_states,
     num_alphabet_symbols,
-    num_sequence_symbols,
+    prompter,
     num_repeats_per_dfa,
     num_dfas,
 ):
     results = []
-    pbar = tqdm.tqdm(total=num_dfas)
+    pbar = tqdm.tqdm(
+        total=num_dfas,
+        desc=f"Num states: {num_states}, "
+        f"Num symbols: {num_alphabet_symbols}, "
+        f"Prompter: {prompter}",
+    )
     for seed in itertools.count():
         rng = np.random.RandomState(seed)
         dfa = naively_sample_dfa(num_states, num_alphabet_symbols, rng)
-        prompter = BasicInstructionTransducerPrompter(num_sequence_symbols)
         try:
             result = TransducerExperimentResult.of(
                 *prompter.run_experiment(dfa, rng, model, num_repeats_per_dfa)
