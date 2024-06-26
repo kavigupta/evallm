@@ -23,6 +23,7 @@ class TransducerExperimentResult:
         inputs, outputs = zip(*metas)
         res = cls(inputs, outputs, prompts, results)
         # populate cache
+        # pylint: disable=pointless-statement
         res.kgram_success_rate
         res.success_rate
         res.null_success_rate
