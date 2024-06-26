@@ -54,7 +54,7 @@ class Prompter(ABC):
         completions = run_prompt(
             model=model,
             prompt=prompts,
-            **self.prompt_kwargs(),
+            kwargs=self.prompt_kwargs(),
         )
         scores = [
             self.score_completion(answer, choice)

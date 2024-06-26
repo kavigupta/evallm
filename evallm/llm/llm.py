@@ -13,7 +13,7 @@ client = OpenAI(
 
 
 @permacache("evallm/llm/llm/run_prompt")
-def run_prompt(model: str, prompt: List[str], **kwargs: dict):
+def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
     completion = client.completions.create(
         model=model,
