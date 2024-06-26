@@ -8,6 +8,7 @@ from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.sample_dfa.naive_sample import naively_sample_dfa
+from evallm.utils import predict_based_on_kgram
 
 
 @dataclass
@@ -15,12 +16,21 @@ class TransducerExperimentResult:
     inputs: list
     outputs: list
     prompts: list
-    confusion: np.ndarray
+    confusion_each: np.ndarray
 
     @classmethod
     def of(cls, metas, prompts, results):
         inputs, outputs = zip(*metas)
-        return cls(inputs, outputs, prompts, np.mean(results, 0))
+        res = cls(inputs, outputs, prompts, results)
+        # populate cache
+        res.kgram_success_rate
+        res.success_rate
+        res.null_success_rate
+        return res
+
+    @cached_property
+    def confusion(self):
+        return np.mean(self.confusion_each, axis=0)
 
     @cached_property
     def null_success_rate(self):
@@ -31,8 +41,25 @@ class TransducerExperimentResult:
     def success_rate(self):
         return np.sum(np.diag(self.confusion))
 
+    @cached_property
+    def success_rate_each(self):
+        return [np.sum(np.diag(confusion)) for confusion in self.confusion_each]
 
-@permacache("evallm/experiments/transducer_experiment_2", key_function=dict(prompter=repr))
+    @cached_property
+    def kgram_successes_each(self):
+        return [
+            predict_based_on_kgram(inp, out) == out[-1]
+            for inp, out in zip(self.inputs, self.outputs)
+        ]
+
+    @cached_property
+    def kgram_success_rate(self):
+        return np.mean(self.kgram_successes_each)
+
+
+@permacache(
+    "evallm/experiments/transducer_experiment_5", key_function=dict(prompter=repr)
+)
 def run_transducer_experiment(
     model,
     num_states,

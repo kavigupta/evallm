@@ -38,8 +38,8 @@ class CleanTransducerPrompter(TransducerPrompter):
 
     def prompt_kwargs(self):
         return {
-            "max_tokens": 4,
             "logprobs": 2,
+            "max_tokens": 4,
         }
 
     def score_completion(self, output, choice):
