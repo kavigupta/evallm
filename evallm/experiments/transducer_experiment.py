@@ -7,6 +7,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
+from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
 from evallm.sample_dfa.naive_sample import naively_sample_dfa
 from evallm.utils import predict_based_on_kgram
 
@@ -24,7 +25,7 @@ class TransducerExperimentResult:
         res = cls(inputs, outputs, prompts, results)
         # populate cache
         # pylint: disable=pointless-statement
-        res.kgram_success_rate
+        res.kgram_successes_each
         res.success_rate
         res.null_success_rate
         return res
@@ -49,17 +50,37 @@ class TransducerExperimentResult:
     @cached_property
     def kgram_successes_each(self):
         return [
-            predict_based_on_kgram(inp, out) == out[-1]
+            [x == out[-1] for x in predict_based_on_kgram(inp, out)]
             for inp, out in zip(self.inputs, self.outputs)
         ]
 
+    @property
+    def kgram_success_rates_each(self):
+        num_k = max(len(successes) for successes in self.kgram_successes_each)
+        success_rates = []
+        for k in range(num_k):
+            success_rates.append(
+                np.mean(
+                    [
+                        successes[k] if k < len(successes) else successes[-1]
+                        for successes in self.kgram_successes_each
+                    ]
+                )
+            )
+        return success_rates
+
     @cached_property
-    def kgram_success_rate(self):
-        return np.mean(self.kgram_successes_each)
+    def success_rate_beats_kgram(self):
+        if self.success_rate > self.kgram_success_rates_each[-1]:
+            return np.inf
+        for k in range(len(self.kgram_success_rates_each) - 1, -1, -1):
+            if self.success_rate > self.kgram_success_rates_each[k]:
+                return k + 1
+        return 0
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_5", key_function=dict(prompter=repr)
+    "evallm/experiments/transducer_experiment_7", key_function=dict(prompter=repr)
 )
 def run_transducer_experiment(
     model,
@@ -91,3 +112,48 @@ def run_transducer_experiment(
             pbar.close()
             break
     return results
+
+
+def current_transducer_experiments():
+    """
+    Updated regularly to reflect the current experiments being run.
+    """
+    num_sequence_symbol_options = [
+        30,
+        40,
+        50,
+        60,
+        70,
+        80,
+        90,
+        100,
+        120,
+        140,
+        160,
+        180,
+        200,
+        250,
+        300,
+        350,
+        400,
+        450,
+        500,
+    ]
+    num_states_options = range(3, 1 + 8)
+    results = {}
+    for num_states in num_states_options:
+        results[num_states] = {}
+        for num_sequence_symbols in num_sequence_symbol_options:
+            results[num_states][num_sequence_symbols] = run_transducer_experiment(
+                "meta-llama/Meta-Llama-3-8B",
+                num_states=num_states,
+                num_alphabet_symbols=3,
+                prompter=BasicInstructionTransducerPrompter(num_sequence_symbols),
+                num_repeats_per_dfa=30,
+                num_dfas=100,
+            )
+    return results
+
+
+if __name__ == "__main__":
+    current_transducer_experiments()
