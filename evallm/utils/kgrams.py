@@ -18,7 +18,6 @@ def predict_from_sequence_based_on_kgram(seq):
     results = []
     for k, _, idxs in longest_terminal_repeated_kgrams(seq):
         preds = [seq[i + k] for i in idxs]
-        print(preds)
         num_ones = sum(1 for x in preds if x == 1)
         if num_ones * 2 > len(preds):
             results.append(1)
@@ -27,7 +26,7 @@ def predict_from_sequence_based_on_kgram(seq):
         else:
             # break ties by whatever the most recent match was
             results.append(preds[-1])
-    return results[-1]
+    return results
 
 
 def predict_based_on_kgram(inp, out):

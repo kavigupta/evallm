@@ -61,7 +61,7 @@ class TestPredictBasedOnKgram(unittest.TestCase):
             evallm.utils.predict_from_sequence_based_on_kgram(
                 ["b", 0, "c", 0, "c", 1, "b", 0, "c"]
             ),
-            0,
+            [1, 1, 0],
         )
 
     def test_tie(self):
@@ -70,12 +70,12 @@ class TestPredictBasedOnKgram(unittest.TestCase):
             evallm.utils.predict_from_sequence_based_on_kgram(
                 ["x", 0, "b", 0, "c", 0, "y", 0, "b", 0, "c", 1, "z", 0, "b", 0, "c"]
             ),
-            1,
+            [1, 1, 1, 1],
         )
         # kgram b0c -> 1 then b0c -> 0, so tie
         self.assertEqual(
             evallm.utils.predict_from_sequence_based_on_kgram(
                 ["x", 0, "b", 0, "c", 1, "y", 0, "b", 0, "c", 0, "z", 0, "b", 0, "c"]
             ),
-            0,
+            [0, 0, 0, 0],
         )
