@@ -4,6 +4,7 @@ from functools import cached_property
 
 import numpy as np
 import tqdm.auto as tqdm
+from evallm.sample_dfa.sample_dfa import sample_dfa
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
@@ -93,12 +94,11 @@ class TransducerExperimentResult:
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_7", key_function=dict(prompter=repr)
+    "evallm/experiments/transducer_experiment_8", key_function=dict(prompter=repr)
 )
 def run_transducer_experiment(
     model,
-    num_states,
-    num_alphabet_symbols,
+    sample_dfa_spec,
     prompter,
     num_repeats_per_dfa,
     num_dfas,
@@ -106,13 +106,11 @@ def run_transducer_experiment(
     results = []
     pbar = tqdm.tqdm(
         total=num_dfas,
-        desc=f"Num states: {num_states}, "
-        f"Num symbols: {num_alphabet_symbols}, "
-        f"Prompter: {prompter}",
+        desc=f"Sampling: {sample_dfa_spec}, " f"Prompter: {prompter}",
     )
     for seed in itertools.count():
         rng = np.random.RandomState(seed)
-        dfa = naively_sample_dfa(num_states, num_alphabet_symbols, rng)
+        dfa = sample_dfa(sample_dfa_spec, rng)
         try:
             result = TransducerExperimentResult.of(
                 *prompter.run_experiment(dfa, rng, model, num_repeats_per_dfa)
@@ -159,8 +157,9 @@ def current_transducer_experiments():
         for num_sequence_symbols in num_sequence_symbol_options:
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
                 "meta-llama/Meta-Llama-3-8B",
-                num_states=num_states,
-                num_alphabet_symbols=3,
+                sample_dfa_spec=dict(
+                    type="naively_sample_dfa", n_states=num_states, n_symbols=3
+                ),
                 prompter=BasicInstructionTransducerPrompter(num_sequence_symbols),
                 num_repeats_per_dfa=30,
                 num_dfas=100,
