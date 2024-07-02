@@ -44,6 +44,10 @@ class TransducerExperimentResult:
         return np.sum(np.diag(self.confusion))
 
     @cached_property
+    def success_rate_binary(self):
+        return np.mean([np.sum(np.diag(x)) > 0.5 for x in self.confusion_each])
+
+    @cached_property
     def success_rate_each(self):
         return [np.sum(np.diag(confusion)) for confusion in self.confusion_each]
 
@@ -70,11 +74,20 @@ class TransducerExperimentResult:
         return success_rates
 
     @cached_property
-    def success_rate_beats_kgram(self):
-        if self.success_rate > self.kgram_success_rates_each[-1]:
+    def success_rate_meets_kgram(self):
+        if self.success_rate >= self.kgram_success_rates_each[-1]:
             return np.inf
         for k in range(len(self.kgram_success_rates_each) - 1, -1, -1):
-            if self.success_rate > self.kgram_success_rates_each[k]:
+            if self.success_rate >= self.kgram_success_rates_each[k]:
+                return k + 1
+        return 0
+
+    @cached_property
+    def success_rate_binary_meets_kgram(self):
+        if self.success_rate_binary >= self.kgram_success_rates_each[-1]:
+            return np.inf
+        for k in range(len(self.kgram_success_rates_each) - 1, -1, -1):
+            if self.success_rate_binary >= self.kgram_success_rates_each[k]:
                 return k + 1
         return 0
 
