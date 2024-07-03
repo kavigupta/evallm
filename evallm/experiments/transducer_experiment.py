@@ -93,7 +93,7 @@ class TransducerExperimentResult:
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_8", key_function=dict(prompter=repr)
+    "evallm/experiments/transducer_experiment_9", key_function=dict(prompter=repr)
 )
 def run_transducer_experiment(
     model,
@@ -157,14 +157,10 @@ def current_transducer_experiments():
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
                 "meta-llama/Meta-Llama-3-8B",
                 sample_dfa_spec=dict(
-                    type="naively_sample_dfa", n_states=num_states, n_symbols=3
+                    type="sample_reachable_dfa", n_states=num_states, n_symbols=3
                 ),
                 prompter=BasicInstructionTransducerPrompter(num_sequence_symbols),
                 num_repeats_per_dfa=30,
                 num_dfas=100,
             )
     return results
-
-
-if __name__ == "__main__":
-    current_transducer_experiments()
