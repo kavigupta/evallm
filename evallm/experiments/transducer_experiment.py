@@ -4,12 +4,11 @@ from functools import cached_property
 
 import numpy as np
 import tqdm.auto as tqdm
-from evallm.sample_dfa.sample_dfa import sample_dfa
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
-from evallm.sample_dfa.naive_sample import naively_sample_dfa
+from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
 
 
