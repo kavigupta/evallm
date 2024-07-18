@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from evallm.llm.llm import run_prompt
+from evallm.llm.llm import run_prompt, model_specs
 
 
 class Prompter(ABC):
@@ -47,15 +47,20 @@ class Prompter(ABC):
 
     def run_experiment(self, dfa, rng, model, num_samples):
         metas, prompts, answers = zip(
-            *[self.prompt_and_answer(dfa, rng) for _ in range(num_samples)]
+            *[
+                self.prompt_and_answer(dfa, rng, is_chat=model_specs[model].is_chat)
+                for _ in range(num_samples)
+            ]
         )
         if self.trivial(metas, answers):
             raise TrivialProblemError
+        print(prompts[0])
         completions = run_prompt(
             model=model,
             prompt=prompts,
             kwargs=self.prompt_kwargs(),
         )
+        print(completions.choices[0])
         scores = [
             self.score_completion(answer, choice)
             for answer, choice in zip(answers, completions.choices)
