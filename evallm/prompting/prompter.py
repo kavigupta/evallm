@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from evallm.llm.llm import run_prompt, model_specs
+from evallm.llm.llm import model_specs, run_prompt
 
 
 class Prompter(ABC):

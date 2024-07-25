@@ -1,15 +1,15 @@
 import codecs
-from dataclasses import dataclass
 import io
 import json
 import time
+from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 from uuid import uuid4
 
+import tqdm.auto as tqdm
 from openai import OpenAI
 from permacache import permacache
-import tqdm.auto as tqdm
 
 sketch5_client = OpenAI(
     api_key="EMPTY",

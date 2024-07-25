@@ -7,7 +7,10 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
-from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter, ChainOfThoughtPrompt
+from evallm.prompting.transducer_prompt import (
+    BasicInstructionTransducerPrompter,
+    ChainOfThoughtPrompt,
+)
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
 
