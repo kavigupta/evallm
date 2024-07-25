@@ -15,8 +15,15 @@ sketch5_client = OpenAI(
     api_key="EMPTY",
     base_url="http://sketch5.csail.mit.edu:52372/v1",
 )
+
+
+def openai_key():
+    with open("/mnt/md0/.openaikey") as f:
+        return f.read().strip()
+
+
 openai_client = OpenAI(
-    api_key=open("/mnt/md0/.openaikey").read().strip(),
+    api_key=openai_key(),
     base_url="https://api.openai.com/v1",
 )
 

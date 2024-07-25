@@ -63,8 +63,11 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
     def display(self):
         return f"BasicInstructionTransducerPrompter({self.num_symbols})"
 
-    def display_prompt(self, inp, out):
-        pattern = super().display_prompt(inp, out)
+    def display_prompt(self, inp, out, is_chat):
+        assert (
+            not is_chat
+        ), "for now, we only support non-chat systems for this prompter"
+        pattern = super().display_prompt(inp, out, is_chat)
         return (
             "A DFA was used to create these outputs given a random sequence of inputs. "
             f"Your job is to fill in the last output:\n{pattern}"
@@ -84,11 +87,14 @@ class ChainOfThoughtPrompt(TransducerPrompter):
     def display_prompt(self, inp, out, is_chat):
         assert is_chat, "for now, we only support chat systems for this prompter"
         return dict(
-            system="You are a question answering system. For each question, think step by step and place your answer between tags like <answer>0</answer> or <answer>1</answer>\n"
-            "QUESTION:\nWhat is 20*2?\n"
-            + "ANSWER:\nTo solve this problem, we need to multiply 20 by 0. We can accomplish this via noticing that anything multiplied by 0 is 0. <answer>0</answer>\n",
-            user="QUESTION:\nA DFA was used to create these outputs given a random sequence of inputs. "
-            + f"Your job is to fill in the last output:\n"
+            system="You are a question answering system. For each question, think step by step and"
+            + " place your answer between tags like <answer>0</answer> or <answer>1</answer>\n"
+            + "QUESTION:\nWhat is 20*2?\n"
+            + "ANSWER:\nTo solve this problem, we need to multiply 20 by 0. We can accomplish this"
+            + " via noticing that anything multiplied by 0 is 0. <answer>0</answer>\n",
+            user="QUESTION:\nA DFA was used to create these outputs given a random"
+            + " sequence of inputs. "
+            + "Your job is to fill in the last output:\n"
             + convert_to_prompt(inp, out)
             + "out: _\n"
             + "\nANSWER:\n",

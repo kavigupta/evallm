@@ -9,7 +9,7 @@ from evallm.llm.llm import model_specs, run_prompt
 class Prompter(ABC):
 
     @abstractmethod
-    def prompt_and_answer(self, dfa, rng) -> Tuple[object, str, object]:
+    def prompt_and_answer(self, dfa, rng, is_chat) -> Tuple[object, str, object]:
         """
         Return a triple of meta information, a prompt, and an answer.
         """
