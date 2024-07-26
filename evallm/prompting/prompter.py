@@ -9,7 +9,7 @@ from evallm.llm.llm import run_prompt
 class Prompter(ABC):
 
     @abstractmethod
-    def prompt_and_answer(self, dfa, rng) -> Tuple[object, str, object]:
+    def prompt_and_answer(self, dfa, rng, is_chat) -> Tuple[object, str, object]:
         """
         Return a triple of meta information, a prompt, and an answer.
         """
@@ -47,7 +47,10 @@ class Prompter(ABC):
 
     def run_experiment(self, dfa, rng, model, num_samples):
         metas, prompts, answers = zip(
-            *[self.prompt_and_answer(dfa, rng) for _ in range(num_samples)]
+            *[
+                self.prompt_and_answer(dfa, rng, is_chat=False)
+                for _ in range(num_samples)
+            ]
         )
         if self.trivial(metas, answers):
             raise TrivialProblemError
