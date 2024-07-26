@@ -1,13 +1,9 @@
-import codecs
-import io
-import json
-import time
+import functools
+import multiprocessing
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
-from uuid import uuid4
 
-import tqdm.auto as tqdm
 from openai import OpenAI
 from permacache import permacache
 
@@ -40,6 +36,16 @@ model_specs = {
 }
 
 
+def to_messages(prompt):
+    return [
+        {
+            "role": role,
+            "content": content,
+        }
+        for role, content in prompt.items()
+    ]
+
+
 def create_batch_request_line(request_id, model, prompt, **kwargs):
     return {
         "custom_id": request_id,
@@ -47,73 +53,25 @@ def create_batch_request_line(request_id, model, prompt, **kwargs):
         "url": "/v1/chat/completions",
         "body": {
             "model": model,
-            "messages": [
-                {
-                    "role": role,
-                    "content": content,
-                }
-                for role, content in prompt.items()
-            ],
+            "messages": to_messages(prompt),
         },
         **kwargs,
     }
 
 
-def create_batch_request(model, prompts, **kwargs):
-    ids = [uuid4().hex for _ in prompts]
-    jsonl = [
-        create_batch_request_line(request_id, model, prompt, **kwargs)
-        for request_id, prompt in zip(ids, prompts)
-    ]
-    f = io.BytesIO()
-    f_string = codecs.getwriter("utf-8")(f)
-    for line in jsonl:
-        f_string.write(json.dumps(line) + "\n")
-    f.seek(0)
-    return ids, f
-
-
-def execute_batch_request(model, prompts, pbar, **kwargs):
-    ids, jsonl = create_batch_request(model, prompts, **kwargs)
-    batch_input_file = openai_client.files.create(file=jsonl, purpose="batch")
-    batch = openai_client.batches.create(
-        input_file_id=batch_input_file.id,
-        endpoint="/v1/chat/completions",
-        completion_window="24h",
-    )
-    if pbar is not None:
-        pbar = pbar(total=len(ids))
-    while True:
-        batch_status = openai_client.batches.retrieve(batch.id)
-        if batch_status.status == "completed":
-            if pbar is not None:
-                pbar.close()
-            break
-        if pbar is not None:
-            pbar.update(
-                batch_status.request_counts.completed
-                + batch_status.request_counts.failed
-                - pbar.n
-            )
-        time.sleep(1)
-    if batch_status.error_file_id is not None:
-        print(openai_client.files.content(batch_status.error_file_id).text)
-    output = openai_client.files.content(batch_status.output_file_id).text
-    output = [json.loads(x) for x in output.split("\n") if x]
-    id_to_output = {x["custom_id"]: x for x in output}
-    return [id_to_output[id] for id in ids]
-
-
-@permacache("evallm/llm/llm/run_prompt")
+@permacache("evallm/llm/llm/run_prompt", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
         assert client == openai_client
-        output = execute_batch_request(model, prompt, tqdm.tqdm, **kwargs)
+        with multiprocessing.Pool() as p:
+            choices_each = p.map(
+                functools.partial(create_openai_completion, "gpt-3.5-turbo-0125"), prompt
+            )
         choices = []
-        for x in output:
-            choices += x["response"]["body"]["choices"]
+        for x in choices_each:
+            choices += x
         return SimpleNamespace(choices=choices)
 
     completion = client.completions.create(
@@ -122,3 +80,9 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
         **kwargs,
     )
     return completion
+
+
+def create_openai_completion(model, prompt):
+    return openai_client.chat.completions.create(
+        model=model, messages=to_messages(prompt)
+    ).choices

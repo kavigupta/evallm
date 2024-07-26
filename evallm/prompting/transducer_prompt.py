@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import re
 
 import numpy as np
 
@@ -76,8 +77,10 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
 
 class ChainOfThoughtPrompt(TransducerPrompter):
 
-    def __init__(self, num_symbols, version=1):
-        assert version == 1, "version mismatch"
+    ANSWER_PATTERN = re.compile(r"<answer>([01])</answer>")
+
+    def __init__(self, num_symbols, version=2):
+        assert version == 2, "version mismatch"
         super().__init__(num_symbols)
         self.version = version
 
@@ -88,7 +91,8 @@ class ChainOfThoughtPrompt(TransducerPrompter):
         assert is_chat, "for now, we only support chat systems for this prompter"
         return dict(
             system="You are a question answering system. For each question, think step by step and"
-            + " place your answer between tags like <answer>0</answer> or <answer>1</answer>\n"
+            + " place your answer between tags like <answer>0</answer> or <answer>1</answer>."
+            + " MAKE SURE TO PUT YOUR ANSWER IN ANSWER TAGS or you will get NO CREDIT.\n"
             + "QUESTION:\nWhat is 20*2?\n"
             + "ANSWER:\nTo solve this problem, we need to multiply 20 by 0. We can accomplish this"
             + " via noticing that anything multiplied by 0 is 0. <answer>0</answer>\n",
@@ -105,12 +109,31 @@ class ChainOfThoughtPrompt(TransducerPrompter):
             "max_tokens": 5000,
         }
 
+    def get_numeric_answer(self, message_content):
+        answer_tag_result = [
+            x.group(1) for x in self.ANSWER_PATTERN.finditer(message_content)
+        ]
+        if answer_tag_result:
+            return int(answer_tag_result[-1])
+        last_index_1 = message_content.rfind("1")
+        last_index_0 = message_content.rfind("0")
+        if last_index_0 == -1 and last_index_1 == -1:
+            # neither occurs in the message
+            return None
+        if last_index_1 == -1:
+            # only 0 occurs in the message
+            return 0
+        if last_index_0 == -1:
+            # only 1 occurs in the message
+            return 1
+        # both occur in the message, return the one that occurs last
+        return 1 if last_index_1 > last_index_0 else 0
+
     def score_completion(self, output, choice):
-        logprobs = choice.logprobs.top_logprobs[-1]
-        probs = {k: np.exp(v) for k, v in logprobs.items() if k in ("0", "1")}
-        denom = sum(probs.values())
-        probs = {k: v / denom for k, v in probs.items()}
+        numeric = self.get_numeric_answer(choice.message.content)
         confusion = np.zeros((2, 2))
-        for j in range(2):
-            confusion[int(output), j] = probs.get(str(j), 0)
+        if numeric is not None:
+            confusion[output, numeric] = 1
+        else:
+            confusion[output, :] = 0.5
         return confusion
