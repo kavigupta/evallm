@@ -54,13 +54,11 @@ class Prompter(ABC):
         )
         if self.trivial(metas, answers):
             raise TrivialProblemError
-        print(prompts[0])
         completions = run_prompt(
             model=model,
             prompt=prompts,
             kwargs=self.prompt_kwargs(),
         )
-        print(completions.choices[0])
         scores = [
             self.score_completion(answer, choice)
             for answer, choice in zip(answers, completions.choices)

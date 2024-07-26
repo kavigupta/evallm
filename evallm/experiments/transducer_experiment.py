@@ -187,27 +187,27 @@ def chatgpt_transducer_experiments():
     """
     num_sequence_symbol_options = [
         30,
-        # 40,
-        # 50,
-        # 60,
+        40,
+        50,
+        60,
         # 70,
-        # 80,
+        80,
         # 90,
-        # 100,
-        # 120,
+        100,
+        120,
         # 140,
-        # 160,
+        160,
         # 180,
-        # 200,
-        # 250,
+        200,
+        250,
         # 300,
         # 350,
         # 400,
         # 450,
-        # 500,
+        500,
     ]
-    # num_states_options = range(3, 1 + 8)
-    num_states_options = [5]
+    num_states_options = range(3, 1 + 5)
+    # num_states_options = [5]
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
@@ -219,6 +219,6 @@ def chatgpt_transducer_experiments():
                 ),
                 prompter=ChainOfThoughtPrompt(num_sequence_symbols),
                 num_repeats_per_dfa=30,
-                num_dfas=10,
+                num_dfas=30,
             )
     return results
