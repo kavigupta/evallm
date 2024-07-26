@@ -1,6 +1,7 @@
 import functools
 import multiprocessing
 from dataclasses import dataclass
+import os
 from types import SimpleNamespace
 from typing import List
 
@@ -14,7 +15,10 @@ sketch5_client = OpenAI(
 
 
 def openai_key():
-    with open("/mnt/md0/.openaikey") as f:
+    openai_key_path = "/mnt/md0/.openaikey"
+    if not os.path.exists(openai_key_path):
+        return "EMPTY"
+    with open(openai_key_path) as f:
         return f.read().strip()
 
 
@@ -46,19 +50,6 @@ def to_messages(prompt):
     ]
 
 
-def create_batch_request_line(request_id, model, prompt, **kwargs):
-    return {
-        "custom_id": request_id,
-        "method": "POST",
-        "url": "/v1/chat/completions",
-        "body": {
-            "model": model,
-            "messages": to_messages(prompt),
-        },
-        **kwargs,
-    }
-
-
 @permacache("evallm/llm/llm/run_prompt", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
@@ -67,7 +58,8 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
         assert client == openai_client
         with multiprocessing.Pool() as p:
             choices_each = p.map(
-                functools.partial(create_openai_completion, "gpt-3.5-turbo-0125"), prompt
+                functools.partial(create_openai_completion, model),
+                prompt,
             )
         choices = []
         for x in choices_each:
