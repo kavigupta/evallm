@@ -7,7 +7,10 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.prompting.prompter import TrivialProblemError
-from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
+from evallm.prompting.transducer_prompt import (
+    BasicInstructionTransducerPrompter,
+    ChainOfThoughtPrompt,
+)
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
 
@@ -174,5 +177,48 @@ def current_transducer_experiments():
                 prompter=BasicInstructionTransducerPrompter(num_sequence_symbols),
                 num_repeats_per_dfa=30,
                 num_dfas=100,
+            )
+    return results
+
+
+def chatgpt_transducer_experiments():
+    """
+    Updated regularly to reflect the current experiments being run.
+    """
+    num_sequence_symbol_options = [
+        30,
+        40,
+        50,
+        60,
+        # 70,
+        80,
+        # 90,
+        100,
+        120,
+        # 140,
+        160,
+        # 180,
+        200,
+        250,
+        # 300,
+        # 350,
+        # 400,
+        # 450,
+        500,
+    ]
+    num_states_options = range(3, 1 + 5)
+    # num_states_options = [5]
+    results = {}
+    for num_states in num_states_options:
+        results[num_states] = {}
+        for num_sequence_symbols in num_sequence_symbol_options:
+            results[num_states][num_sequence_symbols] = run_transducer_experiment(
+                "gpt-3.5-turbo-0125",
+                sample_dfa_spec=dict(
+                    type="sample_reachable_dfa", n_states=num_states, n_symbols=3
+                ),
+                prompter=ChainOfThoughtPrompt(num_sequence_symbols),
+                num_repeats_per_dfa=30,
+                num_dfas=30,
             )
     return results

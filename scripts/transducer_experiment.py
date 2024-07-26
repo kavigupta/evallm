@@ -1,3 +1,3 @@
 import evallm
 
-evallm.experiments.transducer_experiment.current_transducer_experiments()
+evallm.experiments.transducer_experiment.chatgpt_transducer_experiments()

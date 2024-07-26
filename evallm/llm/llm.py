@@ -1,4 +1,8 @@
+import functools
+import multiprocessing
 from dataclasses import dataclass
+import os
+from types import SimpleNamespace
 from typing import List
 
 from openai import OpenAI
@@ -10,6 +14,20 @@ sketch5_client = OpenAI(
 )
 
 
+def openai_key():
+    openai_key_path = "/mnt/md0/.openaikey"
+    if not os.path.exists(openai_key_path):
+        return "EMPTY"
+    with open(openai_key_path) as f:
+        return f.read().strip()
+
+
+openai_client = OpenAI(
+    api_key=openai_key(),
+    base_url="https://api.openai.com/v1",
+)
+
+
 @dataclass
 class ModelSpec:
     client: OpenAI
@@ -18,7 +36,18 @@ class ModelSpec:
 
 model_specs = {
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
+    "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
 }
+
+
+def to_messages(prompt):
+    return [
+        {
+            "role": role,
+            "content": content,
+        }
+        for role, content in prompt.items()
+    ]
 
 
 @permacache("evallm/llm/llm/run_prompt", multiprocess_safe=True)
@@ -26,7 +55,16 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
-        raise NotImplementedError("Chat models are not supported.")
+        assert client == openai_client
+        with multiprocessing.Pool() as p:
+            choices_each = p.map(
+                functools.partial(create_openai_completion, model),
+                prompt,
+            )
+        choices = []
+        for x in choices_each:
+            choices += x
+        return SimpleNamespace(choices=choices)
 
     completion = client.completions.create(
         model=model,
@@ -34,3 +72,9 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
         **kwargs,
     )
     return completion
+
+
+def create_openai_completion(model, prompt):
+    return openai_client.chat.completions.create(
+        model=model, messages=to_messages(prompt)
+    ).choices
