@@ -12,17 +12,17 @@ class TransducerPrompter(Prompter):
     def __init__(self, num_symbols):
         self.num_symbols = num_symbols
 
-    def prompt_and_answer(self, dfa, rng):
+    def prompt_and_answer(self, dfa, rng, is_chat):
         inp = rng.choice(sorted(dfa.input_symbols), size=self.num_symbols)
         out = transduce(dfa, inp)
 
-        return (inp, out), self.display_prompt(inp, out), out[-1]
+        return (inp, out), self.display_prompt(inp, out, is_chat), out[-1]
 
     def trivial(self, metas, answers):
         return len(set(answers)) == 1
 
     @abstractmethod
-    def display_prompt(self, inp, out):
+    def display_prompt(self, inp, out, is_chat):
         pass
 
 
@@ -35,7 +35,8 @@ def serialize_transducer_prompt(inp, out):
 
 
 class CleanTransducerPrompter(TransducerPrompter):
-    def display_prompt(self, inp, out):
+    def display_prompt(self, inp, out, is_chat):
+        del is_chat
         return serialize_transducer_prompt(inp, out)
 
     def prompt_kwargs(self):
@@ -60,8 +61,11 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
     def display(self):
         return f"BasicInstructionTransducerPrompter({self.num_symbols})"
 
-    def display_prompt(self, inp, out):
-        pattern = super().display_prompt(inp, out)
+    def display_prompt(self, inp, out, is_chat):
+        assert (
+            not is_chat
+        ), "BasicInstructionTransducerPrompter does not support chat mode."
+        pattern = super().display_prompt(inp, out, is_chat)
         return (
             "A DFA was used to create these outputs given a random sequence of inputs. "
             f"Your job is to fill in the last output:\n{pattern}"
