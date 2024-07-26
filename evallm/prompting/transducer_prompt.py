@@ -26,7 +26,7 @@ class TransducerPrompter(Prompter):
         pass
 
 
-def convert_to_prompt(inp, out):
+def serialize_transducer_prompt(inp, out):
     return "".join(
         [tok for x, y in zip(inp, out) for tok in (f"in: {x}, ", f"out: {int(y)}\n")][
             :-1
@@ -39,7 +39,7 @@ class CleanTransducerPrompter(TransducerPrompter):
         assert (
             not is_chat
         ), "chat systems won't work with this because we don't have logits"
-        return convert_to_prompt(inp, out)
+        return serialize_transducer_prompt(inp, out)
 
     def prompt_kwargs(self):
         return {
