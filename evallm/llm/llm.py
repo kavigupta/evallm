@@ -46,19 +46,6 @@ def to_messages(prompt):
     ]
 
 
-def create_batch_request_line(request_id, model, prompt, **kwargs):
-    return {
-        "custom_id": request_id,
-        "method": "POST",
-        "url": "/v1/chat/completions",
-        "body": {
-            "model": model,
-            "messages": to_messages(prompt),
-        },
-        **kwargs,
-    }
-
-
 @permacache("evallm/llm/llm/run_prompt", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
@@ -67,7 +54,8 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
         assert client == openai_client
         with multiprocessing.Pool() as p:
             choices_each = p.map(
-                functools.partial(create_openai_completion, "gpt-3.5-turbo-0125"), prompt
+                functools.partial(create_openai_completion, "gpt-3.5-turbo-0125"),
+                prompt,
             )
         choices = []
         for x in choices_each:
