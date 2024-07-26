@@ -36,7 +36,9 @@ def serialize_transducer_prompt(inp, out):
 
 class CleanTransducerPrompter(TransducerPrompter):
     def display_prompt(self, inp, out, is_chat):
-        del is_chat
+        assert (
+            not is_chat
+        ), "chat systems won't work with this because we don't have logits"
         return serialize_transducer_prompt(inp, out)
 
     def prompt_kwargs(self):
@@ -64,7 +66,7 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
     def display_prompt(self, inp, out, is_chat):
         assert (
             not is_chat
-        ), "BasicInstructionTransducerPrompter does not support chat mode."
+        ), "for now, we only support non-chat systems for this prompter"
         pattern = super().display_prompt(inp, out, is_chat)
         return (
             "A DFA was used to create these outputs given a random sequence of inputs. "
