@@ -45,9 +45,12 @@ class Prompter(ABC):
             zeroed out.
         """
 
-    def run_experiment(self, dfa, rng, model, num_samples, is_chat):
+    def run_experiment(self, dfa, rng, model, num_samples):
         metas, prompts, answers = zip(
-            *[self.prompt_and_answer(dfa, rng, is_chat) for _ in range(num_samples)]
+            *[
+                self.prompt_and_answer(dfa, rng, is_chat=False)
+                for _ in range(num_samples)
+            ]
         )
         if self.trivial(metas, answers):
             raise TrivialProblemError
