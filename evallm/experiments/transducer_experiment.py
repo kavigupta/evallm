@@ -92,6 +92,16 @@ class TransducerExperimentResult:
         return 0
 
 
+def single_transducer_experiment(
+    *, seed, model, num_repeats_per_dfa, sample_dfa_spec, prompter
+):
+    rng = np.random.RandomState(seed)
+    dfa = sample_dfa(sample_dfa_spec, rng)
+    return TransducerExperimentResult.of(
+        *prompter.run_experiment(dfa, rng, model, num_repeats_per_dfa)
+    )
+
+
 @permacache(
     "evallm/experiments/transducer_experiment_9", key_function=dict(prompter=repr)
 )
@@ -108,11 +118,13 @@ def run_transducer_experiment(
         desc=f"Sampling: {sample_dfa_spec}, " f"Prompter: {prompter}",
     )
     for seed in itertools.count():
-        rng = np.random.RandomState(seed)
-        dfa = sample_dfa(sample_dfa_spec, rng)
         try:
-            result = TransducerExperimentResult.of(
-                *prompter.run_experiment(dfa, rng, model, num_repeats_per_dfa)
+            result = single_transducer_experiment(
+                seed=seed,
+                model=model,
+                num_repeats_per_dfa=num_repeats_per_dfa,
+                sample_dfa_spec=sample_dfa_spec,
+                prompter=prompter,
             )
         except TrivialProblemError:
             continue
