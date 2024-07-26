@@ -26,15 +26,17 @@ class TransducerPrompter(Prompter):
         pass
 
 
+def serialize_transducer_prompt(inp, out):
+    return "".join(
+        [tok for x, y in zip(inp, out) for tok in (f"in: {x}, ", f"out: {int(y)}\n")][
+            :-1
+        ]
+    )
+
+
 class CleanTransducerPrompter(TransducerPrompter):
     def display_prompt(self, inp, out):
-        return "".join(
-            [
-                tok
-                for x, y in zip(inp, out)
-                for tok in (f"in: {x}, ", f"out: {int(y)}\n")
-            ][:-1]
-        )
+        return serialize_transducer_prompt(inp, out)
 
     def prompt_kwargs(self):
         return {
