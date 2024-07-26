@@ -3,7 +3,7 @@ from typing import Tuple
 
 import numpy as np
 
-from evallm.llm.llm import run_prompt
+from evallm.llm.llm import model_specs, run_prompt
 
 
 class Prompter(ABC):
@@ -48,7 +48,7 @@ class Prompter(ABC):
     def run_experiment(self, dfa, rng, model, num_samples):
         metas, prompts, answers = zip(
             *[
-                self.prompt_and_answer(dfa, rng, is_chat=False)
+                self.prompt_and_answer(dfa, rng, is_chat=model_specs[model].is_chat)
                 for _ in range(num_samples)
             ]
         )
