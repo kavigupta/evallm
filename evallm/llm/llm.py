@@ -54,7 +54,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
         assert client == openai_client
         with multiprocessing.Pool() as p:
             choices_each = p.map(
-                functools.partial(create_openai_completion, "gpt-3.5-turbo-0125"),
+                functools.partial(create_openai_completion, model),
                 prompt,
             )
         choices = []

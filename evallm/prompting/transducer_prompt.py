@@ -99,7 +99,7 @@ class ChainOfThoughtPrompt(TransducerPrompter):
             user="QUESTION:\nA DFA was used to create these outputs given a random"
             + " sequence of inputs. "
             + "Your job is to fill in the last output:\n"
-            + convert_to_prompt(inp, out)
+            + serialize_transducer_prompt(inp, out)
             + "out: _\n"
             + "\nANSWER:\n",
         )
