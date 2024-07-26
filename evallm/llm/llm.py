@@ -1,6 +1,7 @@
 import functools
 import multiprocessing
 from dataclasses import dataclass
+import os
 from types import SimpleNamespace
 from typing import List
 
@@ -14,7 +15,10 @@ sketch5_client = OpenAI(
 
 
 def openai_key():
-    with open("/mnt/md0/.openaikey") as f:
+    openai_key_path = "/mnt/md0/.openaikey"
+    if not os.path.exists(openai_key_path):
+        return "EMPTY"
+    with open(openai_key_path) as f:
         return f.read().strip()
 
 
