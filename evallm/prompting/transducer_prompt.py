@@ -79,8 +79,8 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     ANSWER_PATTERN = re.compile(r"<answer>([01])</answer>")
 
-    def __init__(self, num_symbols, version=2):
-        assert version == 2, "version mismatch"
+    def __init__(self, num_symbols, version=3):
+        assert version == 3, "version mismatch"
         super().__init__(num_symbols)
         self.version = version
 
@@ -131,8 +131,10 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.message.content)
+        output = int(output)
         confusion = np.zeros((2, 2))
         if numeric is not None:
+            assert numeric in (0, 1)
             confusion[output, numeric] = 1
         else:
             confusion[output, :] = 0.5
