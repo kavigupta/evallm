@@ -3,9 +3,12 @@ from dataclasses import dataclass
 from functools import cached_property
 
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 import tqdm.auto as tqdm
 from permacache import permacache
 
+from evallm.llm.llm import run_prompt
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import (
     BasicInstructionTransducerPrompter,
@@ -139,6 +142,75 @@ def run_transducer_experiment(
     return results
 
 
+def compute_relative_to_null(results):
+    return pd.DataFrame(
+        {
+            num_states: {
+                num_sequence_symbols: np.mean(
+                    [
+                        x.success_rate_binary >= x.null_success_rate
+                        for x in results[num_states][num_sequence_symbols]
+                    ]
+                )
+                for num_sequence_symbols in results[num_states]
+            }
+            for num_states in results
+        }
+    )
+
+
+def compute_relative_to_ngram(n, results):
+    return pd.DataFrame(
+        {
+            num_states: {
+                num_sequence_symbols: np.mean(
+                    [
+                        x.success_rate_binary_meets_kgram >= n
+                        for x in results[num_states][num_sequence_symbols]
+                    ]
+                )
+                for num_sequence_symbols in results[num_states]
+            }
+            for num_states in results
+        }
+    )
+
+
+def plot_relative_results(relative, name, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    for k in relative:
+        ax.plot(relative[k].index, relative[k] * 100, label=f"{k} states")
+    ax.legend()
+    ax.set_xlabel("Sequence Length")
+    ax.set_ylabel(f"Meets {name} %")
+    ax.axhline(50, color="black")
+    ax.grid()
+
+def bottom_quartile_outcome(results):
+    outcomes_sorted = sorted(results, key=lambda x: x.success_rate_binary)
+    bad_outcome = outcomes_sorted[len(outcomes_sorted) // 4] 
+    return bad_outcome
+
+def print_example(model, prompter, result):
+    with run_prompt.error_on_miss():
+        out = run_prompt(
+            model, result.prompts, {"max_tokens": 5000}
+        )
+    for i, prompt, output, real_output in zip(
+        itertools.count(), result.prompts, out.choices, result.outputs
+    ):
+        correctness = np.diag(prompter.score_completion(real_output[-1], output)).sum()
+        correctness_string = {1: "CORRECT", 0: "WRONG", 0.5: "NA"}[correctness]
+        print(f"********* EXAMPLE {i}: {correctness_string} ***********")
+        print("######### SYSTEM ############")
+        print(prompt["system"])
+        print("######### USER ############")
+        print(prompt["user"])
+        print(f"######### RESPONSE: {correctness_string} ############")
+        print(output.message.content)
+        print()
+
 def current_transducer_experiments():
     """
     Updated regularly to reflect the current experiments being run.
@@ -181,7 +253,7 @@ def current_transducer_experiments():
     return results
 
 
-def chatgpt_transducer_experiments():
+def chatgpt_transducer_experiments(model_name):
     """
     Updated regularly to reflect the current experiments being run.
     """
@@ -213,7 +285,7 @@ def chatgpt_transducer_experiments():
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
-                "gpt-3.5-turbo-0125",
+                model_name,
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
                 ),
