@@ -1,5 +1,5 @@
-from abc import abstractmethod
 import re
+from abc import abstractmethod
 
 import numpy as np
 

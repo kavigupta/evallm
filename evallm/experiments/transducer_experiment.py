@@ -2,9 +2,9 @@ import itertools
 from dataclasses import dataclass
 from functools import cached_property
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import tqdm.auto as tqdm
 from permacache import permacache
 
@@ -187,16 +187,16 @@ def plot_relative_results(relative, name, ax=None):
     ax.axhline(50, color="black")
     ax.grid()
 
+
 def bottom_quartile_outcome(results):
     outcomes_sorted = sorted(results, key=lambda x: x.success_rate_binary)
-    bad_outcome = outcomes_sorted[len(outcomes_sorted) // 4] 
+    bad_outcome = outcomes_sorted[len(outcomes_sorted) // 4]
     return bad_outcome
+
 
 def print_example(model, prompter, result):
     with run_prompt.error_on_miss():
-        out = run_prompt(
-            model, result.prompts, {"max_tokens": 5000}
-        )
+        out = run_prompt(model, result.prompts, {"max_tokens": 5000})
     for i, prompt, output, real_output in zip(
         itertools.count(), result.prompts, out.choices, result.outputs
     ):
@@ -210,6 +210,7 @@ def print_example(model, prompter, result):
         print(f"######### RESPONSE: {correctness_string} ############")
         print(output.message.content)
         print()
+
 
 def current_transducer_experiments():
     """

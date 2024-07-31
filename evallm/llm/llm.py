@@ -1,7 +1,7 @@
 import functools
 import multiprocessing
-from dataclasses import dataclass
 import os
+from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 
