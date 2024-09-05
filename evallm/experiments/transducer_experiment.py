@@ -295,3 +295,57 @@ def chatgpt_transducer_experiments(model_name):
                 num_dfas=30,
             )
     return results
+
+
+def plot_absolute_results(ax, which_llm, result_by_length):
+    lengths = sorted(result_by_length)
+    ax.plot(
+        lengths,
+        [
+            100 * np.mean([r.null_success_rate for r in result_by_length[length]])
+            for length in lengths
+        ],
+        color="gray",
+        label="null",
+    )
+    ax.plot(
+        lengths,
+        [
+            100 * np.mean([r.success_rate_binary for r in result_by_length[length]])
+            for length in lengths
+        ],
+        color="black",
+        label=which_llm,
+    )
+    for ngram in range(1, 1 + 5):
+        ax.plot(
+            lengths,
+            [
+                100
+                * np.mean(
+                    [
+                        r.kgram_success_rates_each[ngram - 1]
+                        for r in result_by_length[length]
+                    ]
+                )
+                for length in lengths
+            ],
+            label=f"{ngram}gram",
+        )
+    ax.legend()
+    ax.set_xlabel("Sequence length")
+    ax.set_ylabel("Success rate [%]")
+    ax.set_title(which_llm)
+    ax.grid()
+
+def plot_all_absolute_results(results, num_states):
+    _, axs = plt.subplots(
+        1,
+        len(results),
+        figsize=(5 * len(results), 5),
+        tight_layout=True,
+        facecolor="white",
+    )
+    for ax, model_name in zip(axs.flatten(), results):
+        plot_absolute_results(ax, model_name, results[model_name][num_states])
+    plt.suptitle(f"Prediction of {num_states}-state DFA")
