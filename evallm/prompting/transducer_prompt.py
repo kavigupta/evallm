@@ -3,6 +3,7 @@ from abc import abstractmethod
 
 import numpy as np
 
+from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.sample_dfa.transduce import transduce
 
 from .prompter import Prompter
@@ -14,10 +15,14 @@ class TransducerPrompter(Prompter):
         self.num_symbols = num_symbols
 
     def prompt_and_answer(self, dfa, rng, is_chat):
-        inp = rng.choice(sorted(dfa.input_symbols), size=self.num_symbols)
-        out = transduce(dfa, inp)
+        inp, out = self.input_output(dfa, rng)
 
         return (inp, out), self.display_prompt(inp, out, is_chat), out[-1]
+
+    def input_output(self, dfa, rng):
+        inp = rng.choice(sorted(dfa.input_symbols), size=self.num_symbols)
+        out = transduce(dfa, inp)
+        return inp, out
 
     def trivial(self, metas, answers):
         return len(set(answers)) == 1
@@ -139,3 +144,31 @@ class ChainOfThoughtPrompt(TransducerPrompter):
         else:
             confusion[output, :] = 0.5
         return confusion
+
+
+class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
+
+    def __init__(self, num_symbols, sample_dfa_spec, num_samples, version=0):
+        assert version == 0, "version mismatch"
+        super().__init__(num_symbols, 3)
+        self.sample_dfa_spec = sample_dfa_spec
+        self.num_samples = num_samples
+        rng = np.random.RandomState(2**32 - 2)
+        self.samples = [sample_dfa(sample_dfa_spec, rng) for _ in range(num_samples)]
+        self.io = [self.input_output(dfa, rng) for dfa in self.samples]
+        self.user_prompts = [
+            ChainOfThoughtPrompt.display_prompt(self, inp, out, is_chat=True)["user"]
+            + f"<answer>{int(out[-1])}</answer>\n\n"
+            for (inp, out) in self.io
+        ]
+
+    def display(self):
+        return (
+            f"ChainOfThoughtPromptRealExamples({self.num_symbols},"
+            f" {self.sample_dfa_spec}, {self.num_samples}, {self.version})"
+        )
+
+    def display_prompt(self, inp, out, is_chat):
+        prompt = ChainOfThoughtPrompt.display_prompt(self, inp, out, is_chat)
+        prompt["user"] = "".join(self.user_prompts) + prompt["user"]
+        return prompt

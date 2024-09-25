@@ -254,7 +254,12 @@ def current_transducer_experiments():
     return results
 
 
-def chatgpt_transducer_experiments(model_name):
+def chatgpt_transducer_experiments(
+    model_name,
+    cot_prompt=lambda num_sequence_symbols, sample_dfa_spec: ChainOfThoughtPrompt(
+        num_sequence_symbols
+    ),
+):
     """
     Updated regularly to reflect the current experiments being run.
     """
@@ -285,12 +290,14 @@ def chatgpt_transducer_experiments(model_name):
     for num_states in num_states_options:
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
+            sample_dfa_spec = dict(
+                type="sample_reachable_dfa", n_states=num_states, n_symbols=3
+            )
+            prompter = cot_prompt(num_sequence_symbols, sample_dfa_spec)
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
                 model_name,
-                sample_dfa_spec=dict(
-                    type="sample_reachable_dfa", n_states=num_states, n_symbols=3
-                ),
-                prompter=ChainOfThoughtPrompt(num_sequence_symbols),
+                sample_dfa_spec=sample_dfa_spec,
+                prompter=prompter,
                 num_repeats_per_dfa=30,
                 num_dfas=30,
             )
@@ -337,6 +344,7 @@ def plot_absolute_results(ax, which_llm, result_by_length):
     ax.set_ylabel("Success rate [%]")
     ax.set_title(which_llm)
     ax.grid()
+
 
 def plot_all_absolute_results(results, num_states):
     _, axs = plt.subplots(
