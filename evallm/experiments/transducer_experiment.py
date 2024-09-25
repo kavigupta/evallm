@@ -254,6 +254,10 @@ def current_transducer_experiments():
     return results
 
 
+def current_dfa_sample_spec(num_states):
+    return dict(type="sample_reachable_dfa", n_states=num_states, n_symbols=3)
+
+
 def chatgpt_transducer_experiments(
     model_name,
     cot_prompt=lambda num_sequence_symbols, sample_dfa_spec: ChainOfThoughtPrompt(
@@ -290,9 +294,7 @@ def chatgpt_transducer_experiments(
     for num_states in num_states_options:
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
-            sample_dfa_spec = dict(
-                type="sample_reachable_dfa", n_states=num_states, n_symbols=3
-            )
+            sample_dfa_spec = current_dfa_sample_spec(num_states)
             prompter = cot_prompt(num_sequence_symbols, sample_dfa_spec)
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
                 model_name,
@@ -357,3 +359,33 @@ def plot_all_absolute_results(results, num_states):
     for ax, model_name in zip(axs.flatten(), results):
         plot_absolute_results(ax, model_name, results[model_name][num_states])
     plt.suptitle(f"Prediction of {num_states}-state DFA")
+
+
+def gather_prompts(
+    *, prompter_fn, num_states, num_sequence_symbols, n_dfas, n_samples_per_dfa, is_chat
+):
+    dfas = []
+    raw_transducer_results = []
+    prompts = []
+    expected_answers = []
+
+    sample_dfa_spec = current_dfa_sample_spec(num_states)
+    prompter = prompter_fn(num_sequence_symbols, sample_dfa_spec)
+
+    for seed in itertools.count():
+        rng = np.random.RandomState(seed)
+        dfa = sample_dfa(sample_dfa_spec, rng)
+        try:
+            metas, prompt, answers = prompter.metas_prompts_answers(
+                dfa, rng, is_chat, n_samples_per_dfa
+            )
+        except TrivialProblemError:
+            continue
+        dfas.append(dfa)
+        raw_transducer_results.append(metas)
+        prompts.append(prompt)
+        expected_answers.append(answers)
+        if len(dfas) >= n_dfas:
+            break
+
+    return dfas, raw_transducer_results, prompts, expected_answers
