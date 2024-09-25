@@ -163,7 +163,10 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
         ]
 
     def display(self):
-        return f"ChainOfThoughtPromptRealExamples({self.num_symbols}, {self.sample_dfa_spec}, {self.num_samples}, {self.version})"
+        return (
+            f"ChainOfThoughtPromptRealExamples({self.num_symbols},"
+            f" {self.sample_dfa_spec}, {self.num_samples}, {self.version})"
+        )
 
     def display_prompt(self, inp, out, is_chat):
         prompt = ChainOfThoughtPrompt.display_prompt(self, inp, out, is_chat)
