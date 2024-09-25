@@ -46,14 +46,9 @@ class Prompter(ABC):
         """
 
     def run_experiment(self, dfa, rng, model, num_samples):
-        metas, prompts, answers = zip(
-            *[
-                self.prompt_and_answer(dfa, rng, is_chat=model_specs[model].is_chat)
-                for _ in range(num_samples)
-            ]
+        metas, prompts, answers = self.metas_prompts_answers(
+            dfa, rng, model_specs[model].is_chat, num_samples
         )
-        if self.trivial(metas, answers):
-            raise TrivialProblemError
         completions = run_prompt(
             model=model,
             prompt=prompts,
@@ -64,6 +59,17 @@ class Prompter(ABC):
             for answer, choice in zip(answers, completions.choices)
         ]
         return metas, prompts, scores
+
+    def metas_prompts_answers(self, dfa, rng, is_chat, num_samples):
+        metas, prompts, answers = zip(
+            *[
+                self.prompt_and_answer(dfa, rng, is_chat=is_chat)
+                for _ in range(num_samples)
+            ]
+        )
+        if self.trivial(metas, answers):
+            raise TrivialProblemError
+        return metas, prompts, answers
 
     def __repr__(self):
         return self.display()
