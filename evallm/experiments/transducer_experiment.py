@@ -277,6 +277,7 @@ def chatgpt_transducer_experiments_direct(
     cot_prompt=lambda num_sequence_symbols, sample_dfa_spec: ChainOfThoughtPrompt(
         num_sequence_symbols
     ),
+    num_states_options=(3, 5, 7),
 ):
     """
     Updated regularly to reflect the current experiments being run.
@@ -302,8 +303,6 @@ def chatgpt_transducer_experiments_direct(
         # # 450,
         500,
     ]
-    num_states_options = range(3, 1 + 5)
-    # num_states_options = [5]
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
