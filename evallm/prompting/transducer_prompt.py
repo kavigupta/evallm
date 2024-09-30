@@ -136,14 +136,18 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.message.content)
-        output = int(output)
-        confusion = np.zeros((2, 2))
-        if numeric is not None:
-            assert numeric in (0, 1)
-            confusion[output, numeric] = 1
-        else:
-            confusion[output, :] = 0.5
-        return confusion
+        return self.numeric_answer_to_confusion(output, numeric)
+
+
+def numeric_answer_to_confusion(output, numeric):
+    output = int(output)
+    confusion = np.zeros((2, 2))
+    if numeric is not None:
+        assert numeric in (0, 1)
+        confusion[output, numeric] = 1
+    else:
+        confusion[output, :] = 0.5
+    return confusion
 
 
 class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
@@ -172,3 +176,50 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
         prompt = ChainOfThoughtPrompt.display_prompt(self, inp, out, is_chat)
         prompt["user"] = "".join(self.user_prompts) + prompt["user"]
         return prompt
+
+
+class BasicSequencePrompt(TransducerPrompter):
+
+    def __init__(self, num_symbols, *, version):
+        assert version == 3, "version mismatch"
+        super().__init__(num_symbols)
+        self.version = version
+
+    def display(self):
+        return f"BasicSequencePrompt({self.num_symbols}, {self.version})"
+
+    def display_prompt(self, inp, out, is_chat):
+        assert is_chat, "for now, we only support chat systems for this prompter"
+        return dict(
+            system="",
+            user="You are a sequence completion model. Output the next element of the sequence, and nothing else.\n\n"
+            + self.packed_sequence(inp, out),
+        )
+
+    def packed_sequence(self, inp, out):
+        seq_els = [x + ", " for (a, b) in zip(inp, out) for x in [a, str(int(b))]]
+        seq_els.pop()
+        return "".join(seq_els)
+
+    def prompt_kwargs(self):
+        return {
+            "max_tokens": 5,
+            "temperature": 0.0,
+        }
+
+    def get_numeric_answer(self, message_content):
+        # neihther 0 nor 1 occurs in the message, return None
+        if "0" not in message_content and "1" not in message_content:
+            return None
+        first_0 = message_content.find("0")
+        first_1 = message_content.find("1")
+        if first_0 == -1:
+            return 1
+        if first_1 == -1:
+            return 0
+        # both occur in the message, return the one that occurs first
+        return 0 if first_0 < first_1 else 1
+
+    def score_completion(self, output, choice):
+        numeric = self.get_numeric_answer(choice.message.content)
+        return numeric_answer_to_confusion(output, numeric)
