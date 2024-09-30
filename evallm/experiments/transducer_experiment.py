@@ -54,6 +54,12 @@ class TransducerExperimentResult:
         return np.mean([np.sum(np.diag(x)) > 0.5 for x in self.confusion_each])
 
     @cached_property
+    def success_rate_binary_ignore_na(self):
+        return np.mean(
+            [np.sum(np.diag(x)) > 0.5 for x in self.confusion_each if x.max() > 0.5]
+        )
+
+    @cached_property
     def success_rate_each(self):
         return [np.sum(np.diag(confusion)) for confusion in self.confusion_each]
 
@@ -305,7 +311,7 @@ def chatgpt_transducer_experiments(
     return results
 
 
-def plot_absolute_results(ax, which_llm, result_by_length):
+def plot_absolute_results(ax, which_llm, result_by_length, *, ignore_na):
     lengths = sorted(result_by_length)
     ax.plot(
         lengths,
@@ -319,7 +325,17 @@ def plot_absolute_results(ax, which_llm, result_by_length):
     ax.plot(
         lengths,
         [
-            100 * np.mean([r.success_rate_binary for r in result_by_length[length]])
+            100
+            * np.mean(
+                [
+                    (
+                        r.success_rate_binary_ignore_na
+                        if ignore_na
+                        else r.success_rate_binary
+                    )
+                    for r in result_by_length[length]
+                ]
+            )
             for length in lengths
         ],
         color="black",
@@ -347,7 +363,7 @@ def plot_absolute_results(ax, which_llm, result_by_length):
     ax.grid()
 
 
-def plot_all_absolute_results(results, num_states):
+def plot_all_absolute_results(results, num_states, *, ignore_na):
     _, axs = plt.subplots(
         1,
         len(results),
@@ -356,7 +372,9 @@ def plot_all_absolute_results(results, num_states):
         facecolor="white",
     )
     for ax, model_name in zip(axs.flatten(), results):
-        plot_absolute_results(ax, model_name, results[model_name][num_states])
+        plot_absolute_results(
+            ax, model_name, results[model_name][num_states], ignore_na=ignore_na
+        )
     plt.suptitle(f"Prediction of {num_states}-state DFA")
 
 
