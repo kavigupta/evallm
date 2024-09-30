@@ -136,14 +136,18 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.message.content)
-        output = int(output)
-        confusion = np.zeros((2, 2))
-        if numeric is not None:
-            assert numeric in (0, 1)
-            confusion[output, numeric] = 1
-        else:
-            confusion[output, :] = 0.5
-        return confusion
+        return numeric_answer_to_confusion(output, numeric)
+
+
+def numeric_answer_to_confusion(output, numeric):
+    output = int(output)
+    confusion = np.zeros((2, 2))
+    if numeric is not None:
+        assert numeric in (0, 1)
+        confusion[output, numeric] = 1
+    else:
+        confusion[output, :] = 0.5
+    return confusion
 
 
 class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
