@@ -329,7 +329,11 @@ def plot_absolute_results(ax, which_llm, result_by_length, *, ignore_na):
             100
             * np.mean(
                 [
-                    r.success_rate_binary_ignore_na if ignore_na else r.success_rate_binary
+                    (
+                        r.success_rate_binary_ignore_na
+                        if ignore_na
+                        else r.success_rate_binary
+                    )
                     for r in result_by_length[length]
                 ]
             )
@@ -369,7 +373,9 @@ def plot_all_absolute_results(results, num_states, *, ignore_na):
         facecolor="white",
     )
     for ax, model_name in zip(axs.flatten(), results):
-        plot_absolute_results(ax, model_name, results[model_name][num_states], ignore_na=ignore_na)
+        plot_absolute_results(
+            ax, model_name, results[model_name][num_states], ignore_na=ignore_na
+        )
     plt.suptitle(f"Prediction of {num_states}-state DFA")
 
 
