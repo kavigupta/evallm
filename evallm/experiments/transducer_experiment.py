@@ -201,8 +201,7 @@ def bottom_quartile_outcome(results):
 
 
 def print_example(model, prompter, result):
-    with run_prompt.error_on_miss():
-        out = run_prompt(model, result.prompts, {"max_tokens": 5000})
+    out = run_prompt(model, result.prompts, prompter.prompt_kwargs())
     for i, prompt, output, real_output in zip(
         itertools.count(), result.prompts, out.choices, result.outputs
     ):
