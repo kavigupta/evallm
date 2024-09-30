@@ -264,11 +264,21 @@ def current_dfa_sample_spec(num_states):
     return dict(type="sample_reachable_dfa", n_states=num_states, n_symbols=3)
 
 
-def chatgpt_transducer_experiments(
+def chatgpt_transducer_experiments(model_name, *, allow_expensive=False, **kwargs):
+    if model_name in {"gpt-4o-2024-05-13"} and not allow_expensive:
+        with run_prompt.error_on_miss():
+            return chatgpt_transducer_experiments_direct(model_name, **kwargs)
+    else:
+        return chatgpt_transducer_experiments_direct(model_name, **kwargs)
+
+
+def chatgpt_transducer_experiments_direct(
     model_name,
+    *,
     cot_prompt=lambda num_sequence_symbols, sample_dfa_spec: ChainOfThoughtPrompt(
         num_sequence_symbols
     ),
+    num_states_options=(3, 5, 7),
 ):
     """
     Updated regularly to reflect the current experiments being run.
@@ -294,8 +304,6 @@ def chatgpt_transducer_experiments(
         # # 450,
         500,
     ]
-    num_states_options = [3, 5, 7]
-    # num_states_options = [3]
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
