@@ -136,7 +136,7 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.message.content)
-        return self.numeric_answer_to_confusion(output, numeric)
+        return numeric_answer_to_confusion(output, numeric)
 
 
 def numeric_answer_to_confusion(output, numeric):
@@ -192,7 +192,8 @@ class BasicSequencePrompt(TransducerPrompter):
         assert is_chat, "for now, we only support chat systems for this prompter"
         return dict(
             system="",
-            user="You are a sequence completion model. Output the next element of the sequence, and nothing else.\n\n"
+            user="You are a sequence completion model."
+            + " Output the next element of the sequence, and nothing else.\n\n"
             + self.packed_sequence(inp, out),
         )
 

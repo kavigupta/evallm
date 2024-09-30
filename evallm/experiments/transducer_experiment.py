@@ -294,8 +294,8 @@ def chatgpt_transducer_experiments(
         # # 450,
         500,
     ]
-    # num_states_options = [3, 5, 7]
-    num_states_options = [3]
+    num_states_options = [3, 5, 7]
+    # num_states_options = [3]
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
