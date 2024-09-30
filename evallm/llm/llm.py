@@ -38,6 +38,7 @@ model_specs = {
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-mini-2024-07-18": ModelSpec(client=openai_client, is_chat=True),
+    "gpt-4o-2024-05-13": ModelSpec(client=openai_client, is_chat=True),
 }
 
 
