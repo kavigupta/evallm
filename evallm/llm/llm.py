@@ -52,15 +52,15 @@ def to_messages(prompt):
     ]
 
 
-@permacache("evallm/llm/llm/run_prompt", multiprocess_safe=True)
+@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
         assert client == openai_client
-        with multiprocessing.Pool() as p:
+        with multiprocessing.Pool(10) as p:
             choices_each = p.map(
-                functools.partial(create_openai_completion, model),
+                functools.partial(create_openai_completion, model, kwargs),
                 prompt,
             )
         choices = []
@@ -68,15 +68,19 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
             choices += x
         return SimpleNamespace(choices=choices)
 
-    completion = client.completions.create(
-        model=model,
-        prompt=[p.strip() for p in prompt],
-        **kwargs,
-    )
-    return completion
+    chunk_size = 20
+    choices = []
+    for start in range(0, len(prompt), chunk_size):
+        chunk = prompt[start : start + chunk_size]
+        choices += client.completions.create(
+            model=model,
+            prompt=chunk,
+            **kwargs,
+        ).choices
+    return SimpleNamespace(choices=choices)
 
 
-def create_openai_completion(model, prompt):
+def create_openai_completion(model, kwargs, prompt):
     return openai_client.chat.completions.create(
-        model=model, messages=to_messages(prompt)
+        model=model, messages=to_messages(prompt), **kwargs
     ).choices
