@@ -217,44 +217,32 @@ def print_example(model, prompter, result):
         print()
 
 
-def current_transducer_experiments():
+num_sequence_symbol_options_default = (30, 120, 500)
+
+
+def current_transducer_experiments(
+    model,
+    num_dfas=100,
+    num_states_options=(3, 5, 7),
+    num_sequence_symbol_options=num_sequence_symbol_options_default,
+):
     """
     Updated regularly to reflect the current experiments being run.
     """
-    num_sequence_symbol_options = [
-        30,
-        40,
-        50,
-        60,
-        70,
-        80,
-        90,
-        100,
-        120,
-        140,
-        160,
-        180,
-        200,
-        250,
-        300,
-        350,
-        400,
-        450,
-        500,
-    ]
-    num_states_options = range(3, 1 + 8)
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
-                "meta-llama/Meta-Llama-3-8B",
+                model,
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
                 ),
-                prompter=BasicInstructionTransducerPrompter(num_sequence_symbols),
+                prompter=BasicInstructionTransducerPrompter(
+                    num_sequence_symbols, strip=True
+                ),
                 num_repeats_per_dfa=30,
-                num_dfas=100,
+                num_dfas=num_dfas,
             )
     return results
 
@@ -278,31 +266,11 @@ def chatgpt_transducer_experiments_direct(
         num_sequence_symbols
     ),
     num_states_options=(3, 5, 7),
+    num_sequence_symbol_options=num_sequence_symbol_options_default,
 ):
     """
     Updated regularly to reflect the current experiments being run.
     """
-    num_sequence_symbol_options = [
-        30,
-        # 40,
-        # 50,
-        # 60,
-        # # 70,
-        # 80,
-        # # 90,
-        # 100,
-        120,
-        # # 140,
-        # 160,
-        # # 180,
-        # 200,
-        # 250,
-        # # 300,
-        # # 350,
-        # # 400,
-        # # 450,
-        500,
-    ]
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
