@@ -70,12 +70,13 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
         assert version == 3, "version mismatch"
         super().__init__(num_symbols)
         self.strip = strip
+        self.version = version
 
     def display(self):
         return (
             f"BasicInstructionTransducerPrompter({self.num_symbols}"
             + (f", strip={self.strip}" if self.strip else "")
-            + ", version=3)"
+            + f", version={self.version})"
         )
 
     def display_prompt(self, inp, out, is_chat):
