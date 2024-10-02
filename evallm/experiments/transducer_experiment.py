@@ -115,7 +115,7 @@ def single_transducer_experiment(
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_9", key_function=dict(prompter=repr)
+    "evallm/experiments/transducer_experiment_10", key_function=dict(prompter=repr)
 )
 def run_transducer_experiment(
     model,
@@ -125,9 +125,9 @@ def run_transducer_experiment(
     num_dfas,
 ):
     results = []
+    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
     pbar = tqdm.tqdm(
         total=num_dfas,
-        desc=f"Sampling: {sample_dfa_spec}, " f"Prompter: {prompter}",
     )
     for seed in itertools.count():
         try:

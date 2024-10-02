@@ -66,18 +66,30 @@ class CleanTransducerPrompter(TransducerPrompter):
 
 class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
 
+    def __init__(self, num_symbols, *, strip=False, version=3):
+        assert version == 3, "version mismatch"
+        super().__init__(num_symbols)
+        self.strip = strip
+
     def display(self):
-        return f"BasicInstructionTransducerPrompter({self.num_symbols})"
+        return (
+            f"BasicInstructionTransducerPrompter({self.num_symbols}"
+            + (f", strip={self.strip}" if self.strip else "")
+            + ", version=3)"
+        )
 
     def display_prompt(self, inp, out, is_chat):
         assert (
             not is_chat
         ), "for now, we only support non-chat systems for this prompter"
         pattern = super().display_prompt(inp, out, is_chat)
-        return (
+        result = (
             "A DFA was used to create these outputs given a random sequence of inputs. "
             f"Your job is to fill in the last output:\n{pattern}"
         )
+        if self.strip:
+            result = result.strip()
+        return result
 
 
 class ChainOfThoughtPrompt(TransducerPrompter):
