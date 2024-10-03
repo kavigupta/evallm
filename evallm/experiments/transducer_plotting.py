@@ -1,6 +1,7 @@
 import matplotlib as mpl
-from matplotlib import pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
+
 from evallm.utils.bootstrap import boostrap_mean
 
 
@@ -59,7 +60,7 @@ def plot_baselines(ax, result_by_length):
         plot_result(
             ax,
             result_by_length,
-            lambda r: r.kgram_success_rates_each[ngram - 1],
+            lambda r, ngram=ngram: r.kgram_success_rates_each[ngram - 1],
             color=colors.pop(0),
             linestyle=linestyles.pop(0),
             label=f"{ngram}gram",
@@ -86,7 +87,9 @@ def plot_all_absolute_results(results, num_states, *, ignore_na):
     plt.suptitle(f"Prediction of {num_states}-state DFA")
 
 
-def plot_all_absolute_results_single_graph(results, result_baselines, num_states, *, ignore_na):
+def plot_all_absolute_results_single_graph(
+    results, result_baselines, num_states, *, ignore_na
+):
     plt.figure(
         figsize=(8, 8),
         tight_layout=True,
@@ -105,3 +108,15 @@ def plot_all_absolute_results_single_graph(results, result_baselines, num_states
         )
     plot_baselines(plt.gca(), result_baselines[num_states])
     plt.title(f"Prediction of {num_states}-state DFA")
+
+
+def plot_relative_results(relative, name, ax=None):
+    if ax is None:
+        ax = plt.gca()
+    for k in relative:
+        ax.plot(relative[k].index, relative[k] * 100, label=f"{k} states")
+    ax.legend()
+    ax.set_xlabel("Sequence Length")
+    ax.set_ylabel(f"Meets {name} %")
+    ax.axhline(50, color="black")
+    ax.grid()

@@ -10,8 +10,8 @@ def boostrap_mean(values, *, n_samples=1_000, pct=95):
     :param n_samples: number of bootstrap samples to draw
     :param pct: confidence interval percentage
 
-    :return: ndarray of shape (2, *vector_dims) containing the lower and upper
-    bounds of the confidence interval
+    :return: ndarray of shape (2, *vector_dims) containing the lower and
+    upper bounds of the confidence interval
     """
     lo_pct, hi_pct = (100 - pct) / 2, 100 - (100 - pct) / 2
     n_values = len(values)

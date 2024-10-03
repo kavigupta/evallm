@@ -3,8 +3,6 @@ import itertools
 from dataclasses import dataclass
 from functools import cached_property
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import tqdm.auto as tqdm
@@ -213,18 +211,6 @@ def compute_relative_to_ngram(n, results):
             for num_states in results
         }
     )
-
-
-def plot_relative_results(relative, name, ax=None):
-    if ax is None:
-        ax = plt.gca()
-    for k in relative:
-        ax.plot(relative[k].index, relative[k] * 100, label=f"{k} states")
-    ax.legend()
-    ax.set_xlabel("Sequence Length")
-    ax.set_ylabel(f"Meets {name} %")
-    ax.axhline(50, color="black")
-    ax.grid()
 
 
 def bottom_quartile_outcome(results):
