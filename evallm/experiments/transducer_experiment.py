@@ -16,7 +16,6 @@ from evallm.prompting.transducer_prompt import (
 )
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
-from evallm.utils.bootstrap import boostrap_mean
 
 
 @dataclass
