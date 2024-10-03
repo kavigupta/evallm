@@ -97,6 +97,8 @@ def plot_all_absolute_results_single_graph(
         dpi=200,
     )
     for i, model_name in enumerate(results):
+        if num_states not in results[model_name]:
+            continue
         plot_model_result(
             plt.gca(),
             model_name,
@@ -105,6 +107,7 @@ def plot_all_absolute_results_single_graph(
             color=f"C{i}",
         )
     plot_baselines(plt.gca(), result_baselines[num_states])
+    plt.title(f"Prediction of {num_states}-state DFA")
 
 
 def plot_relative_results(relative, name, ax=None):
