@@ -1,3 +1,4 @@
+import copy
 import itertools
 from dataclasses import dataclass
 from functools import cached_property
@@ -150,6 +151,36 @@ def run_transducer_experiment(
     return results
 
 
+@permacache(
+    "evallm/experiments/transducer_experiment_just_stats",
+    key_function=dict(prompter=repr),
+)
+def run_transducer_experiment_just_stats(
+    model,
+    sample_dfa_spec,
+    prompter,
+    num_repeats_per_dfa,
+    num_dfas,
+):
+    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
+    results = run_transducer_experiment(
+        model,
+        sample_dfa_spec,
+        prompter,
+        num_repeats_per_dfa,
+        num_dfas,
+    )
+    new_results = []
+    for result in results:
+        result = copy.copy(result)
+        del result.inputs
+        del result.outputs
+        del result.prompts
+        del result.confusion_each
+        new_results.append(result)
+    return new_results
+
+
 def compute_relative_to_null(results):
     return pd.DataFrame(
         {
@@ -227,15 +258,21 @@ def current_transducer_experiments(
     num_dfas=100,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
+    just_stats=False,
 ):
     """
     Updated regularly to reflect the current experiments being run.
     """
+    run_fn = (
+        run_transducer_experiment_just_stats
+        if just_stats
+        else run_transducer_experiment
+    )
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
-            results[num_states][num_sequence_symbols] = run_transducer_experiment(
+            results[num_states][num_sequence_symbols] = run_fn(
                 model,
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
@@ -287,106 +324,6 @@ def chatgpt_transducer_experiments_direct(
                 num_dfas=30,
             )
     return results
-
-
-def plot_absolute_results(ax, which_llm, result_by_length, *, ignore_na):
-    plot_model_result(ax, which_llm, result_by_length, ignore_na, "black")
-    plot_baselines(ax, result_by_length)
-    ax.set_title(which_llm)
-
-
-def plot_result(ax, result_by_length, compute_outcome, **kwargs):
-    lengths = sorted(result_by_length)
-    results = (
-        100
-        * np.array(
-            [
-                [compute_outcome(r) for r in result_by_length[length]]
-                for length in lengths
-            ]
-        ).T
-    )
-    lo, hi = boostrap_mean(results)
-    ax.plot(lengths, results.mean(0), **kwargs)
-    ax.fill_between(
-        lengths, lo, hi, alpha=0.3, **{k: v for k, v in kwargs.items() if k == "color"}
-    )
-
-
-def plot_model_result(ax, which_llm, result_by_length, ignore_na, color):
-
-    return plot_result(
-        ax,
-        result_by_length,
-        lambda r: (
-            r.success_rate_binary_ignore_na if ignore_na else r.success_rate_binary
-        ),
-        color=color,
-        marker="o",
-        label=which_llm,
-    )
-
-
-def plot_baselines(ax, result_by_length):
-    ngrams = range(1, 1 + 5)
-    count = len(ngrams) + 1
-    linestyles = ["--", "-.", ":"] * 10
-    colors = [mpl.colors.hsv_to_rgb((i / count, 0.5, 0.5)) for i in range(count)]
-    plot_result(
-        ax,
-        result_by_length,
-        lambda r: r.null_success_rate,
-        color=colors.pop(0),
-        linestyle=linestyles.pop(0),
-        label="null",
-    )
-    for ngram in ngrams:
-        plot_result(
-            ax,
-            result_by_length,
-            lambda r: r.kgram_success_rates_each[ngram - 1],
-            color=colors.pop(0),
-            linestyle=linestyles.pop(0),
-            label=f"{ngram}gram",
-        )
-    ax.legend()
-    ax.set_xlabel("Sequence length")
-    ax.set_ylabel("Success rate [%]")
-    ax.grid()
-
-
-def plot_all_absolute_results(results, num_states, *, ignore_na):
-    _, axs = plt.subplots(
-        1,
-        len(results),
-        figsize=(5 * len(results), 5),
-        tight_layout=True,
-        facecolor="white",
-    )
-    axs = [axs] if len(results) == 1 else axs.flatten()
-    for ax, model_name in zip(axs, results):
-        plot_absolute_results(
-            ax, model_name, results[model_name][num_states], ignore_na=ignore_na
-        )
-    plt.suptitle(f"Prediction of {num_states}-state DFA")
-
-
-def plot_all_absolute_results_single_graph(results, num_states, *, ignore_na):
-    plt.figure(
-        figsize=(8, 8),
-        tight_layout=True,
-        facecolor="white",
-        dpi=200,
-    )
-    for i, model_name in enumerate(results):
-        plot_model_result(
-            plt.gca(),
-            model_name,
-            results[model_name][num_states],
-            ignore_na=ignore_na,
-            color=f"C{i}",
-        )
-    plot_baselines(plt.gca(), results[list(results)[0]][num_states])
 
 
 def gather_prompts(

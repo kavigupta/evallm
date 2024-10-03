@@ -35,6 +35,7 @@ class ModelSpec:
 
 
 model_specs = {
+    "none": ModelSpec(client=None, is_chat=False),
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),

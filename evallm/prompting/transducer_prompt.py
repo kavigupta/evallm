@@ -54,6 +54,8 @@ class CleanTransducerPrompter(TransducerPrompter):
         }
 
     def score_completion(self, output, choice):
+        if choice is None:
+            return np.zeros((2, 2))
         logprobs = choice.logprobs.top_logprobs[-1]
         probs = {k: np.exp(v) for k, v in logprobs.items() if k in ("0", "1")}
         denom = sum(probs.values())

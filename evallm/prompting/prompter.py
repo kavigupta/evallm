@@ -49,14 +49,17 @@ class Prompter(ABC):
         metas, prompts, answers = self.metas_prompts_answers(
             dfa, rng, model_specs[model].is_chat, num_samples
         )
-        completions = run_prompt(
-            model=model,
-            prompt=prompts,
-            kwargs=self.prompt_kwargs(),
-        )
+        if model_specs[model].client is None:
+            completions = [None] * num_samples
+        else:
+            completions = run_prompt(
+                model=model,
+                prompt=prompts,
+                kwargs=self.prompt_kwargs(),
+            ).choices
         scores = [
             self.score_completion(answer, choice)
-            for answer, choice in zip(answers, completions.choices)
+            for answer, choice in zip(answers, completions)
         ]
         return metas, prompts, scores
 
