@@ -344,7 +344,7 @@ def plot_baselines(ax, result_by_length):
         plot_result(
             ax,
             result_by_length,
-            lambda r: r.kgram_success_rates_each[ngram - 1],
+            lambda r, ngram=ngram: r.kgram_success_rates_each[ngram - 1],
             color=colors.pop(0),
             linestyle=linestyles.pop(0),
             label=f"{ngram}gram",
