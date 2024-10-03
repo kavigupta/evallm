@@ -87,7 +87,9 @@ def plot_all_absolute_results(results, num_states, *, ignore_na):
     plt.suptitle(f"Prediction of {num_states}-state DFA")
 
 
-def plot_all_absolute_results_single_graph(results, num_states, *, ignore_na):
+def plot_all_absolute_results_single_graph(
+    results, result_baselines, num_states, *, ignore_na
+):
     plt.figure(
         figsize=(8, 8),
         tight_layout=True,
@@ -102,7 +104,7 @@ def plot_all_absolute_results_single_graph(results, num_states, *, ignore_na):
             ignore_na=ignore_na,
             color=f"C{i}",
         )
-    plot_baselines(plt.gca(), results[list(results)[0]][num_states])
+    plot_baselines(plt.gca(), result_baselines[num_states])
 
 
 def plot_relative_results(relative, name, ax=None):
