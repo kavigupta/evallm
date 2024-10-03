@@ -1,3 +1,4 @@
+import copy
 import itertools
 from dataclasses import dataclass
 from functools import cached_property
@@ -147,6 +148,36 @@ def run_transducer_experiment(
     return results
 
 
+@permacache(
+    "evallm/experiments/transducer_experiment_just_stats",
+    key_function=dict(prompter=repr),
+)
+def run_transducer_experiment_just_stats(
+    model,
+    sample_dfa_spec,
+    prompter,
+    num_repeats_per_dfa,
+    num_dfas,
+):
+    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
+    results = run_transducer_experiment(
+        model,
+        sample_dfa_spec,
+        prompter,
+        num_repeats_per_dfa,
+        num_dfas,
+    )
+    new_results = []
+    for result in results:
+        result = copy.copy(result)
+        del result.inputs
+        del result.outputs
+        del result.prompts
+        del result.confusion_each
+        new_results.append(result)
+    return new_results
+
+
 def compute_relative_to_null(results):
     return pd.DataFrame(
         {
@@ -212,15 +243,21 @@ def current_transducer_experiments(
     num_dfas=100,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
+    just_stats=False,
 ):
     """
     Updated regularly to reflect the current experiments being run.
     """
+    run_fn = (
+        run_transducer_experiment_just_stats
+        if just_stats
+        else run_transducer_experiment
+    )
     results = {}
     for num_states in num_states_options:
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
-            results[num_states][num_sequence_symbols] = run_transducer_experiment(
+            results[num_states][num_sequence_symbols] = run_fn(
                 model,
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
