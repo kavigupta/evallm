@@ -297,9 +297,6 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
 
     version = 1
 
-    def __init__(self, num_symbols, num_states):
-        super().__init__(num_symbols, num_states)
-
     def display(self):
         return f"SequencePromptWithExplanationChainOfThought({self.num_symbols}, {self.num_states}, {self.version})"
 
