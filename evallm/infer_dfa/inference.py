@@ -5,6 +5,17 @@ from .partial_dfa import PartialDFA
 
 
 def consistent_universes(num_symbols, num_states, inp, out):
+    """
+    Find all consistent DFAs for a given input/output sequence.
+
+    :param num_symbols: The number of symbols in the alphabet.
+    :param num_states: The number of states in the DFA.
+    :param inp: The input sequence as a list of integers in the range [0, num_symbols).
+    :param out: The output sequence as a list of booleans.
+
+    :return: A list of tuples (logit, dfa) where logit is the log probability of the DFA
+        and dfa is a PartialDFA object.
+    """
     universes = [(0, PartialDFA.empty(num_states, num_symbols))]
     for i, o in zip(inp, out):
         new_universes = []
@@ -19,6 +30,13 @@ def consistent_universes(num_symbols, num_states, inp, out):
 
 
 def prob_1(num_states, inp, out):
+    """
+    Probability of 1 being outputted by the DFA for the given input/output sequence.
+
+    :param num_states: The number of states in the DFA.
+    :param inp: The input sequence as a string / list of strings
+    :param out: The output sequence as a list of booleans.
+    """
     symbols = sorted(set(inp))
     inp = [symbols.index(i) for i in inp]
     assert len(inp) == len(out) + 1
