@@ -67,12 +67,11 @@ class CleanTransducerPrompter(TransducerPrompter):
 
 
 class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
+    version = 3
 
-    def __init__(self, num_symbols, *, strip=False, version=3):
-        assert version == 3, "version mismatch"
+    def __init__(self, num_symbols, *, strip=False):
         super().__init__(num_symbols)
         self.strip = strip
-        self.version = version
 
     def display(self):
         return (
@@ -98,11 +97,10 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
 class ChainOfThoughtPrompt(TransducerPrompter):
 
     ANSWER_PATTERN = re.compile(r"<answer>([01])</answer>")
+    version = 3
 
-    def __init__(self, num_symbols, version=3):
-        assert version == 3, "version mismatch"
+    def __init__(self, num_symbols):
         super().__init__(num_symbols)
-        self.version = version
 
     def display(self):
         return f"ChainOfThoughtPrompt({self.num_symbols}, {self.version})"
@@ -167,8 +165,9 @@ def numeric_answer_to_confusion(output, numeric):
 
 class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 
-    def __init__(self, num_symbols, sample_dfa_spec, num_samples, version=0):
-        assert version == 0, "version mismatch"
+    version = 0
+
+    def __init__(self, num_symbols, sample_dfa_spec, num_samples):
         super().__init__(num_symbols, 3)
         self.sample_dfa_spec = sample_dfa_spec
         self.num_samples = num_samples
@@ -195,10 +194,10 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 
 class BasicSequencePrompt(TransducerPrompter):
 
-    def __init__(self, num_symbols, *, version):
-        assert version == 3, "version mismatch"
+    version = 3
+
+    def __init__(self, num_symbols):
         super().__init__(num_symbols)
-        self.version = version
 
     def display(self):
         return f"BasicSequencePrompt({self.num_symbols}, {self.version})"
