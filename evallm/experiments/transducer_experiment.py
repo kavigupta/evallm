@@ -1,4 +1,3 @@
-import copy
 import itertools
 from dataclasses import dataclass
 from functools import cached_property
