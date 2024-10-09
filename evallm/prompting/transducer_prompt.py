@@ -14,6 +14,11 @@ class TransducerPrompter(Prompter):
     def __init__(self, num_symbols):
         self.num_symbols = num_symbols
 
+    @classmethod
+    @abstractmethod
+    def for_setting(cls, setting_kwargs):
+        pass
+
     def prompt_and_answer(self, dfa, rng, is_chat):
         inp, out = self.input_output(dfa, rng)
 
@@ -72,6 +77,13 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
     def __init__(self, num_symbols, *, strip=False):
         super().__init__(num_symbols)
         self.strip = strip
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            setting_kwargs["num_sequence_symbols"],
+            strip=setting_kwargs.get("strip", False),
+        )
 
     def display(self):
         return (
@@ -192,6 +204,10 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 class BasicSequencePrompt(TransducerPrompter):
 
     version = 3
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return BasicSequencePrompt(setting_kwargs["num_sequence_symbols"])
 
     def display(self):
         return f"BasicSequencePrompt({self.num_symbols}, {self.version})"

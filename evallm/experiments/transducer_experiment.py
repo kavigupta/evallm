@@ -286,9 +286,7 @@ def chatgpt_transducer_experiments(model_name, *, allow_expensive=False, **kwarg
 def chatgpt_transducer_experiments_direct(
     model_name,
     *,
-    cot_prompt=lambda num_sequence_symbols, sample_dfa_spec: ChainOfThoughtPrompt(
-        num_sequence_symbols
-    ),
+    cot_prompt=ChainOfThoughtPrompt.for_setting,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
 ):
@@ -300,7 +298,13 @@ def chatgpt_transducer_experiments_direct(
         results[num_states] = {}
         for num_sequence_symbols in num_sequence_symbol_options:
             sample_dfa_spec = current_dfa_sample_spec(num_states)
-            prompter = cot_prompt(num_sequence_symbols, sample_dfa_spec)
+            prompter = cot_prompt(
+                dict(
+                    num_sequence_symbols=num_sequence_symbols,
+                    num_states=num_states,
+                    sample_dfa_spec=sample_dfa_spec,
+                )
+            )
             results[num_states][num_sequence_symbols] = run_transducer_experiment(
                 model_name,
                 sample_dfa_spec=sample_dfa_spec,
@@ -312,7 +316,13 @@ def chatgpt_transducer_experiments_direct(
 
 
 def gather_prompts(
-    *, prompter_fn, num_states, num_sequence_symbols, n_dfas, n_samples_per_dfa, is_chat
+    *,
+    prompter_class,
+    num_states,
+    num_sequence_symbols,
+    n_dfas,
+    n_samples_per_dfa,
+    is_chat,
 ):
     dfas = []
     raw_transducer_results = []
@@ -320,7 +330,13 @@ def gather_prompts(
     expected_answers = []
 
     sample_dfa_spec = current_dfa_sample_spec(num_states)
-    prompter = prompter_fn(num_sequence_symbols, sample_dfa_spec)
+    prompter = prompter_class.for_setting(
+        dict(
+            num_states=num_states,
+            num_sequence_symbols=num_sequence_symbols,
+            sample_dfa_spec=sample_dfa_spec,
+        )
+    )
 
     for seed in itertools.count():
         rng = np.random.RandomState(seed)
