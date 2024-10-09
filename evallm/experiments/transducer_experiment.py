@@ -299,7 +299,7 @@ def chatgpt_transducer_experiments(model_name, *, allow_expensive=False, **kwarg
 def chatgpt_transducer_experiments_direct(
     model_name,
     *,
-    cot_prompt=lambda setting_kwargs: ChainOfThoughtPrompt.for_setting(setting_kwargs),
+    cot_prompt=ChainOfThoughtPrompt.for_setting,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
 ):
