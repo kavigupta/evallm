@@ -18,7 +18,7 @@ class TransducerPrompter(Prompter):
 
     @classmethod
     @abstractmethod
-    def for_setting(self, setting_kwargs):
+    def for_setting(cls, setting_kwargs):
         pass
 
     def prompt_and_answer(self, dfa, rng, is_chat):
@@ -74,19 +74,17 @@ class CleanTransducerPrompter(TransducerPrompter):
 
 
 class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
+    version = 3
 
-    def __init__(self, num_symbols, *, strip=False, version=3):
-        assert version == 3, "version mismatch"
+    def __init__(self, num_symbols, *, strip=False):
         super().__init__(num_symbols)
         self.strip = strip
-        self.version = version
 
     @classmethod
     def for_setting(cls, setting_kwargs):
         return cls(
             setting_kwargs["num_sequence_symbols"],
             strip=setting_kwargs.get("strip", False),
-            version=3,
         )
 
     def display(self):
@@ -112,10 +110,10 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
 
 class ChainOfThoughtPrompt(TransducerPrompter):
 
-    def __init__(self, num_symbols, version=3):
-        assert version == 3, "version mismatch"
+    version = 3
+
+    def __init__(self, num_symbols):
         super().__init__(num_symbols)
-        self.version = version
 
     def display(self):
         return f"ChainOfThoughtPrompt({self.num_symbols}, {self.version})"
@@ -180,8 +178,9 @@ def numeric_answer_to_confusion(output, numeric):
 
 class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 
-    def __init__(self, num_symbols, sample_dfa_spec, num_samples, version=0):
-        assert version == 0, "version mismatch"
+    version = 0
+
+    def __init__(self, num_symbols, sample_dfa_spec, num_samples):
         super().__init__(num_symbols, 3)
         self.sample_dfa_spec = sample_dfa_spec
         self.num_samples = num_samples
@@ -208,14 +207,14 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 
 class BasicSequencePrompt(TransducerPrompter):
 
-    def __init__(self, num_symbols, *, version):
-        assert version == 3, "version mismatch"
+    version = 3
+
+    def __init__(self, num_symbols):
         super().__init__(num_symbols)
-        self.version = version
 
     @classmethod
-    def for_setting(self, setting_kwargs):
-        return BasicSequencePrompt(setting_kwargs["num_sequence_symbols"], version=3)
+    def for_setting(cls, setting_kwargs):
+        return BasicSequencePrompt(setting_kwargs["num_sequence_symbols"])
 
     def display(self):
         return f"BasicSequencePrompt({self.num_symbols}, {self.version})"
@@ -259,12 +258,11 @@ class BasicSequencePrompt(TransducerPrompter):
 
 
 class SequencePromptWithExplanation(BasicSequencePrompt):
-    
+
     version = 0
 
-    def __init__(self, num_symbols, num_states, *, version):
-        assert version == self.version, "version mismatch"
-        TransducerPrompter.__init__(self, num_symbols)
+    def __init__(self, num_symbols, num_states):
+        super().__init__(num_symbols)
         self.num_states = num_states
 
     @classmethod
@@ -272,7 +270,6 @@ class SequencePromptWithExplanation(BasicSequencePrompt):
         return cls(
             setting_kwargs["num_sequence_symbols"],
             setting_kwargs["num_states"],
-            version=cls.version,
         )
 
     def display(self):
@@ -306,15 +303,17 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
 
     version = 1
 
-    def __init__(self, num_symbols, num_states, *, version):
-        assert version == self.version, "version mismatch"
-        super().__init__(num_symbols, num_states, version=version)
+    def __init__(self, num_symbols, num_states):
+        super().__init__(num_symbols, num_states)
 
     def display(self):
         return f"SequencePromptWithExplanationChainOfThought({self.num_symbols}, {self.num_states}, {self.version})"
 
     def terminal_instruction(self):
-        return "Reason step by step, and then output the next output integer using <output> tags, like <output>0</output>."
+        return (
+            "Reason step by step, and then output the next output"
+            " integer using <output> tags, like <output>0</output>."
+        )
 
     def get_numeric_answer(self, message_content):
         return ChainOfThoughtPrompt.get_numeric_answer(self, message_content)
