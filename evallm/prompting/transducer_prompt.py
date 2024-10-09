@@ -112,9 +112,6 @@ class ChainOfThoughtPrompt(TransducerPrompter):
 
     version = 3
 
-    def __init__(self, num_symbols):
-        super().__init__(num_symbols)
-
     def display(self):
         return f"ChainOfThoughtPrompt({self.num_symbols}, {self.version})"
 
@@ -181,7 +178,7 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
     version = 0
 
     def __init__(self, num_symbols, sample_dfa_spec, num_samples):
-        super().__init__(num_symbols, 3)
+        super().__init__(num_symbols)
         self.sample_dfa_spec = sample_dfa_spec
         self.num_samples = num_samples
         rng = np.random.RandomState(2**32 - 2)
@@ -208,9 +205,6 @@ class ChainOfThoughtPromptRealExampleNoExplanation(ChainOfThoughtPrompt):
 class BasicSequencePrompt(TransducerPrompter):
 
     version = 3
-
-    def __init__(self, num_symbols):
-        super().__init__(num_symbols)
 
     @classmethod
     def for_setting(cls, setting_kwargs):
