@@ -87,14 +87,6 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
             strip=setting_kwargs.get("strip", False),
         )
 
-    @classmethod
-    def for_setting(cls, setting_kwargs):
-        return cls(
-            setting_kwargs["num_sequence_symbols"],
-            strip=setting_kwargs.get("strip", False),
-            version=3,
-        )
-
     def display(self):
         return (
             f"BasicInstructionTransducerPrompter({self.num_symbols}"
@@ -217,10 +209,6 @@ class BasicSequencePrompt(TransducerPrompter):
     @classmethod
     def for_setting(cls, setting_kwargs):
         return BasicSequencePrompt(setting_kwargs["num_sequence_symbols"])
-
-    @classmethod
-    def for_setting(self, setting_kwargs):
-        return BasicSequencePrompt(setting_kwargs["num_sequence_symbols"], version=3)
 
     def display(self):
         return f"BasicSequencePrompt({self.num_symbols}, {self.version})"
