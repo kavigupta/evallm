@@ -26,6 +26,7 @@ setuptools.setup(
         "permacache==3.7.1",
         "matplotlib",
         "pandas",
+        "scipy==1.14.0",
     ],
     extras_require={
         "visual": ["automata-lib[visual]==8.3.0"],
