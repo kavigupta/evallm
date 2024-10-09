@@ -1,13 +1,14 @@
-import copy
 import itertools
 from dataclasses import dataclass
 from functools import cached_property
+from types import SimpleNamespace
 
 import numpy as np
 import pandas as pd
 import tqdm.auto as tqdm
 from permacache import permacache
 
+from evallm.infer_dfa import inference
 from evallm.llm.llm import run_prompt
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import (
@@ -149,7 +150,7 @@ def run_transducer_experiment(
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_just_stats",
+    "evallm/experiments/transducer_experiment_just_stats_3",
     key_function=dict(prompter=repr),
 )
 def run_transducer_experiment_just_stats(
@@ -160,21 +161,32 @@ def run_transducer_experiment_just_stats(
     num_dfas,
 ):
     print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
-    results = run_transducer_experiment(
+    args = (
         model,
         sample_dfa_spec,
         prompter,
         num_repeats_per_dfa,
         num_dfas,
     )
+    results = run_transducer_experiment.function(*args)
     new_results = []
-    for result in results:
-        result = copy.copy(result)
-        del result.inputs
-        del result.outputs
-        del result.prompts
-        del result.confusion_each
-        new_results.append(result)
+    for result in tqdm.tqdm(results):
+        res_stats = SimpleNamespace(
+            null_success_rate=result.null_success_rate,
+            kgram_success_rates_each=result.kgram_success_rates_each,
+        )
+        if sample_dfa_spec["n_states"] == 3:
+            res_stats.brute_force_inference = np.mean(
+                [
+                    (
+                        inference.prob_1(sample_dfa_spec["n_states"], inp, out[:-1])
+                        >= 0.5
+                    )
+                    == out[-1]
+                    for inp, out in zip(result.inputs, result.outputs)
+                ]
+            )
+        new_results.append(res_stats)
     return new_results
 
 
