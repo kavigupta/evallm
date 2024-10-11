@@ -11,7 +11,6 @@ from evallm.enumerate_dfa.enumerate import (
     enumerate_packed_dfas_no_permutations_valid_no_io_permutations,
 )
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
-from evallm.experiments.transducer_experiment import TransducerExperimentResult
 from evallm.prompting.transducer_prompt import BasicSequencePrompt
 
 
@@ -33,6 +32,7 @@ class TransducerExperimentResultPacked:
 
     @classmethod
     def of(cls, metas, prompts, results):
+        del prompts
         ascii_to_int = {c: i for i, c in enumerate(string.ascii_lowercase)}
         inputs, outputs = zip(*metas)
         return cls(
