@@ -1,11 +1,14 @@
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 import string
-from permacache import permacache, swap_unpickler_context_manager, stable_hash
+from permacache import (
+    permacache,
+    renamed_symbol_unpickler,
+    swap_unpickler_context_manager,
+    stable_hash,
+)
 import numpy as np
 import tqdm.auto as tqdm
-
-from evallm.utils.remap_pickle import renamed_symbol_unpickler
 
 from evallm.enumerate_dfa.enumerate import (
     all_io_permutations,
