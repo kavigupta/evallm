@@ -21,23 +21,7 @@ class renamed_symbol_unpickler(pickle.Unpickler):
         if (module, name) in SYMBOL_RENAME_MAP:
             module, name = SYMBOL_RENAME_MAP[(module, name)]
         try:
-            return super(renamed_symbol_unpickler, self).find_class(module, name)
+            return super().find_class(module, name)
         except:
             print("Could not find", (module, name))
             raise
-
-
-# class remapping_pickle:
-#     """
-#     An instance of this class will behave like the pickle module, but
-#     will use the renamed_symbol_unpickler class instead of the default
-#     Unpickler class.
-#     """
-
-#     def __getattribute__(self, name):
-#         if name == "Unpickler":
-#             return renamed_symbol_unpickler
-#         return getattr(pickle, name)
-
-#     def __hasattr__(self, name):
-#         return hasattr(pickle, name)
