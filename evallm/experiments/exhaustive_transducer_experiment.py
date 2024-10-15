@@ -74,7 +74,14 @@ class SummaryStats:
     "evallm/experiments/exhaustive_transducer_experiment/run_experiment_for_dfa_2",
     key_function=dict(prompter=repr),
     read_from_shelf_context_manager=swap_unpickler_context_manager(
-        renamed_symbol_unpickler
+        renamed_symbol_unpickler(
+            {
+                (
+                    "__main__",
+                    "TransducerExperimentResultPacked",
+                ): TransducerExperimentResultPacked
+            }
+        )
     ),
     multiprocess_safe=True,
 )
@@ -89,6 +96,9 @@ def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
 @permacache(
     "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfa_2",
     key_function=dict(prompt=repr),
+    read_from_shelf_context_manager=swap_unpickler_context_manager(
+        renamed_symbol_unpickler({("__main__", "SummaryStats"): SummaryStats})
+    ),
 )
 def summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed):
     result = run_experiment_for_dfa(
