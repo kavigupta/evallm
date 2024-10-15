@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="evallm",
-    version="0.0.54",
+    version="0.0.55",
     author="Kavi Gupta, Armando Solar-Lezama",
     author_email="kavig+evallm@mit.edu",
     description="Evaluate LLMs using DFAs.",
@@ -23,7 +23,7 @@ setuptools.setup(
         "numpy==2.0.0",
         "automata-lib==8.3.0",
         "openai==1.34.0",
-        "permacache==3.7.1",
+        "permacache==3.8.0",
         "matplotlib",
         "pandas",
         "scipy==1.14.0",
