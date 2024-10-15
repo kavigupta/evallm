@@ -60,7 +60,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     client = model_specs[model].client
     if model_specs[model].is_chat:
         assert client == openai_client
-        with multiprocessing.Pool(10) as p:
+        with multiprocessing.Pool(200) as p:
             choices_each = p.map(
                 functools.partial(create_openai_completion, model, kwargs),
                 prompt,
@@ -70,7 +70,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
             choices += x
         return SimpleNamespace(choices=choices)
 
-    chunk_size = 20
+    chunk_size = 200
     choices = []
     for start in range(0, len(prompt), chunk_size):
         chunk = prompt[start : start + chunk_size]

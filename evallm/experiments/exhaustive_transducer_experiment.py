@@ -1,17 +1,23 @@
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 import string
-from permacache import permacache
+from permacache import (
+    permacache,
+    renamed_symbol_unpickler,
+    swap_unpickler_context_manager,
+    stable_hash,
+)
 import numpy as np
 import tqdm.auto as tqdm
-
 
 from evallm.enumerate_dfa.enumerate import (
     all_io_permutations,
     enumerate_packed_dfas_no_permutations_valid_no_io_permutations,
 )
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
+from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicSequencePrompt
+from evallm.utils.kgrams import predict_based_on_kgram
 
 
 @dataclass
@@ -44,9 +50,43 @@ class TransducerExperimentResultPacked:
         )
 
 
+def compute_ngram_each(result):
+    all_ngram_preds = [
+        [x == o[-1] for x in predict_based_on_kgram(i, o)]
+        for i, o in zip(result.inputs_packed, result.outputs_packed)
+    ]
+    max_ngram = max(len(t) for t in all_ngram_preds)
+    for x in all_ngram_preds:
+        x += [x[-1]] * (max_ngram - len(x))
+    ngram_each = np.array(all_ngram_preds).mean(0)
+    return ngram_each
+
+
+@dataclass
+class SummaryStats:
+    model_summary: Counter
+    ngram_each: np.ndarray
+
+    @classmethod
+    def of(cls, result):
+        diags = result.confusion[:, np.eye(2, dtype=bool)].sum(-1)
+        return cls(model_summary=Counter(diags), ngram_each=compute_ngram_each(result))
+
+
 @permacache(
     "evallm/experiments/exhaustive_transducer_experiment/run_experiment_for_dfa_2",
     key_function=dict(prompter=repr),
+    read_from_shelf_context_manager=swap_unpickler_context_manager(
+        renamed_symbol_unpickler(
+            {
+                (
+                    "__main__",
+                    "TransducerExperimentResultPacked",
+                ): TransducerExperimentResultPacked
+            }
+        )
+    ),
+    multiprocess_safe=True,
 )
 def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
     return TransducerExperimentResultPacked.of(
@@ -56,29 +96,66 @@ def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
     )
 
 
-def run_experiment_for_all_dfas(prompter, count, model, sequence_seed):
-    pdfa_and_io = [
-        (pdfa, pdfa_io)
-        for pdfa in enumerate_packed_dfas_no_permutations_valid_no_io_permutations(3, 3)
-        for pdfa_io in all_io_permutations(pdfa)
-    ]
-    result = defaultdict(list)
-    for pdfa, pdfa_io in tqdm.tqdm(pdfa_and_io):
-        result[pdfa].append(
-            run_experiment_for_dfa(prompter, pdfa_io, count, model, sequence_seed)
-        )
+@permacache(
+    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfa_2",
+    key_function=dict(prompt=repr),
+    read_from_shelf_context_manager=swap_unpickler_context_manager(
+        renamed_symbol_unpickler({("__main__", "SummaryStats"): SummaryStats})
+    ),
+)
+def summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed):
+    result = run_experiment_for_dfa(
+        prompt, pdfa, count, model, sequence_seed=sequence_seed
+    )
+    return SummaryStats.of(result)
+
+
+@permacache(
+    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfas_2",
+    key_function=dict(prompt=repr, pdfas=stable_hash),
+)
+def summary_experiment_for_dfas(prompt, pdfas, count, model, sequence_seed):
+    result = {}
+    for pdfa in tqdm.tqdm(pdfas):
+        try:
+            r = summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed)
+        except TrivialProblemError:
+            r = None
+        result[pdfa] = r
     return dict(result)
 
 
-def main():
+def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, limit=None):
+    pdfa_and_io = [
+        (pdfa, pdfa_io)
+        for pdfa in enumerate_packed_dfas_no_permutations_valid_no_io_permutations(3, 3)
+        for pdfa_io in all_io_permutations(pdfa)[:limit]
+    ]
+    result_flat = summary_experiment_for_dfas(
+        prompt,
+        sorted({pdfa_io for _, pdfa_io in pdfa_and_io}),
+        count,
+        model,
+        sequence_seed,
+    )
+    result = defaultdict(list)
+    for pdfa, pdfa_io in pdfa_and_io:
+        result[pdfa].append(result_flat[pdfa_io])
+    return dict(result)
+
+
+def current_exhaustive_experiment(limit):
     num_sequence_symbols = 30
     model = "gpt-4o-mini-2024-07-18"
 
     prompter = BasicSequencePrompt.for_setting(
         dict(num_sequence_symbols=num_sequence_symbols)
     )
-    run_experiment_for_all_dfas(prompter, count=100, model=model, sequence_seed=0)
+    return run_experiment_for_all_dfas(
+        prompter, count=100, model=model, sequence_seed=0, limit=limit
+    )
 
 
 if __name__ == "__main__":
-    main()
+    current_exhaustive_experiment(1)
+    current_exhaustive_experiment(None)
