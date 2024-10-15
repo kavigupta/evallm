@@ -1,7 +1,7 @@
 from collections import Counter, defaultdict
 from dataclasses import dataclass
 import string
-from permacache import permacache, swap_unpickler_context_manager
+from permacache import permacache, swap_unpickler_context_manager, stable_hash
 import numpy as np
 import tqdm.auto as tqdm
 
@@ -89,9 +89,6 @@ def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
 @permacache(
     "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfa_2",
     key_function=dict(prompt=repr),
-    read_from_shelf_context_manager=swap_unpickler_context_manager(
-        renamed_symbol_unpickler
-    ),
 )
 def summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed):
     result = run_experiment_for_dfa(
@@ -100,19 +97,37 @@ def summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed):
     return SummaryStats.of(result)
 
 
-def run_experiment_for_all_dfas(prompter, count, model, sequence_seed, limit=None):
+@permacache(
+    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfas_2",
+    key_function=dict(prompt=repr, pdfas=stable_hash),
+)
+def summary_experiment_for_dfas(prompt, pdfas, count, model, sequence_seed):
+    result = {}
+    for pdfa in tqdm.tqdm(pdfas):
+        try:
+            r = summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed)
+        except TrivialProblemError:
+            r = None
+        result[pdfa] = r
+    return dict(result)
+
+
+def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, limit=None):
     pdfa_and_io = [
         (pdfa, pdfa_io)
         for pdfa in enumerate_packed_dfas_no_permutations_valid_no_io_permutations(3, 3)
         for pdfa_io in all_io_permutations(pdfa)[:limit]
     ]
+    result_flat = summary_experiment_for_dfas(
+        prompt,
+        sorted({pdfa_io for _, pdfa_io in pdfa_and_io}),
+        count,
+        model,
+        sequence_seed,
+    )
     result = defaultdict(list)
-    for pdfa, pdfa_io in tqdm.tqdm(pdfa_and_io):
-        try:
-            r = run_experiment_for_dfa(prompter, pdfa_io, count, model, sequence_seed)
-        except TrivialProblemError:
-            r = None
-        result[pdfa].append(r)
+    for pdfa, pdfa_io in pdfa_and_io:
+        result[pdfa].append(result_flat[pdfa_io])
     return dict(result)
 
 
