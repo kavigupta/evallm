@@ -251,6 +251,29 @@ class BasicSequencePrompt(TransducerPrompter):
         return numeric_answer_to_confusion(output, numeric)
 
 
+class BasicSequencePromptNoChat(BasicSequencePrompt):
+    version = 0
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return BasicSequencePromptNoChat(setting_kwargs["num_sequence_symbols"])
+
+    def display(self):
+        return f"BasicSequencePromptNoChat({self.num_symbols}, {self.version})"
+
+    def display_prompt(self, inp, out, is_chat):
+        assert (
+            not is_chat
+        ), "for now, we only support non-chat systems for this prompter"
+        result = super().display_prompt(inp, out, is_chat=True)
+        assert not result["system"]
+        return result["user"]
+
+    def score_completion(self, output, choice):
+        numeric = self.get_numeric_answer(choice.text)
+        return numeric_answer_to_confusion(output, numeric)
+
+
 class SequencePromptWithExplanation(BasicSequencePrompt):
 
     version = 0

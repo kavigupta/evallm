@@ -16,7 +16,10 @@ from evallm.enumerate_dfa.enumerate import (
 )
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
 from evallm.prompting.prompter import TrivialProblemError
-from evallm.prompting.transducer_prompt import BasicSequencePrompt
+from evallm.prompting.transducer_prompt import (
+    BasicSequencePrompt,
+    BasicSequencePromptNoChat,
+)
 from evallm.utils.kgrams import predict_based_on_kgram
 
 
@@ -144,7 +147,7 @@ def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, limit=None)
     return dict(result)
 
 
-def current_exhaustive_experiment(limit):
+def exhaustive_gpt_4o_mini(limit):
     num_sequence_symbols = 30
     model = "gpt-4o-mini-2024-07-18"
 
@@ -156,6 +159,20 @@ def current_exhaustive_experiment(limit):
     )
 
 
+def exhaustive_llama(limit):
+    num_sequence_symbols = 30
+    model = "meta-llama/Meta-Llama-3-8B"
+
+    prompter = BasicSequencePromptNoChat.for_setting(
+        dict(num_sequence_symbols=num_sequence_symbols)
+    )
+    return run_experiment_for_all_dfas(
+        prompter, count=100, model=model, sequence_seed=0, limit=limit
+    )
+
+
 if __name__ == "__main__":
-    current_exhaustive_experiment(1)
-    current_exhaustive_experiment(None)
+    exhaustive_llama(1)
+    exhaustive_llama(None)
+    # exhaustive_gpt_4o_mini(1)
+    # exhaustive_gpt_4o_mini(None)
