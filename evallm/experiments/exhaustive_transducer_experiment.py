@@ -55,7 +55,10 @@ class TransducerExperimentResultPacked:
 
 def compute_ngram_each(result):
     all_ngram_preds = [
-        [x == o[-1] for x in predict_based_on_kgram(i, o)]
+        [
+            x == o[-1]
+            for x in predict_based_on_kgram([string.ascii_lowercase[c] for c in i], o)
+        ]
         for i, o in zip(result.inputs_packed, result.outputs_packed)
     ]
     max_ngram = max(len(t) for t in all_ngram_preds)
@@ -100,7 +103,7 @@ def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
 
 
 @permacache(
-    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfa_2",
+    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfa_3",
     key_function=dict(prompt=repr),
     read_from_shelf_context_manager=swap_unpickler_context_manager(
         renamed_symbol_unpickler({("__main__", "SummaryStats"): SummaryStats})
@@ -114,8 +117,11 @@ def summary_experiment_for_dfa(prompt, pdfa, count, model, sequence_seed):
 
 
 @permacache(
-    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfas_2",
+    "evallm/experiments/exhaustive_transducer_experiment/summary_experiment_for_dfas_3",
     key_function=dict(prompt=repr, pdfas=stable_hash),
+    read_from_shelf_context_manager=swap_unpickler_context_manager(
+        renamed_symbol_unpickler({("__main__", "SummaryStats"): SummaryStats})
+    ),
 )
 def summary_experiment_for_dfas(prompt, pdfas, count, model, sequence_seed):
     result = {}
