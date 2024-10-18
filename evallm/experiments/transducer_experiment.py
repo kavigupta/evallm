@@ -256,6 +256,9 @@ def current_transducer_experiments(
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
     just_stats=False,
+    prompt=lambda info: BasicInstructionTransducerPrompter(
+        info["num_sequence_symbols"], strip=True
+    ),
 ):
     """
     Updated regularly to reflect the current experiments being run.
@@ -274,8 +277,8 @@ def current_transducer_experiments(
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
                 ),
-                prompter=BasicInstructionTransducerPrompter(
-                    num_sequence_symbols, strip=True
+                prompter=prompt(
+                    dict(num_sequence_symbols=num_sequence_symbols)
                 ),
                 num_repeats_per_dfa=30,
                 num_dfas=num_dfas,
