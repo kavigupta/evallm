@@ -3,6 +3,14 @@ from matplotlib import pyplot as plt
 import numpy as np
 
 
+def res_nan_bad(summary_for_pdfa):
+    return (
+        100
+        * summary_for_pdfa.model_summary[1]
+        / sum(summary_for_pdfa.model_summary.values())
+    )
+
+
 def compute_summary_stats(summary):
     pdfas = sorted(summary.keys())
     model_res_no_nan = [
@@ -11,14 +19,7 @@ def compute_summary_stats(summary):
         / (summary[pdfa].model_summary[0] + summary[pdfa].model_summary[1])
         for pdfa in pdfas
     ]
-    model_res_nan_bad = np.array(
-        [
-            100
-            * summary[pdfa].model_summary[1]
-            / sum(summary[pdfa].model_summary.values())
-            for pdfa in pdfas
-        ]
-    )
+    model_res_nan_bad = np.array([res_nan_bad(summary[pdfa]) for pdfa in pdfas])
     result_5gram = np.array([100 * summary[pdfa].ngram_each[5 - 1] for pdfa in pdfas])
 
     return {
