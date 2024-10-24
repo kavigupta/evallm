@@ -2,10 +2,11 @@ import functools
 import multiprocessing
 import os
 from dataclasses import dataclass
+import time
 from types import SimpleNamespace
 from typing import List
 
-from openai import OpenAI
+from openai import OpenAI, RateLimitError
 from permacache import permacache
 
 sketch5_client = OpenAI(
@@ -56,11 +57,12 @@ def to_messages(prompt):
 
 @permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
+    num_parallel = 200 if model != "gpt-3.5-turbo-instruct" else 10
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
         assert client == openai_client
-        with multiprocessing.Pool(200) as p:
+        with multiprocessing.Pool(num_parallel) as p:
             choices_each = p.map(
                 functools.partial(create_openai_completion, model, kwargs),
                 prompt,
@@ -70,15 +72,21 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
             choices += x
         return SimpleNamespace(choices=choices)
 
-    chunk_size = 200
+    chunk_size = num_parallel
     choices = []
     for start in range(0, len(prompt), chunk_size):
         chunk = prompt[start : start + chunk_size]
-        choices += client.completions.create(
-            model=model,
-            prompt=chunk,
-            **kwargs,
-        ).choices
+        while True:
+            try:
+                from_chunk = client.completions.create(
+                    model=model,
+                    prompt=chunk,
+                    **kwargs,
+                ).choices
+                break
+            except RateLimitError:
+                time.sleep(1)
+        choices += from_chunk
     return SimpleNamespace(choices=choices)
 
 
