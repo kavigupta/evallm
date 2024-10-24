@@ -277,9 +277,7 @@ def current_transducer_experiments(
                 sample_dfa_spec=dict(
                     type="sample_reachable_dfa", n_states=num_states, n_symbols=3
                 ),
-                prompter=prompt(
-                    dict(num_sequence_symbols=num_sequence_symbols)
-                ),
+                prompter=prompt(dict(num_sequence_symbols=num_sequence_symbols)),
                 num_repeats_per_dfa=30,
                 num_dfas=num_dfas,
             )
