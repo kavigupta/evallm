@@ -2,9 +2,9 @@ import itertools
 import string
 from typing import Tuple
 
+import tqdm
 from automata.fa.dfa import DFA
 from permacache import permacache
-import tqdm
 
 from evallm.sample_dfa.reachable_sample import reachable_states
 from evallm.sample_dfa.transduce import transduce

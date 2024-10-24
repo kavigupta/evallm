@@ -1,6 +1,6 @@
+import numpy as np
 from frozendict import frozendict
 from matplotlib import pyplot as plt
-import numpy as np
 
 
 def res_nan_bad(summary_for_pdfa):
