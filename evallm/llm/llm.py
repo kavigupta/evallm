@@ -1,8 +1,8 @@
 import functools
 import multiprocessing
 import os
-from dataclasses import dataclass
 import time
+from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 
