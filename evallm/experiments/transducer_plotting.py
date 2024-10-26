@@ -7,7 +7,7 @@ from evallm.utils.bootstrap import boostrap_mean
 
 def plot_absolute_results(ax, which_llm, result_by_length, *, ignore_na):
     plot_model_result(ax, which_llm, result_by_length, ignore_na, "black")
-    plot_baselines(ax, result_by_length)
+    plot_baselines(ax, result_by_length, ignore_na=ignore_na)
     ax.set_title(which_llm)
 
 
@@ -31,51 +31,72 @@ def plot_result(ax, result_by_length, compute_outcome, **kwargs):
 
 def plot_model_result(ax, which_llm, result_by_length, ignore_na, color):
 
+    def result_calc(r):
+        d = {
+            "na_ignore": r.success_rate_binary_ignore_na,
+            "na_wrong": r.success_rate_binary,
+            # na_freq + (1 - na_freq) * na_wrong = na_ignore
+            # na_freq * (1 - na_wrong) + na_wrong = na_ignore
+            # na_freq = (na_ignore - na_wrong) / (1 - na_wrong)
+            "na_freq": (
+                (r.success_rate_binary_ignore_na - r.success_rate_binary)
+                / (1 - r.success_rate_binary)
+                if r.success_rate_binary < 1
+                else 0
+            ),
+        }
+        return d[ignore_na]
+
     return plot_result(
         ax,
         result_by_length,
-        lambda r: (
-            r.success_rate_binary_ignore_na if ignore_na else r.success_rate_binary
-        ),
+        compute_outcome=result_calc,
         color=color,
         marker="o",
         label=which_llm,
     )
 
 
-def plot_baselines(ax, result_by_length):
-    ngrams = range(1, 1 + 5)
-    count = len(ngrams) + 2
-    linestyles = ["--", "-.", ":"] * 10
-    colors = [mpl.colors.hsv_to_rgb((i / count, 0.5, 0.5)) for i in range(count)]
-    plot_result(
-        ax,
-        result_by_length,
-        lambda r: r.null_success_rate,
-        color=colors.pop(0),
-        linestyle=linestyles.pop(0),
-        label="null",
-    )
-    for ngram in ngrams:
+def plot_baselines(ax, result_by_length, *, ignore_na):
+    if ignore_na != "na_freq":
+        ngrams = range(1, 1 + 5)
+        count = len(ngrams) + 2
+        linestyles = ["--", "-.", ":"] * 10
+        colors = [mpl.colors.hsv_to_rgb((i / count, 0.5, 0.5)) for i in range(count)]
         plot_result(
             ax,
             result_by_length,
-            lambda r, ngram=ngram: r.kgram_success_rates_each[ngram - 1],
+            lambda r: r.null_success_rate,
             color=colors.pop(0),
             linestyle=linestyles.pop(0),
-            label=f"{ngram}gram",
+            label="null",
         )
-    plot_result(
-        ax,
-        result_by_length,
-        lambda r: getattr(r, "brute_force_inference", np.nan),
-        color=colors.pop(0),
-        linestyle=linestyles.pop(0),
-        label="brute force inference",
-    )
+        for ngram in ngrams:
+            plot_result(
+                ax,
+                result_by_length,
+                lambda r, ngram=ngram: r.kgram_success_rates_each[ngram - 1],
+                color=colors.pop(0),
+                linestyle=linestyles.pop(0),
+                label=f"{ngram}gram",
+            )
+        plot_result(
+            ax,
+            result_by_length,
+            lambda r: getattr(r, "brute_force_inference", np.nan),
+            color=colors.pop(0),
+            linestyle=linestyles.pop(0),
+            label="brute force inference",
+        )
     ax.legend()
     ax.set_xlabel("Sequence length")
-    ax.set_ylabel("Success rate [%]")
+    ax.set_ylabel(
+        {
+            "na_ignore": "Success rate (N/A = ignored) [%]",
+            "na_wrong": "Success rate (N/A = wrong) [%]",
+            "na_freq": "N/A frequency",
+        }[ignore_na]
+    )
     ax.grid()
 
 
@@ -114,7 +135,7 @@ def plot_all_absolute_results_single_graph(
             ignore_na=ignore_na,
             color=f"C{i}",
         )
-    plot_baselines(plt.gca(), result_baselines[num_states])
+    plot_baselines(plt.gca(), result_baselines[num_states], ignore_na=ignore_na)
     plt.title(f"Prediction of {num_states}-state DFA")
 
 

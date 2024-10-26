@@ -9,6 +9,7 @@ from evallm.sample_dfa.transduce import transduce
 from .prompter import Prompter
 
 ANSWER_PATTERN = re.compile(r"<answer>([01])</answer>")
+ANSWER_PATTERN_RED_GREEN = re.compile(r"<answer>(red|green)</answer>", re.IGNORECASE)
 
 
 class TransducerPrompter(Prompter):
@@ -337,3 +338,87 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
             "max_tokens": 5000,
             "temperature": 0.0,
         }
+
+
+class RedGreenRoomPrompt1(TransducerPrompter):
+
+    version = 1
+
+    def __init__(self, num_symbols, num_alphabet_symbols, num_states):
+        super().__init__(num_symbols)
+        self.num_alphabet_symbols = num_alphabet_symbols
+        self.num_states = num_states
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return RedGreenRoomPrompt1(
+            setting_kwargs["num_sequence_symbols"],
+            setting_kwargs["sample_dfa_spec"]["n_symbols"],
+            setting_kwargs["num_states"],
+        )
+
+    def display(self):
+        return f"RedGreenRoomPrompt1({self.num_symbols}, {self.num_states}, {self.version})"
+
+    def room_transcript(self, inp, out):
+        inp = [x.upper() for x in inp]
+        out = [{0: "red", 1: "green"}[int(x)] for x in out]
+        lines = []
+        lines += [
+            f'You walk through a portal labeled "{inp[0]}" and end up in a {out[0]} room.'
+        ]
+        for i in range(1, len(inp)):
+            prefix = (
+                f'Then, you walk through a portal labeled "{inp[i]}" and end up in a '
+            )
+            if i == len(inp) - 1:
+                lines += [prefix + "..."]
+            else:
+                lines += [prefix + f"{out[i]} room."]
+        return "\n".join(lines)
+
+    def display_prompt(self, inp, out, is_chat):
+        assert (
+            self.num_alphabet_symbols == 3
+        ), "not implemented for num_alphabet_symbols != 3"
+        assert is_chat, "for now, we only support chat systems for this prompter"
+        return dict(
+            system="",
+            user="```"
+            + "\n"
+            + f"You are in a house of rooms and portals. There are {self.num_states} rooms in the house,"
+            + " and each room has 3 unique portals labeled A, B, and C."
+            + " Each portal teleports you to one room of the house (and sometimes the"
+            + " destination is the room the portal is in). Every portal in a given room"
+            + " always behaves the same way."
+            + "\n\n"
+            + "In this house, each of the rooms look exactly the same, except some of the rooms"
+            + " have red walls and some have green walls. However, there are *three* rooms in total,"
+            + " so you cannot determine which room you are in by color alone, and two rooms of the same"
+            + " color may have portals that behave differently.  As you move through the house, at each"
+            + " time step you write down what portal you take and the color of the room you arrive (or stay) in."
+            + " Based on your notes, predict what color room you will end up in after the last step."
+            + "\n\n"
+            + "Tag your final answer like <answer>color</answer>."
+            + "\n\n"
+            + self.room_transcript(inp, out)
+            + "\n"
+            + "```",
+        )
+
+    def prompt_kwargs(self):
+        # for backwards compatibility. 1000 tokens for 30 symbols
+        return {"max_tokens": (1000 * self.num_symbols) // 30, "temperature": 0.0}
+
+    def get_numeric_answer(self, message_content):
+        answer_tag_result = [
+            x.group(1) for x in ANSWER_PATTERN_RED_GREEN.finditer(message_content)
+        ]
+        if answer_tag_result:
+            color = answer_tag_result[0].lower()
+            return {"red": 0, "green": 1}[color]
+        return None
+
+    def score_completion(self, output, choice):
+        numeric = self.get_numeric_answer(choice.message.content)
+        return numeric_answer_to_confusion(output, numeric)
