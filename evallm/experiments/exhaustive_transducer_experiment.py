@@ -20,6 +20,7 @@ from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import (
     BasicSequencePrompt,
     BasicSequencePromptNoChat,
+    RedGreenRoomPrompt1,
 )
 from evallm.utils.kgrams import predict_based_on_kgram
 
@@ -166,6 +167,22 @@ def exhaustive_gpt_4o_mini(limit):
     )
 
 
+def exhaustive_gpt_4o_mini_red_green(limit):
+    num_sequence_symbols = 30
+    model = "gpt-4o-mini-2024-07-18"
+
+    prompter = RedGreenRoomPrompt1.for_setting(
+        dict(
+            num_sequence_symbols=num_sequence_symbols,
+            num_states=3,
+            sample_dfa_spec=dict(type="sample_reachable_dfa", n_states=3, n_symbols=3),
+        )
+    )
+    return run_experiment_for_all_dfas(
+        prompter, count=100, model=model, sequence_seed=0, limit=limit
+    )
+
+
 def exhaustive_llama(limit):
     num_sequence_symbols = 30
     model = "meta-llama/Meta-Llama-3-8B"
@@ -179,7 +196,8 @@ def exhaustive_llama(limit):
 
 
 if __name__ == "__main__":
-    exhaustive_llama(1)
-    exhaustive_llama(None)
+    # exhaustive_llama(1)
+    # exhaustive_llama(None)
     # exhaustive_gpt_4o_mini(1)
     # exhaustive_gpt_4o_mini(None)
+    exhaustive_gpt_4o_mini_red_green(1)
