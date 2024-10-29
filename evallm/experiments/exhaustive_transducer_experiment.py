@@ -136,12 +136,13 @@ def summary_experiment_for_dfas(prompt, pdfas, count, model, sequence_seed):
     return dict(result)
 
 
-def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, limit=None):
+def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, *, limit=None, limit_pdfas=None):
     pdfa_and_io = [
         (pdfa, pdfa_io)
         for pdfa in enumerate_packed_dfas_no_permutations_valid_no_io_permutations(3, 3)
         for pdfa_io in all_io_permutations(pdfa)[:limit]
     ]
+    pdfa_and_io = pdfa_and_io[:limit_pdfas]
     result_flat = summary_experiment_for_dfas(
         prompt,
         sorted({pdfa_io for _, pdfa_io in pdfa_and_io}),
@@ -179,7 +180,7 @@ def exhaustive_gpt_4o_mini_red_green(limit):
         )
     )
     return run_experiment_for_all_dfas(
-        prompter, count=100, model=model, sequence_seed=0, limit=limit
+        prompter, count=100, model=model, sequence_seed=0, limit=limit, limit_pdfas=1000
     )
 
 
