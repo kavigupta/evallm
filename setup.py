@@ -27,6 +27,7 @@ setuptools.setup(
         "matplotlib",
         "pandas",
         "scipy==1.14.0",
+        "anthropic==0.37.1",
     ],
     extras_require={
         "visual": ["automata-lib[visual]==8.3.0"],
