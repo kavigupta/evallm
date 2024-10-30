@@ -46,3 +46,11 @@ def unpack_dfa(packed_dfa: PackedDFA) -> DFA:
     )
 
     return dfa
+
+
+def normalize_dfa(dfa: DFA) -> DFA:
+    """
+    Returns a DFA with the same language as the given DFA but with the states and symbols renamed.
+    """
+    packed_dfa = pack_dfa(dfa)
+    return unpack_dfa(packed_dfa)
