@@ -96,7 +96,7 @@ def to_messages(prompt):
     ]
 
 
-@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=False)
+@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     num_parallel = 200 if model != "gpt-3.5-turbo-instruct" else 10
     assert isinstance(prompt, (list, tuple))
