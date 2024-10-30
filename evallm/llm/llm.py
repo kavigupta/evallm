@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from typing import List
 
 from openai import OpenAI, RateLimitError
+from anthropic import Anthropic
 from permacache import permacache
 
 sketch5_client = OpenAI(
@@ -15,17 +16,32 @@ sketch5_client = OpenAI(
 )
 
 
-def openai_key():
-    openai_key_path = "/mnt/md0/.openaikey"
+def key(path):
+    openai_key_path = f"/mnt/md0/{path}"
     if not os.path.exists(openai_key_path):
         return "EMPTY"
     with open(openai_key_path) as f:
         return f.read().strip()
 
 
+def openai_key():
+    path = ".openaikey"
+    return key(path)
+
+
+def anthropic_key():
+    path = ".anthropickey"
+    return key(path)
+
+
 openai_client = OpenAI(
     api_key=openai_key(),
     base_url="https://api.openai.com/v1",
+)
+
+anthropic_client = Anthropic(
+    api_key=anthropic_key(),
+    # base_url="https://api.anthropic.com/v1",
 )
 
 
@@ -42,7 +58,32 @@ model_specs = {
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-mini-2024-07-18": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-2024-05-13": ModelSpec(client=openai_client, is_chat=True),
+    "claude-3-5-sonnet-20241022": ModelSpec(client=anthropic_client, is_chat=True),
 }
+
+
+def anthropic_create(*, messages, **kwargs):
+    filtered_messages = []
+    for message in messages:
+        if message["role"] == "system":
+            assert not message["content"]
+            continue
+        filtered_messages.append(message)
+    message = anthropic_client.messages.create(messages=filtered_messages, **kwargs)
+    message_text = "".join([x.text for x in message.content if hasattr(x, "text")])
+    message = SimpleNamespace(content=message_text)
+    return [SimpleNamespace(message=message)]
+
+
+def get_create_method(model):
+    client = model_specs[model].client
+    if client == openai_client:
+        return lambda *args, **kwargs: client.chat.completions.create(
+            *args, **kwargs
+        ).choices
+    elif client == anthropic_client:
+        return anthropic_create
+    raise NotImplementedError(f"Model {model} does not support chat")
 
 
 def to_messages(prompt):
@@ -55,17 +96,19 @@ def to_messages(prompt):
     ]
 
 
-@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
+@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=False)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     num_parallel = 200 if model != "gpt-3.5-turbo-instruct" else 10
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
-        assert client == openai_client
+        assert client in (openai_client, anthropic_client)
         with multiprocessing.Pool(num_parallel) as p:
-            choices_each = p.map(
-                functools.partial(create_openai_completion, model, kwargs),
-                prompt,
+            choices_each = list(
+                map(
+                    functools.partial(create_openai_completion, model, kwargs),
+                    prompt,
+                )
             )
         choices = []
         for x in choices_each:
@@ -91,6 +134,5 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
 
 
 def create_openai_completion(model, kwargs, prompt):
-    return openai_client.chat.completions.create(
-        model=model, messages=to_messages(prompt), **kwargs
-    ).choices
+    create = get_create_method(model)
+    return create(model=model, messages=to_messages(prompt), **kwargs)
