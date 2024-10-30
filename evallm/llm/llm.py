@@ -6,8 +6,8 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 
-from openai import OpenAI, RateLimitError
 from anthropic import Anthropic
+from openai import OpenAI, RateLimitError
 from permacache import permacache
 
 sketch5_client = OpenAI(
@@ -81,7 +81,7 @@ def get_create_method(model):
         return lambda *args, **kwargs: client.chat.completions.create(
             *args, **kwargs
         ).choices
-    elif client == anthropic_client:
+    if client == anthropic_client:
         return anthropic_create
     raise NotImplementedError(f"Model {model} does not support chat")
 
@@ -104,11 +104,9 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     if model_specs[model].is_chat:
         assert client in (openai_client, anthropic_client)
         with multiprocessing.Pool(num_parallel) as p:
-            choices_each = list(
-                map(
-                    functools.partial(create_openai_completion, model, kwargs),
-                    prompt,
-                )
+            choices_each = p.map(
+                functools.partial(create_openai_completion, model, kwargs),
+                prompt,
             )
         choices = []
         for x in choices_each:

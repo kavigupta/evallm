@@ -1,7 +1,7 @@
 import numpy as np
+import pandas as pd
 from frozendict import frozendict
 from matplotlib import pyplot as plt
-import pandas as pd
 
 from evallm.enumerate_dfa.enumerate import (
     enumerate_packed_dfas_no_permutations_valid_no_io_permutations,
