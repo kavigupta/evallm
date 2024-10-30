@@ -136,7 +136,9 @@ def summary_experiment_for_dfas(prompt, pdfas, count, model, sequence_seed):
     return dict(result)
 
 
-def run_experiment_for_all_dfas(prompt, count, model, sequence_seed, *, limit=None, limit_pdfas=None):
+def run_experiment_for_all_dfas(
+    prompt, count, model, sequence_seed, *, limit=None, limit_pdfas=None
+):
     pdfa_and_io = [
         (pdfa, pdfa_io)
         for pdfa in enumerate_packed_dfas_no_permutations_valid_no_io_permutations(3, 3)
