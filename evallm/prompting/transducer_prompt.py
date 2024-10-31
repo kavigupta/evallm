@@ -218,9 +218,13 @@ class BasicSequencePrompt(TransducerPrompter):
         assert is_chat, "for now, we only support chat systems for this prompter"
         return dict(
             system="",
-            user="You are a sequence completion model."
-            + " Output the next element of the sequence, and nothing else.\n\n"
-            + self.packed_sequence(inp, out),
+            user=self.prefix() + "\n\n" + self.packed_sequence(inp, out),
+        )
+
+    def prefix(self):
+        return (
+            "You are a sequence completion model."
+            " Output the next element of the sequence, and nothing else."
         )
 
     def packed_sequence(self, inp, out):
@@ -273,6 +277,27 @@ class BasicSequencePromptNoChat(BasicSequencePrompt):
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.text)
         return numeric_answer_to_confusion(output, numeric)
+
+
+class BasicSequencePromptSlightlyMoreExplanation(BasicSequencePrompt):
+    version = 0
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return BasicSequencePromptSlightlyMoreExplanation(
+            setting_kwargs["num_sequence_symbols"]
+        )
+
+    def display(self):
+        return f"BasicSequencePromptSlightlyMoreExplanation({self.num_symbols}, {self.version})"
+
+    def prefix(self):
+        return (
+            "You are a sequence completion model."
+            " The following sequence is generated from an unknown but consistent grammar."
+            " Identify the patterns within the sequence to determine its next element."
+            " Output the next element of the sequence, and nothing else."
+        )
 
 
 class SequencePromptWithExplanation(BasicSequencePrompt):

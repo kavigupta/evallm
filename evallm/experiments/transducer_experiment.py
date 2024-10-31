@@ -253,6 +253,7 @@ num_sequence_symbol_options_default = (30, 120, 500)
 def current_transducer_experiments(
     model,
     num_dfas=100,
+    num_dfas_3_30=100,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
     just_stats=False,
@@ -279,7 +280,11 @@ def current_transducer_experiments(
                 ),
                 prompter=prompt(dict(num_sequence_symbols=num_sequence_symbols)),
                 num_repeats_per_dfa=30,
-                num_dfas=num_dfas,
+                num_dfas=(
+                    num_dfas_3_30
+                    if num_states == 3 and num_sequence_symbols == 30
+                    else num_dfas
+                ),
             )
     return results
 
@@ -302,6 +307,8 @@ def chatgpt_transducer_experiments_direct(
     cot_prompt=ChainOfThoughtPrompt.for_setting,
     num_states_options=(3, 5, 7),
     num_sequence_symbol_options=num_sequence_symbol_options_default,
+    num_dfas=30,
+    num_dfas_3_30=100,
 ):
     """
     Updated regularly to reflect the current experiments being run.
@@ -323,7 +330,11 @@ def chatgpt_transducer_experiments_direct(
                 sample_dfa_spec=sample_dfa_spec,
                 prompter=prompter,
                 num_repeats_per_dfa=30,
-                num_dfas=30,
+                num_dfas=(
+                    num_dfas_3_30
+                    if num_states == 3 and num_sequence_symbols == 30
+                    else num_dfas
+                ),
             )
     return results
 
