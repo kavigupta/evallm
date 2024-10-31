@@ -96,18 +96,25 @@ def to_messages(prompt):
     ]
 
 
-@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
+@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=False)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
-    num_parallel = 200 if model != "gpt-3.5-turbo-instruct" else 10
+    num_parallel = 200
+    if model == "gpt-3.5-turbo-instruct":
+        num_parallel = 10
+    if model == "claude-3-5-sonnet-20241022":
+        # anthropic has extremely low rate limits
+        num_parallel = 1
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
         assert client in (openai_client, anthropic_client)
         with multiprocessing.Pool(num_parallel) as p:
-            choices_each = p.map(
+            map_fn = p.map if num_parallel > 1 else map
+            choices_each = map_fn(
                 functools.partial(create_openai_completion, model, kwargs),
                 prompt,
             )
+            choices_each = list(choices_each)
         choices = []
         for x in choices_each:
             choices += x
