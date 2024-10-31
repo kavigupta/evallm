@@ -177,7 +177,7 @@ def plot_absolute_results_barchart(
         bc.pop(0),
         lambda r: r.null_success_rate,
     )
-    for i, ngram in enumerate(range(1, 1 + 5)):
+    for ngram in range(1, 1 + 5):
         c.add_result(
             result_baseline[num_states][num_sequence_symbols],
             f"{ngram}gram",
@@ -192,8 +192,8 @@ def plot_absolute_results_barchart(
         lambda r: getattr(r, "brute_force_inference", np.nan),
     )
 
-    models = [model_name(run_name) for run_name in results]
-    models = sorted(set(models), key=lambda x: models.index(x))
+    models = [compute_model_name(run_name) for run_name in results]
+    models = sorted(set(models), key=models.index)
 
     for run_name in results:
         if num_states not in results[run_name]:
@@ -205,7 +205,7 @@ def plot_absolute_results_barchart(
         c.add_result(
             res,
             run_name,
-            f"C{models.index(model_name(run_name))}",
+            f"C{models.index(compute_model_name(run_name))}",
             lambda r: result_calc(ignore_na, r),
         )
 
@@ -219,7 +219,7 @@ def plot_absolute_results_barchart(
     plt.xticks(rotation=90)
 
 
-def model_name(run_name):
+def compute_model_name(run_name):
     return run_name.split(" ")[0]
 
 
