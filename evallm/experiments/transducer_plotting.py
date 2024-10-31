@@ -192,14 +192,22 @@ def plot_absolute_results_barchart(
         lambda r: getattr(r, "brute_force_inference", np.nan),
     )
 
-    for i, model_name in enumerate(results):
-        if num_states not in results[model_name]:
+    models = [model_name(run_name) for run_name in results]
+    models = sorted(set(models), key=lambda x: models.index(x))
+
+    for run_name in results:
+        if num_states not in results[run_name]:
             continue
-        if num_sequence_symbols not in results[model_name][num_states]:
+        if num_sequence_symbols not in results[run_name][num_states]:
             continue
 
-        res = results[model_name][num_states][num_sequence_symbols]
-        c.add_result(res, model_name, f"C{i}", lambda r: result_calc(ignore_na, r))
+        res = results[run_name][num_states][num_sequence_symbols]
+        c.add_result(
+            res,
+            run_name,
+            f"C{models.index(model_name(run_name))}",
+            lambda r: result_calc(ignore_na, r),
+        )
 
     c.sort()
     c.plot_bars()
@@ -209,6 +217,10 @@ def plot_absolute_results_barchart(
     )
     plt.ylabel(get_ylabel(ignore_na))
     plt.xticks(rotation=90)
+
+
+def model_name(run_name):
+    return run_name.split(" ")[0]
 
 
 class BarChartBuilder:
