@@ -193,7 +193,7 @@ def plot_absolute_results_barchart(
     )
 
     models = [compute_model_name(run_name) for run_name in results]
-    models = sorted(set(models), key=lambda x: models.index(x))
+    models = sorted(set(models), key=models.index)
 
     for run_name in results:
         if num_states not in results[run_name]:
