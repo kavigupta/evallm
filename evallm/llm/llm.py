@@ -54,6 +54,11 @@ class ModelSpec:
 model_specs = {
     "none": ModelSpec(client=None, is_chat=False),
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
+    "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
+        client=sketch5_client, is_chat=False
+    ),
+    "google/gemma-7b": ModelSpec(client=sketch5_client, is_chat=False),
+    "tiiuae/falcon-7b": ModelSpec(client=sketch5_client, is_chat=False),
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-mini-2024-07-18": ModelSpec(client=openai_client, is_chat=True),
@@ -96,7 +101,7 @@ def to_messages(prompt):
     ]
 
 
-@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=True)
+@permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=False)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
     num_parallel = 200
     if model == "gpt-3.5-turbo-instruct":
