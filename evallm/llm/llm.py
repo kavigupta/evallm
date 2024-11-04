@@ -54,6 +54,7 @@ class ModelSpec:
 model_specs = {
     "none": ModelSpec(client=None, is_chat=False),
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
+    "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
     "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
         client=sketch5_client, is_chat=False
     ),
