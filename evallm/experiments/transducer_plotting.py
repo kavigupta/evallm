@@ -260,3 +260,51 @@ class BarChartBuilder:
         plt.grid(axis="y")
         plt.yticks(np.arange(50, 101, 5))
         plt.ylim(50, 100)
+
+
+def produce_table(accuracies, ordered_prompts):
+    accuracies_mean = {
+        mod: {prompt: np.mean(accuracies[mod][prompt]) for prompt in accuracies[mod]}
+        for mod in accuracies
+    }
+
+    best_acc_mean_by_mod = {k: max(v.values()) for k, v in accuracies_mean.items()}
+    models_sorted = sorted(accuracies, key=lambda k: best_acc_mean_by_mod[k])[::-1]
+
+    format_by_mod = {}
+    assert "BruteForce" in models_sorted[0]
+    format_by_mod[models_sorted[0]] = r"\cellcolor{lightgray}"
+    format_by_mod[models_sorted[1]] = r"\bf "
+
+    table_alignments = "|" + "|".join("r" + "c" * len(ordered_prompts)) + "|"
+    table = ""
+    table += r"\begin{tabular}{%s}" % table_alignments + "\n"
+    table += r"\hline" + "\n"
+    table += (
+        " & ".join(["Model"] + [rf"\textsc{{{x}}}" for x in ordered_prompts])
+        + r"\\"
+        + "\n"
+    )
+    table += r"\hline" + "\n"
+    for mod in models_sorted:
+        table += format_by_mod.get(mod, "") + mod + " &"
+        for prompt in ordered_prompts:
+            if prompt not in accuracies[mod]:
+                table += "--&"
+                continue
+            table += display_acc(format_by_mod, accuracies[mod][prompt], mod) + "&"
+        assert table[-1] == "&"
+        table = table[:-1]
+        table += r"\\" + "\n"
+        table += r"\hline" + "\n"
+    table += r"\end{tabular}"
+
+    print(table)
+
+
+def display_acc(format_by_mod, acc, mod):
+    acc = np.array(acc) * 100
+    mu = np.mean(acc)
+    lo, hi = boostrap_mean(acc)
+    prefix = format_by_mod.get(mod, "")
+    return prefix + f"{mu:.1f} ({lo:.1f}--{hi:.1f})"
