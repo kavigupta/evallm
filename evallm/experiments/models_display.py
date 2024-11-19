@@ -1,0 +1,15 @@
+model_by_display_key = {
+    "llama3-8B": "meta-llama/Meta-Llama-3-8B",
+    "llama3-70B": "meta-llama/Meta-Llama-3-70B",
+    "llama3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+    "mistral-nemo-minitron-8B": "nvidia/Mistral-NeMo-Minitron-8B-Base",
+    "mistral-nemo-base-12B": "/scratch/kavig/mistral_models/Nemo-Base",
+    "mistral-nemo-instruct-12B": "/scratch/kavig/mistral_models/Nemo-Instruct",
+    "gemma-7b": "google/gemma-7b",
+    "falcon-7b": "tiiuae/falcon-7b",
+    "gpt-3.5-instruct": "gpt-3.5-turbo-instruct",
+    "gpt-3.5-chat": "gpt-3.5-turbo-0125",
+    "gpt-4o-mini": "gpt-4o-mini-2024-07-18",
+    "gpt-4o": "gpt-4o-2024-05-13",
+    "claude-3.5": "claude-3-5-sonnet-20241022",
+}
