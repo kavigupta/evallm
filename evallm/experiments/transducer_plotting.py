@@ -288,18 +288,6 @@ def produce_table(accuracies, ordered_prompts):
     table += r"\hline" + "\n"
     for mod in models_sorted:
         table += format_by_mod.get(mod, "") + mod + " &"
-        if "no-prompt" in accuracies[mod]:
-            table += (
-                r"\multicolumn{%s}{l|}{%s}"
-                % (
-                    len(ordered_prompts),
-                    display_acc(accuracies[mod]["no-prompt"], mod),
-                )
-                + r"\\"
-                + "\n"
-            )
-            table += r"\hline" + "\n"
-            continue
         for prompt in ordered_prompts:
             if prompt not in accuracies[mod]:
                 table += "--&"
