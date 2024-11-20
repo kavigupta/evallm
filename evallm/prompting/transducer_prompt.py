@@ -3,7 +3,6 @@ from abc import abstractmethod
 
 import numpy as np
 
-from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.sample_dfa.transduce import transduce
 
 from .prompter import Prompter
@@ -285,7 +284,7 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
         )
 
     def get_numeric_answer(self, message_content):
-        return parse_cot_answer(self, message_content)
+        return parse_cot_answer(message_content)
 
     def prompt_kwargs(self):
         return {
