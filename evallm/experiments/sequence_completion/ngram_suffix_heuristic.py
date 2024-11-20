@@ -23,6 +23,7 @@ def suffix_after(sequences, prefix):
         if prefix in sequence[:-1]:
             idx = sequence[:-1].rindex(prefix)
             return sequence[idx + len(prefix) :]
+    return None
 
 
 def ngram_heuristic_with_prefix(sequences, prefix):
