@@ -29,7 +29,7 @@ def compute_ngram_scores(num_seeds, setting):
 
 
 def compute_ngram_score(seed, *, setting, function):
-    dfa, examples = _examples(seed, setting)
+    dfa, examples = get_examples(seed, setting)
     return np.mean(
         [
             dfa.accepts_input(prefix + function(sequences, prefix))
@@ -68,7 +68,7 @@ def compute_brute_force_scores(num_seeds, setting):
     "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_brute_force_score"
 )
 def compute_brute_force_score(seed, setting):
-    dfa, examples = _examples(seed, setting)
+    dfa, examples = get_examples(seed, setting)
     return np.mean(
         [
             dfa.accepts_input(
@@ -93,7 +93,7 @@ def compute_random_baseline_scores(num_seeds, setting):
 
 
 def compute_random_baseline_score(seed, *, setting):
-    dfa, examples = _examples(seed, setting)
+    dfa, examples = get_examples(seed, setting)
     rng = np.random.RandomState(np.random.RandomState(seed).randint(2**32))
     return np.mean(
         [
@@ -144,7 +144,7 @@ def compute_model_score(seed, *, setting, model, prompt):
     """
     Returns counts of correct, incorrect, and N/A completions.
     """
-    dfa, sequences_prefixes = _examples(seed, setting)
+    dfa, sequences_prefixes = get_examples(seed, setting)
     is_chat = model_specs[model].is_chat
     prompts = [
         prompt.display_prompt(dfa, sequences, prefix, is_chat=is_chat)
@@ -163,6 +163,6 @@ def compute_model_score(seed, *, setting, model, prompt):
     return {k: results[k] for k in [0.0, 0.5, 1.0]}
 
 
-def _examples(seed, setting):
+def get_examples(seed, setting):
     rng = np.random.RandomState(seed)
     return sample_sequence_completion_problem(rng, **setting, try_limit=50)
