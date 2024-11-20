@@ -145,6 +145,15 @@ def compute_model_score(seed, *, setting, model, prompt):
     Returns counts of correct, incorrect, and N/A completions.
     """
     dfa, sequences_prefixes = get_examples(seed, setting)
+    responses = run_model(model, prompt, dfa, sequences_prefixes)
+    results = Counter(
+        prompt.score_response(dfa, sequences, prefix, response)
+        for (sequences, prefix), response in zip(sequences_prefixes, responses)
+    )
+    return {k: results[k] for k in [0.0, 0.5, 1.0]}
+
+
+def run_model(model, prompt, dfa, sequences_prefixes):
     is_chat = model_specs[model].is_chat
     prompts = [
         prompt.display_prompt(dfa, sequences, prefix, is_chat=is_chat)
@@ -156,11 +165,7 @@ def compute_model_score(seed, *, setting, model, prompt):
         responses = [x.message.content for x in responses]
     else:
         responses = [x.text for x in responses]
-    results = Counter(
-        prompt.score_response(dfa, sequences, prefix, response)
-        for (sequences, prefix), response in zip(sequences_prefixes, responses)
-    )
-    return {k: results[k] for k in [0.0, 0.5, 1.0]}
+    return responses
 
 
 def get_examples(seed, setting):
