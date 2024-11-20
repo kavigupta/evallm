@@ -5,9 +5,6 @@ import numpy as np
 
 class SequenceCompletionPrompt(ABC):
 
-    def __init__(self, num_symbols):
-        self.num_symbols = num_symbols
-
     @classmethod
     @abstractmethod
     def for_setting(cls, setting_kwargs):
