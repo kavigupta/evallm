@@ -9,6 +9,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.infer_dfa import inference
+from evallm.infer_dfa.brute_force_transducer import brute_force_accuracy
 from evallm.llm.llm import run_prompt
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import (
@@ -379,3 +380,29 @@ def gather_prompts(
             break
 
     return dfas, raw_transducer_results, prompts, expected_answers
+
+
+@permacache(
+    "evallm/experiments/run_brute_force_transducer",
+    key_function=dict(prompter=repr),
+)
+def run_brute_force_transducer(
+    sample_dfa_spec,
+    num_states,
+    num_symbols,
+    num_sequence_symbols,
+    num_repeats_per_dfa,
+    num_dfas,
+):
+    results = run_transducer_experiment.function(
+        "none",
+        sample_dfa_spec,
+        BasicInstructionTransducerPrompter(num_sequence_symbols, strip=True),
+        num_repeats_per_dfa,
+        num_dfas,
+    )
+    results = [
+        brute_force_accuracy(num_states, num_symbols, rr.inputs, rr.outputs)
+        for rr in tqdm.tqdm(results)
+    ]
+    return results
