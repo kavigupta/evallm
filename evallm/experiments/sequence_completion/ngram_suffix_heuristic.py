@@ -16,3 +16,21 @@ def ngram_heuristic(sequences, prefix):
             suffix_counts[tuple(sequence[-i:])] += 1
 
     return list(max(suffix_counts, key=lambda x: suffix_counts[x] * len(x)))
+
+
+def suffix_after(sequences, prefix):
+    for sequence in sequences:
+        if prefix in sequence[:-1]:
+            idx = sequence[:-1].rindex(prefix)
+            return sequence[idx + len(prefix) :]
+    return None
+
+
+def ngram_heuristic_with_prefix(sequences, prefix):
+    for trim in range(len(prefix)):
+        s = suffix_after(
+            ["".join(sequence[trim:]) for sequence in sequences], "".join(prefix[trim:])
+        )
+        if s is not None:
+            return list(s)
+    return ngram_heuristic(sequences, prefix)
