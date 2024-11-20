@@ -383,7 +383,10 @@ class RedGreenRoomPrompt1(TransducerPrompter):
         )
 
     def display(self):
-        return f"RedGreenRoomPrompt1({self.num_symbols}, {self.num_states}, {self.version})"
+        display = f"RedGreenRoomPrompt1({self.num_symbols}, {self.num_states}, {self.version})"
+        if self.num_states != 3:
+            display += " fixed_states"
+        return display
 
     def room_transcript(self, inp, out):
         inp = [x.upper() for x in inp]
@@ -418,7 +421,8 @@ class RedGreenRoomPrompt1(TransducerPrompter):
             + " always behaves the same way."
             + "\n\n"
             + "In this house, each of the rooms look exactly the same, except some of the rooms"
-            + " have red walls and some have green walls. However, there are *three* rooms in total,"
+            + " have red walls and some have green walls."
+            + f" However, there are *{self.rendered_num_states}* rooms in total,"
             + " so you cannot determine which room you are in by color alone, and two rooms of the same"
             + " color may have portals that behave differently.  As you move through the house, at each"
             + " time step you write down what portal you take and the color of the room you arrive (or stay) in."
@@ -430,6 +434,10 @@ class RedGreenRoomPrompt1(TransducerPrompter):
             + "\n"
             + "```",
         )
+
+    @property
+    def rendered_num_states(self):
+        return {3: "three", 4: "four", 5: "five"}[self.num_states]
 
     def prompt_kwargs(self):
         # for backwards compatibility. 1000 tokens for 30 symbols
