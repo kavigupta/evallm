@@ -306,6 +306,8 @@ def produce_table(accuracies, ordered_prompts):
 
 
 def display_acc(format_by_mod, acc, mod):
+    if isinstance(acc, (float, np.float32, np.float64)) and np.isnan(acc):
+        return "invalid"
     acc = np.array(acc) * 100
     mu = np.mean(acc)
     lo, hi = boostrap_mean(acc)
