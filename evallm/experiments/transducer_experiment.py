@@ -12,10 +12,7 @@ from evallm.infer_dfa import inference
 from evallm.infer_dfa.brute_force_transducer import brute_force_accuracy
 from evallm.llm.llm import run_prompt
 from evallm.prompting.prompter import TrivialProblemError
-from evallm.prompting.transducer_prompt import (
-    BasicInstructionTransducerPrompter,
-    ChainOfThoughtPrompt,
-)
+from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
 
@@ -292,52 +289,6 @@ def current_transducer_experiments(
 
 def current_dfa_sample_spec(num_states):
     return dict(type="sample_reachable_dfa", n_states=num_states, n_symbols=3)
-
-
-def chatgpt_transducer_experiments(model_name, *, allow_expensive=False, **kwargs):
-    if model_name in {"gpt-4o-2024-05-13"} and not allow_expensive:
-        with run_prompt.error_on_miss():
-            return chatgpt_transducer_experiments_direct(model_name, **kwargs)
-    else:
-        return chatgpt_transducer_experiments_direct(model_name, **kwargs)
-
-
-def chatgpt_transducer_experiments_direct(
-    model_name,
-    *,
-    cot_prompt=ChainOfThoughtPrompt.for_setting,
-    num_states_options=(3, 5, 7),
-    num_sequence_symbol_options=num_sequence_symbol_options_default,
-    num_dfas=30,
-    num_dfas_3_30=100,
-):
-    """
-    Updated regularly to reflect the current experiments being run.
-    """
-    results = {}
-    for num_states in num_states_options:
-        results[num_states] = {}
-        for num_sequence_symbols in num_sequence_symbol_options:
-            sample_dfa_spec = current_dfa_sample_spec(num_states)
-            prompter = cot_prompt(
-                dict(
-                    num_sequence_symbols=num_sequence_symbols,
-                    num_states=num_states,
-                    sample_dfa_spec=sample_dfa_spec,
-                )
-            )
-            results[num_states][num_sequence_symbols] = run_transducer_experiment(
-                model_name,
-                sample_dfa_spec=sample_dfa_spec,
-                prompter=prompter,
-                num_repeats_per_dfa=30,
-                num_dfas=(
-                    num_dfas_3_30
-                    if num_states == 3 and num_sequence_symbols == 30
-                    else num_dfas
-                ),
-            )
-    return results
 
 
 def gather_prompts(
