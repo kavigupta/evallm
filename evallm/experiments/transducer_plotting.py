@@ -262,17 +262,17 @@ class BarChartBuilder:
         plt.ylim(50, 100)
 
 
-def produce_table(accuracies, ordered_prompts):
+def produce_table(accuracies, ordered_prompts, handle_brute_force=True):
     accuracies_mean = {
         mod: {prompt: np.mean(accuracies[mod][prompt]) for prompt in accuracies[mod]}
         for mod in accuracies
     }
 
     best_acc_mean_by_mod = {k: max(v.values()) for k, v in accuracies_mean.items()}
-    models_sorted = sorted(accuracies, key=lambda k: best_acc_mean_by_mod[k])[::-1]
+    models_sorted = sorted(accuracies, key=lambda k: np.nan_to_num(best_acc_mean_by_mod[k], -np.inf))[::-1]
 
     format_by_mod = {}
-    if any("BruteForce" in x for x in models_sorted):
+    if any("BruteForce" in x for x in models_sorted) and handle_brute_force:
         assert "BruteForce" in models_sorted[0]
         format_by_mod[models_sorted[0]] = r"\cellcolor{lightgray}"
         format_by_mod[models_sorted[1]] = r"\bf "
