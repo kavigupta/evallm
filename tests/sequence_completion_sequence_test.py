@@ -55,5 +55,5 @@ class TestNgramSequenceCompletion(unittest.TestCase):
                 ["abcdX"] + ["0bcdY"] * 2 + ["00cdZ"] * 3 + ["000dX"] * 5,
                 "abcd",
             ),
-            ["X", "Z", "Y", "X"],
+            [[x] for x in ["X", "Z", "Y", "X"]],
         )
