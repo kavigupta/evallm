@@ -34,3 +34,32 @@ def ngram_heuristic_with_prefix(sequences, prefix):
         if s is not None:
             return list(s)
     return ngram_heuristic(sequences, prefix)
+
+
+def ngram_completions(sequences, prefix, max_completion_length):
+    results = []
+    for sequence in sequences:
+        for start in range(len(sequence) - len(prefix)):
+            end = start + len(prefix)
+            if len(sequence) - end > max_completion_length:
+                continue
+            if sequence[start:end] == prefix:
+                results.append(sequence[end:])
+    return results
+
+
+def multiple_ngrams(sequences, prefix):
+    sequences = ["".join(sequence) for sequence in sequences]
+    prefix = "".join(prefix)
+    max_completion_length = len(sequences[0]) - len(prefix)
+    suggestions_each = []
+    for prefix_length in range(1, 1 + len(prefix)):
+        prefix_to_use = prefix[-prefix_length:]
+        completions = ngram_completions(sequences, prefix_to_use, max_completion_length)
+        if not completions:
+            suggestions_each += [suggestions_each[-1]]
+            continue
+        counts = Counter(completions)
+        best = max(counts, key=counts.get)
+        suggestions_each.append(list(best))
+    return suggestions_each
