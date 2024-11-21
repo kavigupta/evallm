@@ -95,10 +95,7 @@ class BasicInstructionTransducerPrompter(CleanTransducerPrompter):
         )
 
     def display_prompt(self, inp, out, is_chat):
-        raise NotImplementedError(
-            "This should not actually be used. "
-            "It only exists as a default for caching in ngram models, etc."
-        )
+        return None
 
 
 def parse_cot_answer(message_content):
