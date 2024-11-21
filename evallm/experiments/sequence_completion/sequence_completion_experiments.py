@@ -120,6 +120,8 @@ def compute_model_scores(num_seeds, setting, model, prompt_fn, *, na_mode="ignor
         return res[1] / (res[0] + res[1])
     if na_mode == "zero":
         return res[1] / (res[0] + res[1] + res[0.5])
+    if na_mode == "count-na":
+        return res[0.5] / sum(res.values())
     raise ValueError(f"Invalid na_mode: {na_mode}")
 
 
