@@ -59,8 +59,9 @@ def process_stats_to_dict(stats):
         result["brute_force_inference_old"] = float(stats.brute_force_inference)
     return result
 
+
 def baseline_results():
-    none = current_transducer_experiments(
+    baselines = current_transducer_experiments(
         "none",
         num_states_options=(3, 5, 7),
         num_dfas=1000,
@@ -68,16 +69,13 @@ def baseline_results():
         just_stats=True,
     )
     results = []
-    for num_states in none:
-        for num_sequence_symbols in none[num_states]:
+    for num_states, for_num_states in baselines.items():
+        for num_sequence_symbols, for_num_seq_symbols in for_num_states.items():
             results.append(
                 dict(
                     num_states=num_states,
                     num_sequence_symbols=num_sequence_symbols,
-                    results=[
-                        process_stats_to_dict(r)
-                        for r in none[num_states][num_sequence_symbols]
-                    ],
+                    results=[process_stats_to_dict(r) for r in for_num_seq_symbols],
                 )
             )
     return results
