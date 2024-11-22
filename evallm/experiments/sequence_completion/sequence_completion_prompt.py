@@ -36,8 +36,7 @@ class SequencePromptDirect(SequenceCompletionPrompt):
         prompt += "\n".join(
             self.format_sequence(dfa, sequence) for sequence in sequences
         )
-        prompt += "\n\n"
-        prompt += "Complete the following string:"
+        prompt += self.instructions_before_prefix()
         prompt += "\n"
         prompt += self.format_sequence(dfa, prefix)
         if is_chat:
@@ -47,6 +46,9 @@ class SequencePromptDirect(SequenceCompletionPrompt):
     @abstractmethod
     def preamble(self):
         pass
+
+    def instructions_before_prefix(self):
+        return "\n\nComplete the following string:"
 
     @abstractmethod
     def format_sequence(self, dfa, sequence):
