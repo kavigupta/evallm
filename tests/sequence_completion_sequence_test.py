@@ -1,6 +1,5 @@
 import unittest
 
-import evallm
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
     multiple_ngrams,
     ngram_completions,
