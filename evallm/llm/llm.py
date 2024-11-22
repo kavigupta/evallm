@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 
-from anthropic import Anthropic
+from anthropic import Anthropic, InternalServerError
 from openai import OpenAI, RateLimitError
 from permacache import permacache
 
@@ -82,7 +82,18 @@ def anthropic_create(*, messages, **kwargs):
             assert not message["content"]
             continue
         filtered_messages.append(message)
-    message = anthropic_client.messages.create(messages=filtered_messages, **kwargs)
+    while True:
+        try:
+            message = anthropic_client.messages.create(
+                messages=filtered_messages, **kwargs
+            )
+            break
+        except InternalServerError as e:
+            if "overloaded_error" in e.message:
+                print(e)
+                time.sleep(10)
+                continue
+            raise
     message_text = "".join([x.text for x in message.content if hasattr(x, "text")])
     message = SimpleNamespace(content=message_text)
     return [SimpleNamespace(message=message)]
