@@ -269,7 +269,7 @@ class SequencePromptWithExplanation(BasicSequencePrompt):
 
 class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation):
 
-    version = 1
+    version = 2
 
     def display(self):
         return f"SequencePromptWithExplanationChainOfThought({self.num_symbols}, {self.num_states}, {self.version})"
@@ -277,7 +277,7 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
     def terminal_instruction(self):
         return (
             "Reason step by step, and then output the next output"
-            " integer using <output> tags, like <output>0</output>."
+            " integer using <answer> tags, like <answer>0</answer>."
         )
 
     def get_numeric_answer(self, message_content):
