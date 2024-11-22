@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import re
 
 
 class SequenceCompletionPrompt(ABC):
@@ -100,6 +101,52 @@ class SequencePromptDirectAlien(SequencePromptDirect):
         return {"max_tokens": self.max_out_characters * 5, "temperature": 0.0}
 
 
+class SequencePromptDirectAlien2(SequencePromptDirectAlien):
+    def hash_prompt(self):
+        return f"SequencePromptDirectAlien2({self.max_out_characters})"
+
+    def preamble(self):
+        return (
+            "The following strings come from an alien language that follows a simple grammar."
+            + " Infer the alien grammar using the example strings. Then, add a suffix to the final string"
+            + f" using between 1 and {self.max_out_characters} characters such that the full string"
+            + " follows the grammar. Output only the necessary suffix to complete the final string, and nothing else."
+            + "\n"
+        )
+
+    def instructions_before_prefix(self):
+        return ""
+
+
+class SequencePromptDirectAlien2WithSpaces(SequencePromptDirectAlien2):
+
+    def hash_prompt(self):
+        return f"SequencePromptDirectAlien2WithSpaces({self.max_out_characters})"
+
+    def format_sequence(self, dfa, sequence):
+        return " ".join(sequence)
+
+
+class SequencePromptDirectAlien3(SequencePromptDirectAlien):
+    def hash_prompt(self):
+        return f"SequencePromptDirectAlien3({self.max_out_characters})"
+
+    def instructions_before_prefix(self):
+        return (
+            "\n\nWrite a grammatical suffix for the following string."
+            + " Do not explain your answer. Only output the suffix, and nothing else:"
+        )
+
+
+class SequencePromptDirectAlien3WithSpaces(SequencePromptDirectAlien3):
+
+    def hash_prompt(self):
+        return f"SequencePromptDirectAlien3WithSpaces({self.max_out_characters})"
+
+    def format_sequence(self, dfa, sequence):
+        return " ".join(sequence)
+
+
 class SequencePromptDirectAlienWithSpaces(SequencePromptDirectAlien):
 
     def hash_prompt(self):
@@ -107,3 +154,113 @@ class SequencePromptDirectAlienWithSpaces(SequencePromptDirectAlien):
 
     def format_sequence(self, dfa, sequence):
         return " ".join(sequence)
+
+
+class MoreExplanationPrompt(SequencePromptDirectAlien):
+
+    def __init__(self, max_out_characters, num_states):
+        super().__init__(max_out_characters)
+        self.num_states = num_states
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+            num_states=setting_kwargs["dfa_spec"]["n_states"],
+        )
+
+    def hash_prompt(self):
+        return f"MoreExplanationPrompt({self.max_out_characters}, {self.num_states})"
+
+    def preamble(self):
+        return (
+            f"I have a {self.num_states}-state DFA model that outputs either 0 or 1 after each element I input."
+            + ' 1 indicates that the input string thus far results in a "valid" state,'
+            + " and 0 indicates that it does not. I collect a set of valid strings using this DFA,"
+            + " listed below. Infer the underlying DFA model using these strings and complete the final string,"
+            + " using up to n characters, such that it is also a valid string."
+            + " "
+            + self.end_of_preamble()
+            + "\n\n"
+            + "Given these valid strings:"
+        )
+
+    def end_of_preamble(self):
+        return "Output the necessary suffix for this final string, and nothing else."
+
+
+ANSWER_PATTERN = re.compile(r"<answer>([^<]+)</answer>")
+
+
+class MoreExplanationPromptCOT(MoreExplanationPrompt):
+
+    version = 2
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+            num_states=setting_kwargs["dfa_spec"]["n_states"],
+        )
+
+    def hash_prompt(self):
+        return f"MoreExplanationPromptCOT({self.max_out_characters}, {self.num_states}, {self.version})"
+
+    def end_of_preamble(self):
+        return (
+            "Reason step by step, and then output the next necessary suffix for this final string,"
+            + f" <answer> tags, like <answer>{self.format_sequence(None, ['a', 'b'])}</answer>."
+        )
+
+    def score_response(self, dfa, sequences, prefix, response):
+        match = ANSWER_PATTERN.search(response)
+        if match is None:
+            return 0.5
+        prediction = match.group(1)
+        return super().score_response(dfa, sequences, prefix, prediction)
+
+    def model_kwargs(self):
+        return {"max_tokens": self.max_out_characters * 5 + 5000, "temperature": 0.0}
+
+
+class RedGreenPrompt(MoreExplanationPromptCOT):
+
+    version = 1
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+            num_states=setting_kwargs["dfa_spec"]["n_states"],
+        )
+
+    def hash_prompt(self):
+        return f"RedGreenPrompt({self.max_out_characters}, {self.version})"
+
+    def preamble(self):
+        return (
+            f"You are outside a house of rooms and portals. There are {self.num_states} rooms in the house, and each room has 3"
+            + " unique portals labeled a, b, and c. Each portal teleports you to one room of the house"
+            + " (and sometimes the destination is the room the portal is in). Every portal in a given room always behaves the same way."
+            + "\n\n"
+            + "In this house, each of the rooms look exactly the same, except some of the rooms have red walls and some"
+            f" have green walls. However, there are *{self.num_states}* rooms in total, so you cannot determine which room"
+            " you are in by color alone, and two rooms of the same color may have portals that behave differently."
+            " You've been into this house many times before. Each time, as you move through the house, you write down"
+            " what series of portals you take and the color of the room you end up in. You have a collection of paths you've"
+            " taken where you've ended up in a room with green walls, listed below. Given the final incomplete path at the bottom,"
+            f" write a series of up to {self.max_out_characters} remaining steps that will cause you to end up in a room with green walls again."
+            + "\n\n"
+            + f"Tag your final answer like <answer>{self.format_sequence(None, ['a', 'b'])}</answer>."
+            + "\n\n"
+            + "Given these paths that end in a room with green walls:"
+        )
+
+    def end_of_preamble(self):
+        raise NotImplementedError
+
+    def instructions_before_prefix(self):
+        return "\n\nComplete the following path:"
