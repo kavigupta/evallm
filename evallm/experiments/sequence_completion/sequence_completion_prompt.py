@@ -190,6 +190,40 @@ class MoreExplanationPrompt(SequencePromptDirectAlien):
         return "Output the necessary suffix for this final string, and nothing else."
 
 
+class MoreExplanationPrompt2(SequencePromptDirectAlien):
+
+    def __init__(self, max_out_characters, num_states):
+        super().__init__(max_out_characters)
+        self.num_states = num_states
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+            num_states=setting_kwargs["dfa_spec"]["n_states"],
+        )
+
+    def hash_prompt(self):
+        return f"MoreExplanationPrompt2({self.max_out_characters}, {self.num_states})"
+
+    def preamble(self):
+        return (
+            f"I have a {self.num_states}-state DFA model that outputs either 0 or 1 after each element I input."
+            + ' 1 indicates that the input string thus far results in a "valid" state,'
+            + " and 0 indicates that it does not. I collect a set of valid strings using this DFA,"
+            + " listed below. Infer the underlying DFA model using these strings and complete the final string,"
+            + " using up to n characters, such that it is also a valid string."
+            + " "
+            + self.end_of_preamble()
+        )
+
+    def end_of_preamble(self):
+        return "Output only the necessary suffix to complete the final string, and nothing else."
+
+    def instructions_before_prefix(self):
+        return ""
+
 ANSWER_PATTERN = re.compile(r"<answer>([^<]+)</answer>")
 
 
