@@ -7,6 +7,7 @@ from evallm.experiments.sequence_completion.sequence_completion_brute_force impo
     sequence_completion_brute_force,
 )
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
+    multiple_ngrams,
     ngram_heuristic,
     ngram_heuristic_with_prefix,
 )
@@ -46,6 +47,23 @@ def compute_ngram_scores_with_prefix(num_seeds, setting):
         [
             compute_ngram_score(
                 seed, setting=setting, function=ngram_heuristic_with_prefix
+            )
+            for seed in tqdm.trange(num_seeds)
+        ]
+    )
+
+
+@permacache(
+    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_true_ngrams"
+)
+def compute_true_ngrams(ngram, num_seeds, setting):
+    assert ngram >= 2
+    return np.array(
+        [
+            compute_ngram_score(
+                seed,
+                setting=setting,
+                function=lambda seq, pre: multiple_ngrams(seq, pre)[ngram - 2],
             )
             for seed in tqdm.trange(num_seeds)
         ]
