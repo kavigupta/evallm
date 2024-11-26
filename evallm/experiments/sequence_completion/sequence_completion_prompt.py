@@ -229,7 +229,7 @@ ANSWER_PATTERN = re.compile(r"<answer>([^<]+)</answer>")
 
 class MoreExplanationPromptCOT(MoreExplanationPrompt):
 
-    version = 2
+    version = 3
 
     @classmethod
     def for_setting(cls, setting_kwargs):
@@ -256,7 +256,7 @@ class MoreExplanationPromptCOT(MoreExplanationPrompt):
         return super().score_response(dfa, sequences, prefix, prediction)
 
     def model_kwargs(self):
-        return {"max_tokens": self.max_out_characters * 5 + 5000, "temperature": 0.0}
+        return {"max_tokens": 4090, "temperature": 0.0}
 
 
 class RedGreenPrompt(MoreExplanationPromptCOT):
