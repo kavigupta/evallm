@@ -74,6 +74,7 @@ model_specs = {
     "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
+    "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
     # openai models
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
