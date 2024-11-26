@@ -53,6 +53,7 @@ class ModelSpec:
 
 model_specs = {
     "none": ModelSpec(client=None, is_chat=False),
+    # open source completion models
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
     "meta-llama/Meta-Llama-3-70B": ModelSpec(client=sketch5_client, is_chat=False),
     "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
@@ -67,15 +68,18 @@ model_specs = {
     ),
     "google/gemma-7b": ModelSpec(client=sketch5_client, is_chat=False),
     "tiiuae/falcon-7b": ModelSpec(client=sketch5_client, is_chat=False),
+    # open source code models
     "bigcode/starcoder2-15b": ModelSpec(client=sketch5_client, is_chat=False),
     "mistralai/Codestral-22B-v0.1": ModelSpec(client=sketch5_client, is_chat=False),
     "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
+    # openai models
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-mini-2024-07-18": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-2024-05-13": ModelSpec(client=openai_client, is_chat=True),
+    # anthropic models
     "claude-3-5-sonnet-20241022": ModelSpec(client=anthropic_client, is_chat=True),
 }
 
