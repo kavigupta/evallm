@@ -284,7 +284,7 @@ def produce_table(accuracies, ordered_prompts, handle_brute_force=True):
     table += r"\begin{tabular}{%s}" % table_alignments + "\n"
     table += r"\hline" + "\n"
     table += (
-        " & ".join(["Model"] + [rf"\textsc{{{x}}}" for x in ordered_prompts])
+        " & ".join(["Model"] + ordered_prompts)
         + r"\\"
         + "\n"
     )
