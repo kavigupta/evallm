@@ -264,12 +264,21 @@ class BarChartBuilder:
 
 def produce_table(accuracies, ordered_prompts, handle_brute_force=True):
     accuracies_mean = {
-        mod: {prompt: np.mean(accuracies[mod][prompt]) for prompt in accuracies[mod]}
+        mod: {
+            prompt: np.mean(accuracies[mod][prompt])
+            for prompt in accuracies[mod]
+            if prompt in ordered_prompts
+        }
         for mod in accuracies
     }
 
-    best_acc_mean_by_mod = {k: max(v.values()) for k, v in accuracies_mean.items()}
-    models_sorted = sorted(accuracies, key=lambda k: np.nan_to_num(best_acc_mean_by_mod[k], -np.inf))[::-1]
+    best_acc_mean_by_mod = {
+        k: max(np.nan_to_num(x, -np.inf) for x in v.values())
+        for k, v in accuracies_mean.items()
+    }
+    models_sorted = sorted(
+        accuracies, key=lambda k: np.nan_to_num(best_acc_mean_by_mod[k], -np.inf)
+    )[::-1]
 
     format_by_mod = {}
     if any("BruteForce" in x for x in models_sorted) and handle_brute_force:
@@ -283,11 +292,7 @@ def produce_table(accuracies, ordered_prompts, handle_brute_force=True):
     table = ""
     table += r"\begin{tabular}{%s}" % table_alignments + "\n"
     table += r"\hline" + "\n"
-    table += (
-        " & ".join(["Model"] + ordered_prompts)
-        + r"\\"
-        + "\n"
-    )
+    table += " & ".join(["Model"] + ordered_prompts) + r"\\" + "\n"
     table += r"\hline" + "\n"
     for mod in models_sorted:
         table += format_by_mod.get(mod, "") + mod + " &"
