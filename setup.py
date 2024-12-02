@@ -23,6 +23,7 @@ setuptools.setup(
         "numpy==2.0.0",
         "automata-lib==8.3.0",
         "openai==1.55.3",
+        "httpx==0.25.2",
         "permacache==3.8.0",
         "matplotlib",
         "pandas",
