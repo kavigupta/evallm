@@ -92,6 +92,27 @@ def sample_sequence_completion_problem(
             continue
         break
 
+    result = sample_task_instances_given_dfa(
+        rng,
+        num_sequences,
+        num_sequence_symbols,
+        num_sequence_symbols_prompt,
+        try_limit,
+        num_instances,
+        dfa,
+    )
+    return dfa, result
+
+
+def sample_task_instances_given_dfa(
+    rng,
+    num_sequences,
+    num_sequence_symbols,
+    num_sequence_symbols_prompt,
+    try_limit,
+    num_instances,
+    dfa,
+):
     result = []
     while len(result) < num_instances:
         try:
@@ -107,7 +128,7 @@ def sample_sequence_completion_problem(
             )
         except UnsamplableDFAError:
             continue
-    return dfa, result
+    return result
 
 
 class UnsamplableDFAError(Exception):
