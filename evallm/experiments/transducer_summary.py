@@ -1,31 +1,32 @@
 from collections import defaultdict
-from evallm.llm.llm import model_specs
-from evallm.prompting.transducer_prompt import (
-    BasicSequencePrompt,
-    BasicSequencePromptSlightlyMoreExplanation,
-    BasicSequencePromptNoChat,
-    SequencePromptWithExplanation,
-    SequencePromptWithExplanationChainOfThought,
-    RedGreenRoomPrompt1,
-    BasicInstructionTransducerPrompter,
-)
+
+from evallm.experiments.models_display import model_by_display_key
 from evallm.experiments.transducer_experiment import (
-    current_transducer_experiments,
-    compute_relative_to_null,
-    compute_relative_to_ngram,
-    print_example,
     bottom_quartile_outcome,
+    compute_relative_to_ngram,
+    compute_relative_to_null,
     current_dfa_sample_spec,
-    run_transducer_experiment_just_stats,
-    run_transducer_experiment,
+    current_transducer_experiments,
+    print_example,
     run_brute_force_transducer,
+    run_transducer_experiment,
+    run_transducer_experiment_just_stats,
 )
 from evallm.experiments.transducer_plotting import (
-    plot_all_absolute_results_single_graph,
     plot_absolute_results_barchart,
+    plot_all_absolute_results_single_graph,
     produce_table,
 )
-from evallm.experiments.models_display import model_by_display_key
+from evallm.llm.llm import model_specs
+from evallm.prompting.transducer_prompt import (
+    BasicInstructionTransducerPrompter,
+    BasicSequencePrompt,
+    BasicSequencePromptNoChat,
+    BasicSequencePromptSlightlyMoreExplanation,
+    RedGreenRoomPrompt1,
+    SequencePromptWithExplanation,
+    SequencePromptWithExplanationChainOfThought,
+)
 from evallm.utils.bootstrap import boostrap_mean
 
 num_states = 3

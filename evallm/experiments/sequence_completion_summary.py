@@ -1,5 +1,4 @@
 from evallm.experiments.models_display import model_by_display_key
-
 from evallm.experiments.sequence_completion.sequence_completion_experiments import (
     compute_brute_force_scores,
     compute_model_scores,
@@ -8,15 +7,13 @@ from evallm.experiments.sequence_completion.sequence_completion_experiments impo
     compute_true_ngrams,
 )
 from evallm.experiments.sequence_completion.sequence_completion_prompt import (
+    MoreExplanationPrompt2,
+    MoreExplanationPromptCOT,
+    RedGreenPrompt,
     SequencePromptDirectAlien2,
     SequencePromptDirectAlien2WithCommas,
-    MoreExplanationPrompt2,
-    RedGreenPrompt,
-    MoreExplanationPromptCOT,
 )
-
 from evallm.experiments.transducer_experiment import current_dfa_sample_spec
-
 
 spec = current_dfa_sample_spec(3)
 
