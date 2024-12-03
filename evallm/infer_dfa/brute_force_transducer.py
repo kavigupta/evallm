@@ -1,6 +1,7 @@
-from permacache import permacache, stable_hash
 import numpy as np
 import tqdm.auto as tqdm
+from permacache import permacache, stable_hash
+
 from evallm.experiments.sequence_completion.sequence_completion_brute_force import (
     all_dfas,
 )

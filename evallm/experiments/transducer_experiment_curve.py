@@ -1,6 +1,7 @@
 from typing import Counter
 
 import numpy as np
+
 from evallm.experiments.transducer_experiment import (
     current_dfa_sample_spec,
     current_transducer_experiments,
