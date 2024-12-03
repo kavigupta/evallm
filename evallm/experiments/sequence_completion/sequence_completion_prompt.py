@@ -1,5 +1,5 @@
-from abc import ABC, abstractmethod
 import re
+from abc import ABC, abstractmethod
 
 
 class SequenceCompletionPrompt(ABC):
@@ -257,6 +257,7 @@ class MoreExplanationPrompt2(SequencePromptDirectAlien):
 
     def instructions_before_prefix(self):
         return ""
+
 
 ANSWER_PATTERN = re.compile(r"<answer>([^<]+)</answer>")
 

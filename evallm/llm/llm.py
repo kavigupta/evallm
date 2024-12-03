@@ -71,7 +71,9 @@ model_specs = {
     # open source code models
     "bigcode/starcoder2-15b": ModelSpec(client=sketch5_client, is_chat=False),
     "mistralai/Codestral-22B-v0.1": ModelSpec(client=sketch5_client, is_chat=False),
-    "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(client=sketch5_client, is_chat=False),
+    "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(
+        client=sketch5_client, is_chat=False
+    ),
     "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),

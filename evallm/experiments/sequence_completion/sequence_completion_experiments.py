@@ -1,11 +1,10 @@
 from typing import Counter
+
 import numpy as np
-from permacache import permacache
 import tqdm.auto as tqdm
+from permacache import permacache
+
 from evallm.enumerate_dfa.pack_dfa import pack_dfa
-from evallm.experiments.sequence_completion.sequence_completion_brute_force import (
-    sequence_completion_brute_force,
-)
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
     multiple_ngrams,
     ngram_heuristic,
@@ -13,6 +12,9 @@ from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
 )
 from evallm.experiments.sequence_completion.sample_sequences import (
     sample_sequence_completion_problem,
+)
+from evallm.experiments.sequence_completion.sequence_completion_brute_force import (
+    sequence_completion_brute_force,
 )
 from evallm.llm.llm import model_specs, run_prompt
 

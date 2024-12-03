@@ -1,8 +1,9 @@
-from functools import lru_cache
 import itertools
+from functools import lru_cache
 
 import numpy as np
 from permacache import permacache, stable_hash
+
 from evallm.enumerate_dfa.enumerate import enumerate_packed_dfas_no_permutations
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
 
