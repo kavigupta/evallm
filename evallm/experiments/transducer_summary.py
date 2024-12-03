@@ -2,20 +2,10 @@ from collections import defaultdict
 
 from evallm.experiments.models_display import model_by_display_key
 from evallm.experiments.transducer_experiment import (
-    bottom_quartile_outcome,
-    compute_relative_to_ngram,
-    compute_relative_to_null,
     current_dfa_sample_spec,
-    current_transducer_experiments,
-    print_example,
     run_brute_force_transducer,
     run_transducer_experiment,
     run_transducer_experiment_just_stats,
-)
-from evallm.experiments.transducer_plotting import (
-    plot_absolute_results_barchart,
-    plot_all_absolute_results_single_graph,
-    produce_table,
 )
 from evallm.llm.llm import model_specs
 from evallm.prompting.transducer_prompt import (
@@ -24,10 +14,8 @@ from evallm.prompting.transducer_prompt import (
     BasicSequencePromptNoChat,
     BasicSequencePromptSlightlyMoreExplanation,
     RedGreenRoomPrompt1,
-    SequencePromptWithExplanation,
     SequencePromptWithExplanationChainOfThought,
 )
-from evallm.utils.bootstrap import boostrap_mean
 
 num_states = 3
 num_symbols = 3
