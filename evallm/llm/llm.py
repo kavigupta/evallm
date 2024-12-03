@@ -9,6 +9,7 @@ from typing import List
 from anthropic import Anthropic, InternalServerError
 from openai import OpenAI, RateLimitError
 from permacache import permacache
+import tqdm.auto as tqdm
 
 sketch5_client = OpenAI(
     api_key="EMPTY",
@@ -145,7 +146,15 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     if model_specs[model].is_chat:
         assert client in (openai_client, anthropic_client)
         with multiprocessing.Pool(num_parallel) as p:
-            map_fn = p.map if num_parallel > 1 else map
+            map_fn = (
+                p.map
+                if num_parallel > 1
+                else (
+                    (lambda fn, xs: map(fn, tqdm.tqdm(xs)))
+                    if len(prompt) > 100
+                    else map
+                )
+            )
             choices_each = map_fn(
                 functools.partial(create_openai_completion, model, kwargs),
                 prompt,
