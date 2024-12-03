@@ -54,6 +54,10 @@ class TransducerExperimentResultPacked:
             confusion=np.array(results),
         )
 
+    @property
+    def accuracy_each(self):
+        return self.confusion[:, np.eye(2, dtype=bool)].sum(-1)
+
 
 def compute_ngram_each(result):
     all_ngram_preds = [
@@ -66,7 +70,7 @@ def compute_ngram_each(result):
     max_ngram = max(len(t) for t in all_ngram_preds)
     for x in all_ngram_preds:
         x += [x[-1]] * (max_ngram - len(x))
-    ngram_each = np.array(all_ngram_preds).mean(0)
+    ngram_each = np.array(all_ngram_preds)
     return ngram_each
 
 
@@ -77,8 +81,10 @@ class SummaryStats:
 
     @classmethod
     def of(cls, result):
-        diags = result.confusion[:, np.eye(2, dtype=bool)].sum(-1)
-        return cls(model_summary=Counter(diags), ngram_each=compute_ngram_each(result))
+        diags = result.accuracy_each
+        return cls(
+            model_summary=Counter(diags), ngram_each=compute_ngram_each(result).mean(0)
+        )
 
 
 @permacache(

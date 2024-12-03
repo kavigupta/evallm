@@ -168,6 +168,9 @@ def compute_model_score(seed, *, setting, model, prompt):
     """
     dfa, sequences_prefixes = get_examples(seed, setting)
     responses = run_model(model, prompt, dfa, sequences_prefixes)
+    return collate_model_responses(prompt, dfa, sequences_prefixes, responses)
+
+def collate_model_responses(prompt, dfa, sequences_prefixes, responses):
     results = Counter(
         prompt.score_response(dfa, sequences, prefix, response)
         for (sequences, prefix), response in zip(sequences_prefixes, responses)
