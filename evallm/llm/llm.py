@@ -133,8 +133,22 @@ def to_messages(prompt):
     ]
 
 
+MAX_CHUNKSIZE = 100
+
+
+def run_prompt_chunked(model: str, prompt: List[str], kwargs: dict):
+    choices = []
+    for i in tqdm.trange(0, len(prompt), MAX_CHUNKSIZE):
+        print(i)
+        x = run_prompt(model, prompt[i : i + MAX_CHUNKSIZE], kwargs)
+        choices += x.choices
+    return SimpleNamespace(choices=choices)
+
+
 @permacache("evallm/llm/llm/run_prompt_2", multiprocess_safe=False)
 def run_prompt(model: str, prompt: List[str], kwargs: dict):
+    if len(prompt) > MAX_CHUNKSIZE:
+        return run_prompt_chunked(model, prompt, kwargs)
     num_parallel = 200
     if model == "gpt-3.5-turbo-instruct":
         num_parallel = 10
