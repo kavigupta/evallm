@@ -9,6 +9,7 @@ from permacache import (
     renamed_symbol_unpickler,
     stable_hash,
     swap_unpickler_context_manager,
+    drop_if_equal,
 )
 
 from evallm.enumerate_dfa.enumerate import (
@@ -40,9 +41,10 @@ class TransducerExperimentResultPacked:
     inputs_packed: np.ndarray
     outputs_packed: np.ndarray
     confusion: np.ndarray
+    completions: np.ndarray | None
 
     @classmethod
-    def of(cls, metas, prompts, results):
+    def of(cls, completions, metas, prompts, results, keep_completions=False):
         del prompts
         ascii_to_int = {c: i for i, c in enumerate(string.ascii_lowercase)}
         inputs, outputs = zip(*metas)
@@ -52,6 +54,9 @@ class TransducerExperimentResultPacked:
             ),
             outputs_packed=np.array(outputs, dtype=bool),
             confusion=np.array(results),
+            completions=(
+                completions if keep_completions else None
+            ),
         )
 
     @property
@@ -89,7 +94,7 @@ class SummaryStats:
 
 @permacache(
     "evallm/experiments/exhaustive_transducer_experiment/run_experiment_for_dfa_2",
-    key_function=dict(prompter=repr),
+    key_function=dict(prompter=repr, keep_completions=drop_if_equal(False)),
     read_from_shelf_context_manager=swap_unpickler_context_manager(
         renamed_symbol_unpickler(
             {
@@ -102,11 +107,14 @@ class SummaryStats:
     ),
     multiprocess_safe=True,
 )
-def run_experiment_for_dfa(prompter, pdfa, count, model, sequence_seed):
+def run_experiment_for_dfa(
+    prompter, pdfa, count, model, sequence_seed, keep_completions=False
+):
     return TransducerExperimentResultPacked.of(
         *prompter.run_experiment(
             unpack_dfa(pdfa), np.random.RandomState(sequence_seed), model, count
-        )
+        ),
+        keep_completions=keep_completions
     )
 
 

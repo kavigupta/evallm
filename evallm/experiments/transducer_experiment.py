@@ -108,9 +108,10 @@ def single_transducer_experiment(
 ):
     rng = np.random.RandomState(seed)
     dfa = sample_dfa(sample_dfa_spec, rng)
-    return TransducerExperimentResult.of(
-        *prompter.run_experiment(dfa, rng, model, num_repeats_per_dfa)
+    _, metas, prompts, scores = prompter.run_experiment(
+        dfa, rng, model, num_repeats_per_dfa
     )
+    return TransducerExperimentResult.of(metas, prompts, scores)
 
 
 @permacache(
