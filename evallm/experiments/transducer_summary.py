@@ -136,3 +136,15 @@ def compute_results():
             r.success_rate_binary_ignore_na for r in model_outcomes[model, prompt]
         ]
     return accuracies
+
+
+def display_prompt(p):
+    return rf"\textsc{{{p}}}$_T$"
+
+
+def transducer_results():
+    accuracies = compute_results()
+    return {
+        m: {display_prompt(p): accuracies[m][p] for p in accuracies[m]}
+        for m in accuracies
+    }
