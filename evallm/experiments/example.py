@@ -12,6 +12,10 @@ from evallm.experiments.exhaustive_transducer_experiment import (
     TransducerExperimentResultPacked,
 )
 
+blue = "#009bff"
+green = "#26d94a"
+red = "#ff0062"
+
 
 def transducer_example_csv(
     results: TransducerExperimentResultPacked, samples: Dict[str, List[int]]
