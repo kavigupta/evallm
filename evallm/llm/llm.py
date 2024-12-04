@@ -198,5 +198,8 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
 
 
 def create_openai_completion(model, kwargs, prompt):
+    if model == "gpt-4o-2024-05-13" and kwargs["max_tokens"] == 5000:
+        kwargs = kwargs.copy()
+        kwargs["max_tokens"] = 4096
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
