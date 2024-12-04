@@ -61,7 +61,7 @@ class Prompter(ABC):
             self.score_completion(answer, choice)
             for answer, choice in zip(answers, completions)
         ]
-        return metas, prompts, scores
+        return completions, metas, prompts, scores
 
     def metas_prompts_answers(self, dfa, rng, is_chat, num_samples):
         metas, prompts, answers = zip(
