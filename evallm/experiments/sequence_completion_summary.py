@@ -105,3 +105,15 @@ def results_for_baseline():
         )
 
     return results
+
+
+def display_prompt(p):
+    return rf"\textsc{{{p}}}$_S$"
+
+
+def sequence_completion_results():
+    results = {**results_for_models(), **results_for_baseline()}
+    results_nested = {m: {} for m, _ in results}
+    for m, p in results:
+        results_nested[m][display_prompt(p)] = results[m, p]
+    return results_nested
