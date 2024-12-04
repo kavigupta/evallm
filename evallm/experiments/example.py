@@ -3,6 +3,12 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
+from matplotlib_venn import venn3
+
+blue = "#009bff"
+green = "#26d94a"
+red = "#ff0062"
+
 from evallm.experiments.exhaustive_transducer_experiment import (
     TransducerExperimentResultPacked,
 )
@@ -33,4 +39,12 @@ def transducer_example_csv(
             )
             for k in samples
         ]
+    )
+
+
+def plot_errors(transducer_masks: Dict[str, np.ndarray]):
+    venn3(
+        subsets=[set(np.where(x == 0)[0]) for x in transducer_masks.values()],
+        set_labels=[f"{k}: {v.mean():.1%}" for k, v in transducer_masks.items()],
+        set_colors=(red, green, blue),
     )
