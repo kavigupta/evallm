@@ -26,6 +26,7 @@ setuptools.setup(
         "httpx==0.25.2",
         "permacache==3.8.0",
         "matplotlib",
+        "matplotlib-venn==1.1.1",
         "pandas",
         "scipy==1.14.0",
         "anthropic==0.37.1",
