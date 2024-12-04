@@ -94,7 +94,14 @@ def compute_results():
             "COT",
             "Red-Green",
         ),
-        **for_model_and_prompt("gpt-4o", 30, "Basic"),
+        **for_model_and_prompt(
+            "gpt-4o",
+            30,
+            "Basic",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+        ),
         **for_model_and_prompt(
             "claude-3.5",
             30,
