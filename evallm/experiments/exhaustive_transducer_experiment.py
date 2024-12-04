@@ -5,11 +5,11 @@ from dataclasses import dataclass
 import numpy as np
 import tqdm.auto as tqdm
 from permacache import (
+    drop_if_equal,
     permacache,
     renamed_symbol_unpickler,
     stable_hash,
     swap_unpickler_context_manager,
-    drop_if_equal,
 )
 
 from evallm.enumerate_dfa.enumerate import (
@@ -54,9 +54,7 @@ class TransducerExperimentResultPacked:
             ),
             outputs_packed=np.array(outputs, dtype=bool),
             confusion=np.array(results),
-            completions=(
-                completions if keep_completions else None
-            ),
+            completions=(completions if keep_completions else None),
         )
 
     @property

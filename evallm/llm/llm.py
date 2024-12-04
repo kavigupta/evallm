@@ -6,10 +6,10 @@ from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import List
 
+import tqdm.auto as tqdm
 from anthropic import Anthropic, InternalServerError
 from openai import OpenAI, RateLimitError
 from permacache import permacache
-import tqdm.auto as tqdm
 
 sketch5_client = OpenAI(
     api_key="EMPTY",
