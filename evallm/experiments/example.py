@@ -4,10 +4,6 @@ import numpy as np
 import pandas as pd
 from matplotlib_venn import venn3
 
-blue = "#009bff"
-green = "#26d94a"
-red = "#ff0062"
-
 from evallm.experiments.exhaustive_transducer_experiment import (
     TransducerExperimentResultPacked,
 )
