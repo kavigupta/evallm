@@ -95,12 +95,12 @@ def results_for_baseline():
         amount_baselines, setting=current_setting
     )
 
-    results[r"$\textsc{BruteForce}_S$", "Basic"] = compute_brute_force_scores(
+    results[r"\textsc{BruteForce}$_S$", "Basic"] = compute_brute_force_scores(
         100, current_setting
     )
 
     for ngram in (2, 3, 4, 5, 6):
-        results[rf"{ngram}-$\textsc{{Gram}}_S$", "Basic"] = compute_true_ngrams(
+        results[rf"{ngram}-\textsc{{Gram}}$_S$", "Basic"] = compute_true_ngrams(
             ngram, amount_baselines, current_setting
         )
 
