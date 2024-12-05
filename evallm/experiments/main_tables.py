@@ -88,7 +88,7 @@ def display_result(results, name):
         [brute_force] = brute_forces
         format_by_mod[brute_force] = r"\cellcolor{lightgray} "
     maximum_acc_model_not_brute_force = max(
-        [x for x in results if "BruteForce" not in x],
+        (x for x in results if "BruteForce" not in x),
         key=lambda x: np.mean(results[x]),
     )
     format_by_mod[maximum_acc_model_not_brute_force] = r"\bf "
@@ -164,16 +164,16 @@ def multi_prompt_table_of_results(transducer_results, sequence_completion_result
         for name in group:
             assert all(p in prompts for p in group[name]), group[name].keys()
             format_by_prompt = {}
-            best_prompt = max(
+            best_p = max(
                 group[name],
-                key=lambda x: (
+                key=lambda x, group=group, name=name: (
                     np.mean(group[name][x])
                     if ~np.isnan(np.mean(group[name][x])).all()
                     else -np.inf
                 ),
             )
 
-            format_by_prompt[best_prompt] = r"\bf "
+            format_by_prompt[best_p] = r"\bf "
             table += f"{name} & "
             for prompt in prompts:
                 if prompt in group[name]:
