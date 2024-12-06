@@ -2,10 +2,15 @@ from typing import Dict, List
 
 import numpy as np
 import pandas as pd
+from automata.fa.dfa import DFA
 from matplotlib_venn import venn3
 
+from evallm.enumerate_dfa.pack_dfa import pack_dfa, unpack_dfa
 from evallm.experiments.exhaustive_transducer_experiment import (
     TransducerExperimentResultPacked,
+)
+from evallm.experiments.sequence_completion.sample_sequences import (
+    sample_task_instances_given_dfa,
 )
 
 blue = "#009bff"
@@ -47,3 +52,45 @@ def plot_errors(transducer_masks: Dict[str, np.ndarray]):
         set_labels=[f"{k}: {v.mean():.1%}" for k, v in transducer_masks.items()],
         set_colors=(red, green, blue),
     )
+
+
+def generate_data_for_dfa(rule, current_setting_s):
+    dfa = unpack_dfa(
+        pack_dfa(
+            DFA(
+                states={0, 1, 2},
+                input_symbols={0, 1, 2},
+                transitions={a: {b: rule(a, b) for b in range(3)} for a in range(3)},
+                initial_state=0,
+                final_states={0},
+            )
+        )
+    )
+    sequence_tasks = sample_task_instances_given_dfa(
+        np.random.RandomState(0),
+        num_sequences=current_setting_s["num_sequences"],
+        num_sequence_symbols=current_setting_s["num_sequence_symbols"],
+        num_sequence_symbols_prompt=current_setting_s["num_sequence_symbols_prompt"],
+        try_limit=50,
+        num_instances=1000,
+        dfa=dfa,
+    )
+    return dfa, sequence_tasks
+
+
+def qualitative_results_table(table):
+    result = ""
+    result += r"\begin{tabular}{|r|r|r|}" + "\n"
+    result += r"\hline" + "\n"
+    for c in table.columns:
+        result += f"{c} & "
+    result = result[:-2] + r"\\"
+    result += r"\hline" + "\n"
+    for i in range(len(table)):
+        for c in table.columns:
+            result += f"{table[c][i]} & "
+        result = result[:-2] + r"\\"
+        result += "\n"
+        result += r"\hline" + "\n"
+    result += r"\end{tabular}" + "\n"
+    return result

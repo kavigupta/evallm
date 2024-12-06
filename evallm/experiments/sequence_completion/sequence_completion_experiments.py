@@ -171,11 +171,15 @@ def compute_model_score(seed, *, setting, model, prompt):
     return collate_model_responses(prompt, dfa, sequences_prefixes, responses)
 
 
-def collate_model_responses(prompt, dfa, sequences_prefixes, responses):
-    results = Counter(
+def score_model_responses(prompt, dfa, sequences_prefixes, responses):
+    return [
         prompt.score_response(dfa, sequences, prefix, response)
         for (sequences, prefix), response in zip(sequences_prefixes, responses)
-    )
+    ]
+
+
+def collate_model_responses(prompt, dfa, sequences_prefixes, responses):
+    results = Counter(score_model_responses(prompt, dfa, sequences_prefixes, responses))
     return {k: results[k] for k in [0.0, 0.5, 1.0]}
 
 
