@@ -115,8 +115,13 @@ def display_result(results, name):
     )
     format_by_mod[maximum_acc_model_not_brute_force] = r"\bf "
     if name not in results:
-        return "--"
-    return display_acc(format_by_mod, results[name], name)
+        return "-- & --"
+    mean_results_non_nan = {
+        k: np.mean(v) for k, v in results.items() if not np.isnan(np.mean(v))
+    }
+    ordered = sorted(mean_results_non_nan, key=mean_results_non_nan.get, reverse=True)
+    ordinal = str(ordered.index(name) + 1) if name in ordered else "--"
+    return display_acc(format_by_mod, results[name], name) + " & " + ordinal
 
 
 def main_table_of_results(transducer_results, sequence_completion_results):
@@ -124,16 +129,16 @@ def main_table_of_results(transducer_results, sequence_completion_results):
     check_all_accounted(sequence_completion_results)
     table = ""
     # model name, parameters, finetuning, coding model, transducer results, sequence completion results
-    table += r"\begin{tabular}{|l|c|c|c|c|c|}" + "\n"
+    table += r"\begin{tabular}{|l|c|c|c|c|c|c|c|c|}" + "\n"
     table += r"\hline" + "\n"
     table += (
-        r"\bf Model & \bf Size & \bf RLHF? & \bf Coding? & \bf Transducer & \bf Sequence Completion \\"
+        r"\bf Model & \bf Size & \bf IT? & \bf Code? & \bf Sequence Completion & \bf SR & \bf Transducer & \bf TR\\"
         + "\n"
     )
     for group_name, group in grouped_models.items():
         # double line rule for each header group
         table += r"\hline" + "\n"
-        table += r"\multicolumn{6}{|c|}{ \bf " + group_name + r"} \\" + "\n"
+        table += r"\multicolumn{8}{|c|}{ \bf " + group_name + r"} \\" + "\n"
         table += r"\hline" + "\n"
         for name in group:
             metadata = (
@@ -143,7 +148,7 @@ def main_table_of_results(transducer_results, sequence_completion_results):
             )
             table += f"{name} & {metadata.model_size} & {metadata.rlhf_finetuning_check} & {metadata.coding_model_check} & "
             table += (
-                f"{display_result(transducer_results, name)} & {display_result(sequence_completion_results, name)} \\\\"
+                f"{display_result(sequence_completion_results, name)} & {display_result(transducer_results, name)} \\\\"
                 + "\n"
             )
             table += r"\hline" + "\n"
@@ -159,8 +164,8 @@ def multi_prompt_table_of_results(transducer_results, sequence_completion_result
     # model name, *prompts
     # Transducer Results then Sequence Completion Results
     results = {
-        "Transducer": transducer_results,
         "Sequence Completion": sequence_completion_results,
+        "Transducer": transducer_results,
     }
     table = ""
     table += r"\begin{tabular}{|l|" + "|".join("c" * len(prompts)) + "|}" + "\n"
