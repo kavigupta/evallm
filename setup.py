@@ -30,6 +30,7 @@ setuptools.setup(
         "pandas",
         "scipy==1.14.0",
         "anthropic==0.37.1",
+        "adjustText==1.3.0",
     ],
     extras_require={
         "visual": ["automata-lib[visual]==8.3.0"],

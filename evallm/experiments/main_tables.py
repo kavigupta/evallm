@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 
+import matplotlib as mpl
 import numpy as np
+from adjustText import adjust_text
+from matplotlib import pyplot as plt
 
-from evallm.experiments.transducer_plotting import display_acc
+from evallm.experiments.transducer_plotting import display_acc, plot_bootstrap_means
 
 
 @dataclass
@@ -238,3 +241,78 @@ def multi_prompts(results):
         for k, for_k in results.items()
     }
     return {k: v for k, v in results.items() if len(v) > 1}
+
+
+def plot_transducer_vs_sequence_completion(results_sc, results_t):
+
+    category_to_color = {
+        "Baselines": "#009bff",
+        "Open Source Code": "#ff9500",
+        "Open Source Completion": "#7a00ff",
+        "Proprietary": "#ff0062",
+    }
+
+    summary_t = best_prompt(results_t)
+    summary_sc = best_prompt(results_sc)
+    common_keys = set(summary_t) & set(summary_sc)
+    ordered_keys = [
+        x
+        for x in models_to_category
+        if x in common_keys
+        and not isinstance(summary_sc[x], float)
+        and not isinstance(summary_t[x], float)
+    ]
+    set(models_to_category) - set(ordered_keys)
+
+    to_display = set(grouped_models["Baselines"])
+    for category in grouped_models:
+        ms = [model for model in grouped_models[category] if model in ordered_keys]
+        for summary in summary_t, summary_sc:
+            to_display.add(ms[np.argmax([np.mean(summary[m]) for m in ms])])
+
+    plt.figure(figsize=(7, 4), dpi=200, facecolor="white")
+    plt.rc("text", usetex=True)
+
+    off = 0.1
+
+    ax = plt.gca()
+
+    texts = []
+    for model in ordered_keys:
+        color = category_to_color[models_to_category[model]]
+
+        x, y = plot_bootstrap_means(
+            ax,
+            100 * np.array(summary_sc[model]),
+            100 * np.array(summary_t[model]),
+            scatter_kwargs=dict(color=color, marker="."),
+            err_kwargs=dict(color=color, lw=0.5),
+        )
+        if model in to_display:
+            texts += [
+                plt.text(
+                    x=x + off,
+                    y=y + off,
+                    s=model,
+                    size=5,
+                    ha="center",
+                    va="center",
+                    color=darken(color, 0.5),
+                )
+            ]
+
+    adjust_text(texts)
+    # plt.grid(color="black", linestyle=(0, (5, 15)), linewidth=0.5)
+    plt.xlabel("Sequence Completion Result")
+    plt.ylabel("Transducer Result")
+    plt.ylim(plt.ylim()[0], 100)
+    # legend for each category
+    for category, color in category_to_color.items():
+        plt.scatter([], [], color=color, label=category)
+    plt.legend()
+    plt.show()
+
+
+def darken(color, factor):
+    color = np.array(mpl.colors.to_rgba(color))
+    return mpl.colors.to_hex(color * factor)
