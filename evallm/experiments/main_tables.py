@@ -262,11 +262,10 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         and not isinstance(summary_sc[x], float)
         and not isinstance(summary_t[x], float)
     ]
-    set(models_to_category) - set(ordered_keys)
 
     to_display = set(grouped_models["Baselines"])
-    for category in grouped_models:
-        ms = [model for model in grouped_models[category] if model in ordered_keys]
+    for category, ms in grouped_models.items():
+        ms = [m for m in ms if m in ordered_keys]
         for summary in summary_t, summary_sc:
             to_display.add(ms[np.argmax([np.mean(summary[m]) for m in ms])])
 
