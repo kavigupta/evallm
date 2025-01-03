@@ -318,3 +318,23 @@ def display_acc(format_by_mod, acc, mod):
     lo, hi = boostrap_mean(acc)
     prefix = format_by_mod.get(mod, "")
     return prefix + f"{mu:.1f} ({lo:.1f}--{hi:.1f})"
+
+
+def plot_bootstrap_means(ax, xs, ys, *, scatter_kwargs, err_kwargs):
+    xs, ys = np.array(xs), np.array(ys)
+    mu_x, mu_y = np.mean(xs), np.mean(ys)
+    lo_x, hi_x = boostrap_mean(xs)
+    lo_y, hi_y = boostrap_mean(ys)
+
+    ax.scatter(mu_x, mu_y, **scatter_kwargs)
+
+    err_x_center = (lo_x + hi_x) / 2
+    err_y_center = (lo_y + hi_y) / 2
+
+    err_x_bar = (hi_x - lo_x) / 2
+    err_y_bar = (hi_y - lo_y) / 2
+
+    ax.errorbar(mu_x, err_y_center, yerr=err_y_bar, **err_kwargs)
+    ax.errorbar(err_x_center, mu_y, xerr=err_x_bar, **err_kwargs)
+
+    return mu_x, mu_y
