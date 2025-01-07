@@ -269,7 +269,7 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         for summary in summary_t, summary_sc:
             to_display.add(ms[np.argmax([np.mean(summary[m]) for m in ms])])
 
-    plt.figure(figsize=(7, 4), dpi=200, facecolor="white")
+    plt.figure(figsize=(7, 4), dpi=400, facecolor="white", tight_layout=True)
     plt.rc("text", usetex=True)
 
     off = 0.1
@@ -309,7 +309,6 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
     for category, color in category_to_color.items():
         plt.scatter([], [], color=color, label=category)
     plt.legend()
-    plt.show()
 
 
 def darken(color, factor):
