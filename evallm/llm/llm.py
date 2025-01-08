@@ -165,7 +165,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
                 if num_parallel > 1
                 else (
                     (lambda fn, xs: map(fn, tqdm.tqdm(xs)))
-                    if len(prompt) > 100
+                    if len(prompt) > 1
                     else map
                 )
             )
