@@ -104,13 +104,21 @@ class TransducerExperimentResult:
 
 
 def single_transducer_experiment(
-    *, seed, model, num_repeats_per_dfa, sample_dfa_spec, prompter
+    *,
+    seed,
+    model,
+    num_repeats_per_dfa,
+    sample_dfa_spec,
+    prompter,
+    print_completions=False,
 ):
     rng = np.random.RandomState(seed)
     dfa = sample_dfa(sample_dfa_spec, rng)
-    _, metas, prompts, scores = prompter.run_experiment(
+    completions, metas, prompts, scores = prompter.run_experiment(
         dfa, rng, model, num_repeats_per_dfa
     )
+    if print_completions:
+        print(completions)
     return TransducerExperimentResult.of(metas, prompts, scores)
 
 
