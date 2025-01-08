@@ -83,6 +83,7 @@ model_specs = {
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-mini-2024-07-18": ModelSpec(client=openai_client, is_chat=True),
     "gpt-4o-2024-05-13": ModelSpec(client=openai_client, is_chat=True),
+    "o1-preview-2024-09-12": ModelSpec(client=openai_client, is_chat=True),
     # anthropic models
     "claude-3-5-sonnet-20241022": ModelSpec(client=anthropic_client, is_chat=True),
 }
@@ -155,6 +156,9 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     if model == "claude-3-5-sonnet-20241022":
         # anthropic has extremely low rate limits
         num_parallel = 1
+    if model.startswith("o1"):
+        # expensive so lets not churn through $20 instantly
+        num_parallel = 1
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
@@ -201,5 +205,11 @@ def create_openai_completion(model, kwargs, prompt):
     if model == "gpt-4o-2024-05-13" and kwargs["max_tokens"] == 5000:
         kwargs = kwargs.copy()
         kwargs["max_tokens"] = 4096
+    if model.startswith("o1"):
+        assert set(prompt.keys()) == {"system", "user"}
+        prompt = {"user": prompt["user"]}
+        kwargs = kwargs.copy()
+        del kwargs["max_tokens"] # this causes issues
+        del kwargs["temperature"] # non-default temperature is not supported
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
