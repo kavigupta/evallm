@@ -2,7 +2,6 @@ from dataclasses import dataclass
 
 import matplotlib as mpl
 import numpy as np
-from adjustText import adjust_text
 from matplotlib import pyplot as plt
 
 from evallm.experiments.transducer_plotting import display_acc, plot_bootstrap_means
@@ -263,18 +262,41 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         and not isinstance(summary_t[x], float)
     ]
 
-    to_display = set(grouped_models["Baselines"])
+    to_display = set(grouped_models["Baselines"]) | set(grouped_models["Proprietary"])
     for category, ms in grouped_models.items():
         ms = [m for m in ms if m in ordered_keys]
         for summary in summary_t, summary_sc:
-            to_display.add(ms[np.argmax([np.mean(summary[m]) for m in ms])])
+            means = [np.mean(summary[m]) for m in ms]
+            to_display.add(ms[np.argmax(means)])
+            to_display.add(ms[np.argmin(means)])
 
     plt.figure(figsize=(7, 4), dpi=400, facecolor="white", tight_layout=True)
     plt.rc("text", usetex=True)
 
-    off = 0.1
-
     ax = plt.gca()
+
+    margin_text = 0.01
+    margin_point = 0.05
+    off_dist = 2.5
+
+    directions = {
+        "\\textsc{BruteForce}": (-1, -1, 0.1),
+        "6-\\textsc{Gram}": (1, -1, 0.1),
+        "5-\\textsc{Gram}": (-1, 1, 0.1),
+        "4-\\textsc{Gram}": (1, -1, 0.1),
+        "3-\\textsc{Gram}": (1, -1, 0.1),
+        "2-\\textsc{Gram}": (1, 1, 0.1),
+        "mistral-nemo-minitron-8B": (-0.0001, 1, 1),
+        "qwen-2.5-coder-7B": (0.0001, -1, 1),
+        "qwen-2.5-coder-instruct-7B": (0.0001, 1, 1),
+        "gpt-3.5-instruct": (-1, 1, 0.1),
+        "gpt-4o-mini": (1, -1, 0.1),
+        "gpt-4o": (1, -1, 0.1),
+        "gemma-7b": (-1, -1, 0.1),
+        "falcon-7b": (-1, -1, 0.1),
+        "starcoder2-15b": (-1, 1, 1),
+        "deepseek-coder-33b-instruct": (1, -1, 1),
+    }
 
     texts = []
     for model in ordered_keys:
@@ -288,20 +310,48 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
             err_kwargs=dict(color=color, lw=0.5),
         )
         if model in to_display:
+            dirx, diry, rel_dist = directions.get(model, (1, 1, 1))
+            # margin_text_this should be the distance required to put margin_text
+            # vertical units away from the point
+            margin_text_this = margin_text / np.abs(np.sin(np.arctan2(diry, dirx)))
+            radius_adj = rel_dist * off_dist / np.sqrt(dirx**2 + diry**2)
+            offx, offy = dirx * radius_adj, diry * radius_adj
+
             texts += [
                 plt.text(
-                    x=x + off,
-                    y=y + off,
+                    x=x + offx,
+                    y=y + offy,
                     s=model,
                     size=5,
-                    ha="center",
-                    va="center",
+                    ha="right" if dirx < 0 else "left",
+                    va="top" if diry < 0 else "bottom",
                     color=darken(color, 0.5),
                 )
             ]
 
-    adjust_text(texts)
-    # plt.grid(color="black", linestyle=(0, (5, 15)), linewidth=0.5)
+            # start near x + offx, but with the margin_text_this applied
+            start_pos = (
+                x + offx * (1 - margin_text_this),
+                y + offy * (1 - margin_text_this),
+            )
+            # end near x but with the margin_text applied
+            end_pos = (
+                x + offx * margin_point,
+                y + offy * margin_point,
+            )
+
+            if rel_dist > 0.2:
+                patch = mpl.patches.FancyArrowPatch(
+                    start_pos,
+                    end_pos,
+                    arrowstyle="-|>,head_width=0.2,head_length=0.4",
+                    color="black",
+                    lw=0.4,
+                    mutation_scale=5,
+                    zorder=10,
+                )
+                ax.add_patch(patch)
+
     plt.xlabel("Sequence Completion Result")
     plt.ylabel("Transducer Result")
     plt.ylim(plt.ylim()[0], 100)
