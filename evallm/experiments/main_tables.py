@@ -317,11 +317,13 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
             radius_adj = rel_dist * off_dist / np.sqrt(dirx**2 + diry**2)
             offx, offy = dirx * radius_adj, diry * radius_adj
 
+            model_display = model.replace(r"\textsc{", "").replace("}", "")
+
             texts += [
                 plt.text(
                     x=x + offx,
                     y=y + offy,
-                    s=model,
+                    s=model_display,
                     size=5,
                     ha="right" if dirx < 0 else "left",
                     va="top" if diry < 0 else "bottom",
