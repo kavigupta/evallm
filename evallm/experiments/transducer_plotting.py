@@ -338,3 +338,7 @@ def plot_bootstrap_means(ax, xs, ys, *, scatter_kwargs, err_kwargs):
     ax.errorbar(err_x_center, mu_y, xerr=err_x_bar, **err_kwargs)
 
     return mu_x, mu_y
+
+
+def setup_plot():
+    plt.rc("text", usetex=True)
