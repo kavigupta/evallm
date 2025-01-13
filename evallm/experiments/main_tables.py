@@ -55,6 +55,8 @@ metadata_for_models = {
 
 metadata_baseline = ModelMetadata("--", False, False)
 
+random_null = r"\textsc{Random}$_S$/\textsc{Null}$_T$"
+
 grouped_models = {
     "Baselines": [
         r"\textsc{BruteForce}",
@@ -64,8 +66,7 @@ grouped_models = {
         r"3-\textsc{Gram}",
         r"2-\textsc{Gram}",
         r"\textsc{Common-Suffix}",
-        r"\textsc{Null}",
-        r"\textsc{Random}",
+        random_null,
     ],
     "Open Source Completion": [
         "llama3-8B",
@@ -132,9 +133,29 @@ def display_result(results, name):
     return display_acc(format_by_mod, results[name], name) + " & " + ordinal
 
 
+def replace_null_random(results):
+    r"""
+    Set \textsc{Random} or \textsc{Null} with a row saying \textsc{Random}$_S$/\textsc{Null}$_T$
+    """
+    results = results.copy()
+
+    keys = [k for k in results.keys() if "Random" in k or "Null" in k]
+    assert len(keys) == 1, keys
+
+    key = keys[0]
+
+    results[random_null] = results.pop(key)
+
+    return results
+
+
 def main_table_of_results(transducer_results, sequence_completion_results):
+    transducer_results = replace_null_random(transducer_results)
+    sequence_completion_results = replace_null_random(sequence_completion_results)
+
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
+
     table = ""
     # model name, parameters, finetuning, coding model, transducer results, sequence completion results
     table += r"\begin{tabular}{|l|c|c|c|c|c|c|c|c|}" + "\n"
@@ -259,6 +280,10 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
 
     summary_t = best_prompt(results_t)
     summary_sc = best_prompt(results_sc)
+
+    summary_t = replace_null_random(summary_t)
+    summary_sc = replace_null_random(summary_sc)
+
     common_keys = set(summary_t) & set(summary_sc)
     ordered_keys = [
         x
@@ -276,7 +301,6 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
             to_display.add(ms[np.argmax(means)])
             to_display.add(ms[np.argmin(means)])
 
-    plt.figure(figsize=(7, 4), dpi=400, facecolor="white", tight_layout=True)
     setup_plot()
 
     ax = plt.gca()
@@ -302,6 +326,7 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "falcon-7b": (-1, -1, 0.1),
         "starcoder2-15b": (-1, 1, 1),
         "deepseek-coder-33b-instruct": (1, -1, 1),
+        random_null: (1, 1, 0.1),
     }
 
     texts = []
