@@ -110,6 +110,7 @@ def compute_results():
             "COT",
             "Red-Green",
         ),
+        **for_model_and_prompt("o1-preview", 10, "Basic"),
     }
 
     no_prompt = "Basic"

@@ -46,6 +46,7 @@ metadata_for_models = {
     "gpt-4o-mini": ModelMetadata("?", True, False),
     "gpt-4o": ModelMetadata("?", True, False),
     "claude-3.5": ModelMetadata("?", True, False),
+    "o1-preview": ModelMetadata("?", True, False),
 }
 
 metadata_baseline = ModelMetadata("--", False, False)
@@ -86,6 +87,7 @@ grouped_models = {
         "gpt-4o-mini",
         "gpt-4o",
         "claude-3.5",
+        "o1-preview",
     ],
 }
 
