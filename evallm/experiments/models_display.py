@@ -17,5 +17,6 @@ model_by_display_key = {
     "gpt-3.5-chat": "gpt-3.5-turbo-0125",
     "gpt-4o-mini": "gpt-4o-mini-2024-07-18",
     "gpt-4o": "gpt-4o-2024-05-13",
+    "o1-preview": "o1-preview-2024-09-12",
     "claude-3.5": "claude-3-5-sonnet-20241022",
 }
