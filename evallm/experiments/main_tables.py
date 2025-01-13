@@ -4,7 +4,11 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib import pyplot as plt
 
-from evallm.experiments.transducer_plotting import display_acc, plot_bootstrap_means, setup_plot
+from evallm.experiments.transducer_plotting import (
+    display_acc,
+    plot_bootstrap_means,
+    setup_plot,
+)
 
 
 @dataclass
@@ -274,7 +278,7 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
 
     plt.figure(figsize=(7, 4), dpi=400, facecolor="white", tight_layout=True)
     setup_plot()
-    
+
     ax = plt.gca()
 
     margin_text = 0.01

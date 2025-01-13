@@ -339,5 +339,6 @@ def plot_bootstrap_means(ax, xs, ys, *, scatter_kwargs, err_kwargs):
 
     return mu_x, mu_y
 
+
 def setup_plot():
     plt.rc("text", usetex=True)
