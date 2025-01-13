@@ -12,6 +12,7 @@ from evallm.experiments.exhaustive_transducer_experiment import (
 from evallm.experiments.sequence_completion.sample_sequences import (
     sample_task_instances_given_dfa,
 )
+from evallm.experiments.transducer_plotting import setup_plot
 
 blue = "#009bff"
 green = "#26d94a"
@@ -47,6 +48,7 @@ def transducer_example_csv(
 
 
 def plot_errors(transducer_masks: Dict[str, np.ndarray]):
+    setup_plot()
     venn3(
         subsets=[set(np.where(x == 0)[0]) for x in transducer_masks.values()],
         set_labels=[f"{k}: {v.mean():.1%}" for k, v in transducer_masks.items()],
