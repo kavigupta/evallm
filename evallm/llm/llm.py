@@ -168,9 +168,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
                 p.map
                 if num_parallel > 1
                 else (
-                    (lambda fn, xs: map(fn, tqdm.tqdm(xs)))
-                    if len(prompt) > 1
-                    else map
+                    (lambda fn, xs: map(fn, tqdm.tqdm(xs))) if len(prompt) > 1 else map
                 )
             )
             choices_each = map_fn(
@@ -209,7 +207,7 @@ def create_openai_completion(model, kwargs, prompt):
         assert set(prompt.keys()) == {"system", "user"}
         prompt = {"user": prompt["user"]}
         kwargs = kwargs.copy()
-        del kwargs["max_tokens"] # this causes issues
-        del kwargs["temperature"] # non-default temperature is not supported
+        del kwargs["max_tokens"]  # this causes issues
+        del kwargs["temperature"]  # non-default temperature is not supported
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
