@@ -51,7 +51,10 @@ def plot_errors(transducer_masks: Dict[str, np.ndarray]):
     setup_plot()
     venn3(
         subsets=[set(np.where(x == 0)[0]) for x in transducer_masks.values()],
-        set_labels=[f"{k}: {v.mean():.1%}" for k, v in transducer_masks.items()],
+        set_labels=[
+            f"{k}: {v.mean():.1%}".replace("%", r"\%")
+            for k, v in transducer_masks.items()
+        ],
         set_colors=(red, green, blue),
     )
 
