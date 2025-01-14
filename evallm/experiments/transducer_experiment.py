@@ -81,6 +81,7 @@ class TransducerExperimentResult:
             )
         return success_rates
 
+
 def single_transducer_experiment(
     *,
     seed,

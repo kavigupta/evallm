@@ -19,4 +19,3 @@ def boostrap_mean(values, *, n_samples=1_000, pct=95):
     samples = values[indices]
     means = samples.mean(axis=0)
     return np.percentile(means, [lo_pct, hi_pct], axis=0)
-
