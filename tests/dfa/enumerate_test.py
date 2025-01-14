@@ -2,7 +2,6 @@ import unittest
 
 import numpy as np
 from parameterized import parameterized
-import tqdm
 
 from evallm.enumerate_dfa.enumerate import (
     all_state_permutations,
