@@ -21,7 +21,7 @@ from evallm.llm.llm import model_specs, run_prompt
 @permacache(
     "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_ngram_scores"
 )
-def common_suffix_heuristic(num_seeds, setting):
+def compute_common_suffix_heuristic(num_seeds, setting):
     return np.array(
         [
             compute_ngram_score(seed, setting=setting, function=common_suffix_heuristic)
