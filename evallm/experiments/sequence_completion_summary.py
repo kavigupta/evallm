@@ -1,8 +1,8 @@
 from evallm.experiments.models_display import model_by_display_key
 from evallm.experiments.sequence_completion.sequence_completion_experiments import (
     compute_brute_force_scores,
+    compute_common_suffix_heuristic,
     compute_model_scores,
-    compute_ngram_scores,
     compute_random_baseline_scores,
     compute_true_ngrams,
 )
@@ -91,7 +91,7 @@ def results_for_baseline():
         amount_baselines, setting=current_setting
     )
 
-    results[r"\textsc{Common-Suffix}$_S$", "Basic"] = compute_ngram_scores(
+    results[r"\textsc{Common-Suffix}$_S$", "Basic"] = compute_common_suffix_heuristic(
         amount_baselines, setting=current_setting
     )
 

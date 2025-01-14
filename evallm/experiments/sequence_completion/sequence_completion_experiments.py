@@ -6,8 +6,8 @@ from permacache import permacache
 
 from evallm.enumerate_dfa.pack_dfa import pack_dfa
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
+    common_suffix_heuristic,
     multiple_ngrams,
-    ngram_heuristic,
 )
 from evallm.experiments.sequence_completion.sample_sequences import (
     sample_sequence_completion_problem,
@@ -21,10 +21,10 @@ from evallm.llm.llm import model_specs, run_prompt
 @permacache(
     "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_ngram_scores"
 )
-def compute_ngram_scores(num_seeds, setting):
+def compute_common_suffix_heuristic(num_seeds, setting):
     return np.array(
         [
-            compute_ngram_score(seed, setting=setting, function=ngram_heuristic)
+            compute_ngram_score(seed, setting=setting, function=common_suffix_heuristic)
             for seed in tqdm.trange(num_seeds)
         ]
     )
