@@ -8,7 +8,6 @@ from evallm.enumerate_dfa.pack_dfa import pack_dfa
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
     multiple_ngrams,
     ngram_heuristic,
-    ngram_heuristic_with_prefix,
 )
 from evallm.experiments.sequence_completion.sample_sequences import (
     sample_sequence_completion_problem,
@@ -37,20 +36,6 @@ def compute_ngram_score(seed, *, setting, function):
         [
             dfa.accepts_input(prefix + function(sequences, prefix))
             for sequences, prefix in examples
-        ]
-    )
-
-
-@permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_ngram_scores_with_prefix"
-)
-def compute_ngram_scores_with_prefix(num_seeds, setting):
-    return np.array(
-        [
-            compute_ngram_score(
-                seed, setting=setting, function=ngram_heuristic_with_prefix
-            )
-            for seed in tqdm.trange(num_seeds)
         ]
     )
 
