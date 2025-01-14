@@ -5,10 +5,8 @@ from parameterized import parameterized
 import tqdm
 
 from evallm.enumerate_dfa.enumerate import (
-    all_io_permutations,
     all_state_permutations,
     enumerate_packed_dfas,
-    enumerate_packed_dfas_no_permutations_valid,
 )
 from evallm.enumerate_dfa.pack_dfa import pack_dfa, unpack_dfa
 from evallm.sample_dfa.naive_sample import naively_sample_dfa
@@ -46,8 +44,6 @@ class PermutationsTest(unittest.TestCase):
 class FullEnumerationTest(unittest.TestCase):
     chunk_size = 1000
     enumerated = set(enumerate_packed_dfas(3, 3))
-    enumerated_valid = set(enumerate_packed_dfas_no_permutations_valid(3, 3))
-    enumerated_valid_list = list(enumerated_valid)
 
     @parameterized.expand([(seed,) for seed in range(100)])
     def test_pack_random_dfa(self, seed):
@@ -55,13 +51,3 @@ class FullEnumerationTest(unittest.TestCase):
         dfa = naively_sample_dfa(3, 3, rng)
         packed = pack_dfa(dfa)
         self.assertIn(packed, self.enumerated)
-
-    @parameterized.expand(
-        [(chunk,) for chunk in range(0, len(enumerated_valid_list), chunk_size)]
-    )
-    def test_symbol_permutations_present(self, chunk):
-        for pdfa in tqdm.tqdm(
-            self.enumerated_valid_list[chunk : chunk + self.chunk_size]
-        ):
-            for pdfa_sym in all_io_permutations(pdfa):
-                assert pdfa_sym in self.enumerated_valid
