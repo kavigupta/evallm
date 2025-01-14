@@ -1,7 +1,7 @@
 from collections import Counter
 
 
-def ngram_heuristic(sequences, prefix):
+def common_suffix_heuristic(sequences, prefix):
     """
     Compute a completion for the given prefix using an n-gram heuristic.
 
