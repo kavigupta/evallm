@@ -273,8 +273,8 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
 
     category_to_color = {
         "Baselines": "#009bff",
-        "Open Source Code": "#ff9500",
         "Open Source Completion": "#7a00ff",
+        "Open Source Code": "#ff9500",
         "Proprietary": "#ff0062",
     }
 
@@ -314,7 +314,7 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "6-\\textsc{Gram}": (1, -1, 0.1),
         "5-\\textsc{Gram}": (-1, 1, 0.1),
         "4-\\textsc{Gram}": (1, -1, 0.1),
-        "3-\\textsc{Gram}": (1, -1, 0.1),
+        "3-\\textsc{Gram}": (1, 1, 0.1),
         "2-\\textsc{Gram}": (1, 1, 0.1),
         "mistral-nemo-minitron-8B": (-0.0001, 1, 1),
         "qwen-2.5-coder-7B": (0.0001, -1, 1),
@@ -326,10 +326,12 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "falcon-7b": (-1, -1, 0.1),
         "starcoder2-15b": (-1, 1, 1),
         "deepseek-coder-33b-instruct": (1, -1, 1),
+        "claude-3.5": (1, -1, 1),
         random_null: (1, 1, 0.1),
     }
 
     texts = []
+    xs, ys = [], []
     for model in ordered_keys:
         color = category_to_color[models_to_category[model]]
 
@@ -340,6 +342,9 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
             scatter_kwargs=dict(color=color, marker="."),
             err_kwargs=dict(color=color, lw=0.5),
         )
+        if models_to_category[model] != "Baselines":
+            xs.append(x)
+            ys.append(y)
         if model in to_display:
             dirx, diry, rel_dist = directions.get(model, (1, 1, 1))
             # margin_text_this should be the distance required to put margin_text
@@ -385,12 +390,28 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
                 )
                 ax.add_patch(patch)
 
-    plt.xlabel("Sequence Completion Result")
-    plt.ylabel("Transducer Result")
-    plt.ylim(plt.ylim()[0], 100)
-    # legend for each category
+    lo_x, lo_y = ax.get_xlim()[0], ax.get_ylim()[0]
+
     for category, color in category_to_color.items():
         plt.scatter([], [], color=color, label=category)
+
+    x_model_max, y_model_max = max(xs), max(ys)
+
+    plt.fill_between(
+        [x_model_max, 100],
+        y_model_max,
+        100,
+        color=category_to_color["Baselines"],
+        alpha=0.2,
+        zorder=0,
+        label="Better than all LLMs on both tasks",
+        lw=0,
+    )
+
+    plt.xlabel("Sequence Completion Result")
+    plt.ylabel("Transducer Result")
+    plt.xlim(lo_x, 100)
+    plt.ylim(lo_y, 100)
     plt.legend()
 
 
