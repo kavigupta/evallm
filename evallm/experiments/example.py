@@ -93,7 +93,10 @@ def qualitative_results_table(table):
     result += r"\hline" + "\n"
     for i in range(len(table)):
         for c in table.columns:
-            result += f"{table[c][i]} & "
+            disp = table[c][i]
+            if isinstance(disp, (float, int)):
+                disp = f"{disp/30*100:.0f}\\%"
+            result += f"{disp} & "
         result = result[:-2] + r"\\"
         result += "\n"
         result += r"\hline" + "\n"
