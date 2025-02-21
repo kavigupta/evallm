@@ -52,7 +52,7 @@ def plot_results_by_difficulty(table):
         cd = modify_color(c, 0.5, 0.9)
         plt.plot(mu, label=model, color=cd)
         plt.fill_between(np.arange(len(masks)), *ci.T, alpha=0.25, color=c)
-        plt.text(x=len(mu) - 0.5, y=yfake, s=model, size=10, color=cd)
+        plt.text(x=len(mu) - 0.4, y=yfake, s=model, size=10, color=cd, va="center")
         plt.arrow(x=len(mu) - 0.5, y=yfake, dx=-0.4, dy=mu[-1] - yfake, color=cd)
     plt.xticks(np.arange(len(masks)), masks_names)
     plt.xlim(0, len(masks) + 1)
