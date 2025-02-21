@@ -5,8 +5,6 @@ from matplotlib import colors as mcolors
 from evallm.experiments.transducer_plotting import setup_plot
 from evallm.utils.bootstrap import boostrap_mean
 
-from .main_tables import grouped_models
-
 
 def compute_masks(table):
     names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
@@ -41,7 +39,7 @@ def plot_results_by_difficulty(table):
     plt.figure(figsize=(8, 6), tight_layout=True)
     masks, masks_names = compute_masks(table)
     results_full = compute_full_results(table, masks)
-    endings = [results_full[k][-1].mean() for k in results_full]
+    endings = [v[-1].mean() for v in results_full.values()]
     yfakes = np.linspace(max(endings), min(endings), len(results_full))
     setup_plot()
     for i, (yfake, model) in enumerate(
