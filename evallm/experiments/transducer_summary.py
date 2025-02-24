@@ -61,7 +61,7 @@ def for_model_and_prompt(model, num_dfas, *prompts):
     }
 
 
-def compute_results():
+def compute_results(accuracy_summary=True):
     deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
         "none",
         sample_dfa_spec,
@@ -134,7 +134,8 @@ def compute_results():
     )
     for model, prompt in model_outcomes:
         accuracies[model][prompt] = [
-            r.success_rate_binary_ignore_na for r in model_outcomes[model, prompt]
+            r.success_rate_binary_ignore_na if accuracy_summary else r.success_rate_each
+            for r in model_outcomes[model, prompt]
         ]
     return accuracies
 
@@ -143,8 +144,8 @@ def display_prompt(p):
     return rf"\textsc{{{p}}}$_T$"
 
 
-def transducer_results():
-    accuracies = compute_results()
+def transducer_results(accuracy_summary=True):
+    accuracies = compute_results(accuracy_summary=accuracy_summary)
     return {
         m: {display_prompt(p): accuracies[m][p] for p in accuracies[m]}
         for m in accuracies
