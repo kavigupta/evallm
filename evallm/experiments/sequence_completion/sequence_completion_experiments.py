@@ -1,3 +1,4 @@
+import os
 from typing import Counter
 
 import numpy as np
@@ -16,10 +17,12 @@ from evallm.experiments.sequence_completion.sequence_completion_brute_force impo
     sequence_completion_brute_force,
 )
 from evallm.llm.llm import model_specs, run_prompt
+from ...cachedir import cache_dir
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_ngram_scores"
+    os.path.join(cache_dir, "compute_common_suffix_heuristic"),
+    shelf_type="individual-file",
 )
 def compute_common_suffix_heuristic(num_seeds, setting):
     return np.array(
@@ -41,7 +44,8 @@ def compute_ngram_score(seed, *, setting, function):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_true_ngrams"
+    os.path.join(cache_dir, "compute_true_ngrams"),
+    shelf_type="individual-file",
 )
 def compute_true_ngrams(ngram, num_seeds, setting):
     assert ngram >= 2
@@ -58,7 +62,8 @@ def compute_true_ngrams(ngram, num_seeds, setting):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_brute_force_scores"
+    os.path.join(cache_dir, "compute_brute_force_scores"),
+    shelf_type="individual-file",
 )
 def compute_brute_force_scores(num_seeds, setting):
     return np.array(
@@ -86,7 +91,8 @@ def compute_brute_force_score(seed, setting):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_random_baseline_scores"
+    os.path.join(cache_dir, "compute_random_baseline_scores"),
+    shelf_type="individual-file",
 )
 def compute_random_baseline_scores(num_seeds, setting):
     return np.array(
@@ -131,8 +137,9 @@ def compute_model_scores(num_seeds, setting, model, prompt_fn, *, na_mode="ignor
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_model_scores_cached_4",
+    os.path.join(cache_dir, "compute_model_score_cached"),
     key_function=dict(prompt=lambda prompt: prompt.hash_prompt()),
+    shelf_type="individual-file",
 )
 def compute_model_score_cached(num_seeds, setting, model, prompt):
     results = {0: [], 0.5: [], 1: []}
