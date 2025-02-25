@@ -1,3 +1,4 @@
+import os
 import string
 from dataclasses import dataclass
 
@@ -11,6 +12,7 @@ from permacache import (
 
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
 from evallm.utils.kgrams import predict_based_on_kgram
+from ..cachedir import cache_dir
 
 
 @dataclass
@@ -65,19 +67,9 @@ def compute_ngram_each(result):
 
 
 @permacache(
-    "evallm/experiments/exhaustive_transducer_experiment/run_experiment_for_dfa_2",
+    os.path.join(cache_dir, "run_experiment_for_dfa"),
     key_function=dict(prompter=repr, keep_completions=drop_if_equal(False)),
-    read_from_shelf_context_manager=swap_unpickler_context_manager(
-        renamed_symbol_unpickler(
-            {
-                (
-                    "__main__",
-                    "TransducerExperimentResultPacked",
-                ): TransducerExperimentResultPacked
-            }
-        )
-    ),
-    multiprocess_safe=True,
+    shelf_type="individual-file",
 )
 def run_experiment_for_dfa(
     prompter, pdfa, count, model, sequence_seed, keep_completions=False
