@@ -21,7 +21,8 @@ from ...cachedir import cache_dir
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_ngram_scores"
+    os.path.join(cache_dir, "compute_common_suffix_heuristic"),
+    shelf_type="individual-file",
 )
 def compute_common_suffix_heuristic(num_seeds, setting):
     return np.array(
@@ -43,7 +44,8 @@ def compute_ngram_score(seed, *, setting, function):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_true_ngrams"
+    os.path.join(cache_dir, "compute_true_ngrams"),
+    shelf_type="individual-file",
 )
 def compute_true_ngrams(ngram, num_seeds, setting):
     assert ngram >= 2
@@ -60,7 +62,8 @@ def compute_true_ngrams(ngram, num_seeds, setting):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_brute_force_scores"
+    os.path.join(cache_dir, "compute_brute_force_scores"),
+    shelf_type="individual-file",
 )
 def compute_brute_force_scores(num_seeds, setting):
     return np.array(
@@ -88,7 +91,8 @@ def compute_brute_force_score(seed, setting):
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_random_baseline_scores"
+    os.path.join(cache_dir, "compute_random_baseline_scores"),
+    shelf_type="individual-file",
 )
 def compute_random_baseline_scores(num_seeds, setting):
     return np.array(
