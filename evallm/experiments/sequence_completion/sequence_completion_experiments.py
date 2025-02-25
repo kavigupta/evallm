@@ -1,3 +1,4 @@
+import os
 from typing import Counter
 
 import numpy as np
@@ -16,6 +17,7 @@ from evallm.experiments.sequence_completion.sequence_completion_brute_force impo
     sequence_completion_brute_force,
 )
 from evallm.llm.llm import model_specs, run_prompt
+from ...cachedir import cache_dir
 
 
 @permacache(
@@ -131,8 +133,9 @@ def compute_model_scores(num_seeds, setting, model, prompt_fn, *, na_mode="ignor
 
 
 @permacache(
-    "evallm/experiments/sequence_completion/sequence_completion_experiments/compute_model_scores_cached_4",
+    os.path.join(cache_dir, "compute_model_score_cached"),
     key_function=dict(prompt=lambda prompt: prompt.hash_prompt()),
+    shelf_type="individual-file",
 )
 def compute_model_score_cached(num_seeds, setting, model, prompt):
     results = {0: [], 0.5: [], 1: []}
