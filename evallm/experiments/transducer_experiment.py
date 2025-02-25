@@ -1,6 +1,7 @@
 import itertools
 from dataclasses import dataclass
 from functools import cached_property
+import os
 from types import SimpleNamespace
 
 import numpy as np
@@ -12,6 +13,7 @@ from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
+from ..cachedir import cache_dir
 
 
 @dataclass
@@ -102,7 +104,9 @@ def single_transducer_experiment(
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_10", key_function=dict(prompter=repr)
+    os.path.join(cache_dir, "run_transducer_experiment"),
+    key_function=dict(prompter=repr),
+    shelf_type="individual-file",
 )
 def run_transducer_experiment(
     model,
@@ -136,8 +140,9 @@ def run_transducer_experiment(
 
 
 @permacache(
-    "evallm/experiments/transducer_experiment_just_stats_3",
+    os.path.join(cache_dir, "run_transducer_experiment_just_stats"),
     key_function=dict(prompter=repr),
+    shelf_type="individual-file",
 )
 def run_transducer_experiment_just_stats(
     model,
@@ -173,8 +178,9 @@ def current_dfa_sample_spec(num_states):
 
 
 @permacache(
-    "evallm/experiments/run_brute_force_transducer",
+    os.path.join(cache_dir, "run_brute_force_transducer"),
     key_function=dict(prompter=repr),
+    shelf_type="individual-file",
 )
 def run_brute_force_transducer(
     sample_dfa_spec,
