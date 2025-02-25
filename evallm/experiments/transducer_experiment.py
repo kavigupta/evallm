@@ -100,29 +100,35 @@ def single_transducer_experiment(
     )
     if print_completions:
         print(completions)
-    return TransducerExperimentResult.of(metas, prompts, scores)
+    return dfa, TransducerExperimentResult.of(metas, prompts, scores)
 
 
-@permacache(
-    os.path.join(cache_dir, "run_transducer_experiment"),
-    key_function=dict(prompter=repr),
-    shelf_type="individual-file",
-)
-def run_transducer_experiment(
-    model,
-    sample_dfa_spec,
-    prompter,
-    num_repeats_per_dfa,
-    num_dfas,
+def transducer_dataset(
+    sample_dfa_spec, *, num_dfas, num_symbols_per_sequence, num_repeat_per_dfa
 ):
-    results = []
-    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
-    pbar = tqdm.tqdm(
-        total=num_dfas,
+    dfas, results = run_multiple(
+        "none",
+        sample_dfa_spec,
+        BasicInstructionTransducerPrompter(num_symbols_per_sequence, strip=True),
+        num_repeat_per_dfa,
+        num_dfas,
     )
+    return [
+        SimpleNamespace(
+            dfa=dfa,
+            inputs=rr.inputs,
+            outputs=rr.outputs,
+        )
+        for dfa, rr in zip(dfas, results)
+    ]
+
+
+def run_multiple(model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas):
+    dfas, results = [], []
+    pbar = tqdm.tqdm(total=num_dfas)
     for seed in itertools.count():
         try:
-            result = single_transducer_experiment(
+            dfa, result = single_transducer_experiment(
                 seed=seed,
                 model=model,
                 num_repeats_per_dfa=num_repeats_per_dfa,
@@ -131,11 +137,31 @@ def run_transducer_experiment(
             )
         except TrivialProblemError:
             continue
+        dfas.append(dfa)
         results.append(result)
         pbar.update()
         if len(results) == num_dfas:
             pbar.close()
             break
+    return dfas, results
+
+
+@permacache(
+    os.path.join(cache_dir, "run_transducer_experiment"),
+    key_function=dict(prompter=repr),
+    shelf_type="individual-file",
+)
+def run_transducer_experiment(
+    model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
+):
+    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
+    _, results = run_multiple(
+        model=model,
+        num_repeats_per_dfa=num_repeats_per_dfa,
+        sample_dfa_spec=sample_dfa_spec,
+        prompter=prompter,
+        num_dfas=num_dfas,
+    )
     return results
 
 
