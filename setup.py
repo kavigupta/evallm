@@ -24,7 +24,7 @@ setuptools.setup(
         "automata-lib==8.3.0",
         "openai==1.55.3",
         "httpx==0.25.2",
-        "permacache==3.8.0",
+        "permacache==4.0.0",
         "matplotlib",
         "matplotlib-venn==1.1.1",
         "pandas",
