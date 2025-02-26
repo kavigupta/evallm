@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import tqdm.auto as tqdm
 from permacache import permacache, stable_hash
@@ -6,6 +8,8 @@ from evallm.experiments.sequence_completion.sequence_completion_brute_force impo
     all_dfas,
 )
 from evallm.sample_dfa.transduce import transduce
+
+from ..cachedir import cache_dir
 
 
 def consistent_with_dfa(dfa, i, o):
@@ -28,6 +32,18 @@ def consistent_dfa_predictions(num_states, num_symbols, i, o):
         consistent, final_pred = consistent_with_dfa(dfa, i, o)
         results[final_pred] += consistent
     return results
+
+
+@permacache(
+    os.path.join(cache_dir, "brute_force_on_instances"),
+    key_function=dict(inputs=stable_hash, outputs=stable_hash),
+    shelf_type="individual-file",
+)
+def brute_force_on_instances(num_states, num_symbols, inputs, outputs):
+    return [
+        consistent_dfa_predictions(num_states, num_symbols, i, o)
+        for i, o in zip(inputs, outputs)
+    ]
 
 
 def brute_force_accuracy(num_states, num_symbols, inputs, outputs):
