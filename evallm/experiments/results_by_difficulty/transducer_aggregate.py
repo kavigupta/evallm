@@ -1,6 +1,5 @@
 import numpy as np
 
-
 from .difficulty_categories import mask_names
 
 
