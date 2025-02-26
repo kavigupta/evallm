@@ -245,16 +245,27 @@ def multi_prompt_table_of_results(transducer_results, sequence_completion_result
     print(table)
 
 
-def best_prompt(results):
+def arg_best_prompt(results):
     return {
-        k.replace("$_T$", "").replace("$_S$", ""): max(
-            v.values(),
-            key=lambda x: (
-                np.mean(x) if not (isinstance(x, float) and np.isnan(x)) else -np.inf
+        k: max(
+            v.items(),
+            key=lambda yx: (
+                np.mean(yx[1])
+                if not (isinstance(yx[1], float) and np.isnan(yx[1]))
+                else -np.inf
             ),
-        )
+        )[0]
         for k, v in results.items()
     }
+
+
+def sanitize_names(results):
+    return {k.replace("$_T$", "").replace("$_S$", ""): v for k, v in results.items()}
+
+
+def best_prompt(results):
+    best_prompt_key = arg_best_prompt(results)
+    return sanitize_names({k: results[k][best_prompt_key[k]] for k in results})
 
 
 def multi_prompts(results):
