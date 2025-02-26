@@ -116,22 +116,23 @@ def compute_results(accuracy_summary=True):
     no_prompt = "Basic"
 
     accuracies = defaultdict(dict)
-    accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
-        r.null_success_rate for r in deterministic_baseline_outcomes
-    ]
-    for ngram in range(2, 2 + 5):
-        accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
-            r.kgram_success_rates_each[ngram - 2]
-            for r in deterministic_baseline_outcomes
+    if accuracy_summary:
+        accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
+            r.null_success_rate for r in deterministic_baseline_outcomes
         ]
-    accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
-        sample_dfa_spec,
-        num_states,
-        num_symbols,
-        num_sequence_symbols,
-        num_repeats_per_dfa,
-        num_dfas=1000,
-    )
+        for ngram in range(2, 2 + 5):
+            accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
+                r.kgram_success_rates_each[ngram - 2]
+                for r in deterministic_baseline_outcomes
+            ]
+        accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
+            sample_dfa_spec,
+            num_states,
+            num_symbols,
+            num_sequence_symbols,
+            num_repeats_per_dfa,
+            num_dfas=1000,
+        )
     for model, prompt in model_outcomes:
         accuracies[model][prompt] = [
             r.success_rate_binary_ignore_na if accuracy_summary else r.success_rate_each
