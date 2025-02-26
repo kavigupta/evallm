@@ -5,19 +5,20 @@ from matplotlib import colors as mcolors
 from evallm.experiments.transducer_plotting import setup_plot
 from evallm.utils.bootstrap import boostrap_mean
 
+mask_names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
+    r"\textsc{BruteForce}"
+]
+
 
 def compute_masks(table):
-    names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
-        r"\textsc{BruteForce}"
-    ]
-    ngrams = np.array([table[name] for name in names])
+    ngrams = np.array([table[name] for name in mask_names])
     not_solved_by_smaller = np.ones(ngrams.shape[1], bool)
     masks = []
     for ng in ngrams:
         ng = ng >= 28 / 30
         masks.append(ng & not_solved_by_smaller)
         not_solved_by_smaller &= ~ng
-    return masks, names
+    return masks
 
 
 def compute_full_results(table, masks):
@@ -37,7 +38,7 @@ def compute_full_results(table, masks):
 
 def plot_results_by_difficulty(table):
     plt.figure(figsize=(8, 6), tight_layout=True)
-    masks, masks_names = compute_masks(table)
+    masks = compute_masks(table)
     results_full = compute_full_results(table, masks)
     endings = [v[-1].mean() for v in results_full.values()]
     yfakes = np.linspace(max(endings), min(endings), len(results_full))
@@ -54,7 +55,7 @@ def plot_results_by_difficulty(table):
         plt.fill_between(np.arange(len(masks)), *ci.T, alpha=0.25, color=c)
         plt.text(x=len(mu) - 0.4, y=yfake, s=model, size=10, color=cd, va="center")
         plt.arrow(x=len(mu) - 0.5, y=yfake, dx=-0.4, dy=mu[-1] - yfake, color=cd)
-    plt.xticks(np.arange(len(masks)), masks_names)
+    plt.xticks(np.arange(len(masks)), mask_names)
     plt.xlim(0, len(masks) + 1)
     plt.xlabel(r"First baseline that solves (acc $\geq \frac{28}{30}$) task")
     plt.ylabel(r"Accuracy on task collection [\%]")
