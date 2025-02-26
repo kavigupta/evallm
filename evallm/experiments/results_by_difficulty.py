@@ -9,10 +9,6 @@ mask_names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
     r"\textsc{BruteForce}"
 ]
 
-mask_names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
-    r"\textsc{BruteForce}"
-]
-
 
 def compute_masks(table):
     ngrams = np.array([table[name] for name in mask_names])
