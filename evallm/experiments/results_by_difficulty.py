@@ -3,9 +3,7 @@ import numpy as np
 from matplotlib import colors as mcolors
 
 from evallm.experiments.transducer_plotting import setup_plot
-from evallm.infer_dfa.brute_force_transducer import brute_force_on_instances
 from evallm.utils.bootstrap import boostrap_mean
-from evallm.utils.kgrams import predict_based_on_kgram
 
 mask_names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
     r"\textsc{BruteForce}"
