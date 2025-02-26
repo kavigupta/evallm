@@ -14,22 +14,25 @@ def longest_terminal_repeated_kgrams(s):
         indices = new_indices
 
 
-def predict_from_sequence_based_on_kgram(seq):
+def predict_from_sequence_based_on_kgram(seq, *, uncertainty=False):
     results = []
     for k, _, idxs in longest_terminal_repeated_kgrams(seq):
         preds = [seq[i + k] for i in idxs]
         num_ones = sum(1 for x in preds if x == 1)
-        if num_ones * 2 > len(preds):
-            results.append(1)
-        elif num_ones * 2 < len(preds):
-            results.append(0)
+        if uncertainty:
+            results.append(num_ones / len(preds))
         else:
-            # break ties by whatever the most recent match was
-            results.append(preds[-1])
+            if num_ones * 2 > len(preds):
+                results.append(1)
+            elif num_ones * 2 < len(preds):
+                results.append(0)
+            else:
+                # break ties by whatever the most recent match was
+                results.append(preds[-1])
     return results
 
 
-def predict_based_on_kgram(inp, out):
+def predict_based_on_kgram(inp, out, *, uncertainty=False):
     prefix = [x for i, o in zip(inp, out) for x in [i, o]][:-1]
 
-    return predict_from_sequence_based_on_kgram(prefix)
+    return predict_from_sequence_based_on_kgram(prefix, uncertainty=uncertainty)
