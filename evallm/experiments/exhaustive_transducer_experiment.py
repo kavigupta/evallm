@@ -7,6 +7,7 @@ from permacache import drop_if_equal, permacache
 
 from evallm.enumerate_dfa.pack_dfa import unpack_dfa
 from evallm.utils.kgrams import predict_based_on_kgram
+
 from ..cachedir import cache_dir
 
 

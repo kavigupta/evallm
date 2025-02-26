@@ -1,7 +1,7 @@
 import itertools
+import os
 from dataclasses import dataclass
 from functools import cached_property
-import os
 from types import SimpleNamespace
 
 import numpy as np
@@ -13,6 +13,7 @@ from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
 from evallm.sample_dfa.sample_dfa import sample_dfa
 from evallm.utils import predict_based_on_kgram
+
 from ..cachedir import cache_dir
 
 
