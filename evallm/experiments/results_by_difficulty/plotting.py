@@ -2,44 +2,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import colors as mcolors
 
+from evallm.experiments.results_by_difficulty.transducer_aggregate import (
+    compute_full_results,
+    difficulty_bin_masks_by_aggregate_accuracy,
+)
 from evallm.experiments.transducer_plotting import setup_plot
 from evallm.utils.bootstrap import boostrap_mean
 
-mask_names = ["%s-\\textsc{Gram}" % n for n in range(2, 1 + 5)] + [
-    r"\textsc{BruteForce}"
-]
-
-
-def compute_masks(table):
-    ngrams = np.array([table[name] for name in mask_names])
-    not_solved_by_smaller = np.ones(ngrams.shape[1], bool)
-    masks = []
-    for ng in ngrams:
-        ng = ng >= 28 / 30
-        masks.append(ng & not_solved_by_smaller)
-        not_solved_by_smaller &= ~ng
-    return masks
-
-
-def compute_full_results(table, masks):
-    results_full = {}
-    for model in table:
-        # if model in grouped_models["Baselines"]:
-        # continue
-        if model == r"\textsc{Null}":
-            continue
-        res = 100 * np.array(table[model])
-        if res.shape[0] < 100:
-            continue
-        results_full[model] = [res[mask[: len(res)]] for mask in masks]
-
-    return results_full
+from .difficulty_categories import mask_names
 
 
 def plot_results_by_difficulty(table):
+    results_full = compute_full_results(
+        table, difficulty_bin_masks_by_aggregate_accuracy(table)
+    )
+    category_description = r"First baseline that solves (acc $\geq \frac{28}{30}$) task"
+    plot_results_by_diff_category(results_full, category_description)
+
+
+def plot_results_by_diff_category(results_full, category_description):
     plt.figure(figsize=(8, 6), tight_layout=True)
-    masks = compute_masks(table)
-    results_full = compute_full_results(table, masks)
     endings = [v[-1].mean() for v in results_full.values()]
     yfakes = np.linspace(max(endings), min(endings), len(results_full))
     setup_plot()
@@ -52,12 +34,12 @@ def plot_results_by_difficulty(table):
         c = THEME_COLORS[i % len(THEME_COLORS)]
         cd = modify_color(c, 0.5, 0.9)
         plt.plot(mu, label=model, color=cd)
-        plt.fill_between(np.arange(len(masks)), *ci.T, alpha=0.25, color=c)
+        plt.fill_between(np.arange(len(mask_names)), *ci.T, alpha=0.25, color=c)
         plt.text(x=len(mu) - 0.4, y=yfake, s=model, size=10, color=cd, va="center")
         plt.arrow(x=len(mu) - 0.5, y=yfake, dx=-0.4, dy=mu[-1] - yfake, color=cd)
-    plt.xticks(np.arange(len(masks)), mask_names)
-    plt.xlim(0, len(masks) + 1)
-    plt.xlabel(r"First baseline that solves (acc $\geq \frac{28}{30}$) task")
+    plt.xticks(np.arange(len(mask_names)), mask_names)
+    plt.xlim(0, len(mask_names) + 1)
+    plt.xlabel(category_description)
     plt.ylabel(r"Accuracy on task collection [\%]")
     plt.title("Results by difficulty")
 
