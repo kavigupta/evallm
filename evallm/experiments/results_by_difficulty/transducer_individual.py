@@ -1,6 +1,5 @@
 import numpy as np
 
-
 from evallm.experiments.main_tables import arg_best_prompt, sanitize_names
 from evallm.experiments.transducer_summary import transducer_results
 from evallm.infer_dfa.brute_force_transducer import brute_force_on_instances
