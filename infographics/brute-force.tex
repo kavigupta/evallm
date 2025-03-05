@@ -1,0 +1,33 @@
+\documentclass[tikz]{standalone}
+
+\usetikzlibrary{positioning}
+\usetikzlibrary{shapes.geometric, arrows}
+
+\tikzstyle{startstop} = [ellipse, text width=2cm, minimum height=1cm, text centered, fill=customBlue, text=white]
+\tikzstyle{intermediate} = [ellipse, text width=2cm, minimum height=0.8cm, text centered]
+\tikzstyle{process} = [rectangle, text width=4cm, minimum height=1cm, text centered, fill=customPurple, text=white]
+\tikzstyle{arrow} = [thick, ->, >=stealth]
+
+\begin{document}
+
+\include{colors}
+
+
+\begin{tikzpicture}[node distance=2cm]
+    \node (allDFAs) [startstop] {All DFAs};
+    \node (consistentData) [process, below of=allDFAs] {Consistent with data};
+    \node (consistentDFAs) [intermediate, below=0.5cm of consistentData] {Consistent DFAs};
+    \node (makePredictions) [process, below=0.5cm of consistentDFAs] {Make predictions};
+    \node (predictions) [intermediate, below=0.5cm of makePredictions] {Predictions};
+    \node (majorityVote) [process, below=0.5cm of predictions] {Majority vote};
+    \node (result) [startstop, below of=majorityVote] {Result};
+    
+    \draw [arrow] (allDFAs) -- (consistentData);
+    \draw [arrow] (consistentData) -- (consistentDFAs);
+    \draw [arrow] (consistentDFAs) -- (makePredictions);
+    \draw [arrow] (makePredictions) -- (predictions);
+    \draw [arrow] (predictions) -- (majorityVote);
+    \draw [arrow] (majorityVote) -- (result);
+\end{tikzpicture}
+
+\end{document}
