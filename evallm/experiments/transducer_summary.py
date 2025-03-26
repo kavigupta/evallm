@@ -1,5 +1,7 @@
 from collections import defaultdict
 
+import numpy as np
+
 from evallm.experiments.models_display import model_by_display_key
 from evallm.experiments.transducer_experiment import (
     current_dfa_sample_spec,
@@ -157,3 +159,18 @@ def transducer_results(accuracy_summary=True):
         m: {display_prompt(p): accuracies[m][p] for p in accuracies[m]}
         for m in accuracies
     }
+
+
+def summarize_null_results(model_outcomes, display_prompt):
+    result = {}
+    for (model, prompt), v in model_outcomes.items():
+        prompt = display_prompt(prompt)
+        result[model] = result.get(model, {})
+        result[model][prompt] = [
+            (np.array(xs.success_rate_each) == 0.5).mean() for xs in v
+        ]
+    return result
+
+
+def transducer_null_results():
+    return summarize_null_results(compute_model_outcomes(), display_prompt)
