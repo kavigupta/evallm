@@ -162,3 +162,11 @@ def sequence_completion_results():
     for m, p in results:
         results_nested[m][display_prompt(p)] = results[m, p]
     return results_nested
+
+
+def sequence_completion_null_results():
+    result = {}
+    for (model, prompt), v in results_for_models("count-na").items():
+        result[model] = result.get(model, {})
+        result[model][display_prompt(prompt)] = v
+    return result

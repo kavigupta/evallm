@@ -1,7 +1,9 @@
+import itertools
 from dataclasses import dataclass
 
 import matplotlib as mpl
 import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 
 from evallm.experiments.transducer_plotting import (
@@ -431,3 +433,50 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
 def darken(color, factor):
     color = np.array(mpl.colors.to_rgba(color))
     return mpl.colors.to_hex(color * factor)
+
+
+def flat_pandas_table(results_ignore_na, results_null):
+    flat_ignore_na = {}
+    flat_null = {}
+    for model, prompts in results_ignore_na.items():
+        for prompt, results in prompts.items():
+            flat_ignore_na[(model, prompt)] = np.mean(results)
+    for model, prompts in results_null.items():
+        for prompt, results in prompts.items():
+            flat_null[(model, prompt)] = np.mean(results)
+
+    for k in set(flat_ignore_na) - set(flat_null):
+        assert k[0].replace("$_T$", "").replace("$_S$", "") in grouped_models[
+            "Baselines"
+        ] + [r"\textsc{Null}", r"\textsc{Random}"], k
+        flat_null[k] = 0
+
+    assert set(flat_ignore_na) == set(flat_null)
+    result = pd.DataFrame(dict(acc_ignore_na=flat_ignore_na, null=flat_null))
+    result = result.loc[[x for x in result.index if "Commas" not in x[1]]]
+    result = result[result.null < 0.25]
+    result["acc_full"] = result.acc_ignore_na * (1 - result.null)
+    result["best_prompt"] = False
+    for model, prompt in result.index:
+        others = result.loc[[x for x in result.index if x[0] == model]]
+        if result.loc[model, prompt].acc_ignore_na == others.acc_ignore_na.max():
+            result.loc[(model, prompt), "best_prompt"] = True
+    return result
+
+
+def reorderings(flat_table, same_model=False, only_best_prompt=False):
+    if only_best_prompt:
+        # compute for each model the best score in each column, grouped by prompt
+        flat_table = flat_table.groupby(level=0).max()
+    for i1, i2 in itertools.combinations(flat_table.index, 2):
+        if same_model and i1[0] != i2[0]:
+            continue
+        r1, r2 = flat_table.loc[i1], flat_table.loc[i2]
+        if r1.acc_ignore_na > r2.acc_ignore_na:
+            r1, r2 = r2, r1
+            i1, i2 = i2, i1
+        # now we have that r1 is the one with the lower accuracy on our metric
+        if r1.acc_full > r2.acc_full:
+            print(
+                f"{i1} is better than {i2} on full accuracy; despite being worse on ignore-na accuracy"
+            )
