@@ -161,7 +161,7 @@ def transducer_results(accuracy_summary=True):
     }
 
 
-def summarize_null_results(model_outcomes, display_prompt):
+def summarize_null_results(model_outcomes):
     result = {}
     for (model, prompt), v in model_outcomes.items():
         prompt = display_prompt(prompt)
@@ -173,4 +173,4 @@ def summarize_null_results(model_outcomes, display_prompt):
 
 
 def transducer_null_results():
-    return summarize_null_results(compute_model_outcomes(), display_prompt)
+    return summarize_null_results(compute_model_outcomes())
