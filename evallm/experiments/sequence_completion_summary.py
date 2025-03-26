@@ -35,48 +35,93 @@ prompts_by_key = {
 }
 
 
-def for_model(model, count, *prompts):
+def for_model(model, count, *prompts, na_mode):
     return {
         (model, prompt): compute_model_scores(
             count,
             current_setting,
             model_by_display_key[model],
             prompts_by_key[prompt],
-            na_mode="ignore",
+            na_mode=na_mode,
         )
         for prompt in prompts
     }
 
 
-def results_for_models():
+def results_for_models(na_mode="ignore"):
     results = {
         # open source completion
-        **for_model("llama3-8B", 1000, "Basic", "Basic-Commas"),
-        **for_model("llama3-70B", 1000, "Basic", "Basic-Commas"),
-        **for_model("llama3.1-8B-Instruct", 1000, "Basic", "Basic-Commas"),
-        **for_model("mistral-nemo-minitron-8B", 1000, "Basic", "Basic-Commas"),
-        **for_model("mistral-nemo-base-12B", 1000, "Basic", "Basic-Commas"),
-        **for_model("mistral-nemo-instruct-12B", 1000, "Basic", "Basic-Commas"),
-        **for_model("gemma-7b", 1000, "Basic", "Basic-Commas"),
-        **for_model("falcon-7b", 1000, "Basic", "Basic-Commas"),
+        **for_model("llama3-8B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model("llama3-70B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model(
+            "llama3.1-8B-Instruct", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
+        **for_model(
+            "mistral-nemo-minitron-8B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
+        **for_model(
+            "mistral-nemo-base-12B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
+        **for_model(
+            "mistral-nemo-instruct-12B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
+        **for_model("gemma-7b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model("falcon-7b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         # open source code
-        **for_model("starcoder2-15b", 1000, "Basic", "Basic-Commas"),
-        **for_model("codestral-22B", 1000, "Basic", "Basic-Commas"),
-        **for_model("deepseek-coder-33b-instruct", 1000, "Basic", "Basic-Commas"),
-        **for_model("qwen-2.5-coder-instruct-7B", 1000, "Basic", "Basic-Commas"),
-        **for_model("qwen-2.5-coder-instruct-32B", 1000, "Basic", "Basic-Commas"),
-        **for_model("qwen-2.5-coder-7B", 1000, "Basic", "Basic-Commas"),
+        **for_model("starcoder2-15b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model("codestral-22B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model(
+            "deepseek-coder-33b-instruct",
+            1000,
+            "Basic",
+            "Basic-Commas",
+            na_mode=na_mode,
+        ),
+        **for_model(
+            "qwen-2.5-coder-instruct-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
+        **for_model(
+            "qwen-2.5-coder-instruct-32B",
+            1000,
+            "Basic",
+            "Basic-Commas",
+            na_mode=na_mode,
+        ),
+        **for_model(
+            "qwen-2.5-coder-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
+        ),
         # closed source
-        **for_model("gpt-3.5-instruct", 100, "Basic", "Basic-Commas"),
-        **for_model("gpt-3.5-chat", 100, "Basic", "Basic-Commas"),
+        **for_model("gpt-3.5-instruct", 100, "Basic", "Basic-Commas", na_mode=na_mode),
+        **for_model("gpt-3.5-chat", 100, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
-            "gpt-4o-mini", 100, "Basic", "Basic-Commas", "More-Expl", "COT", "Red-Green"
+            "gpt-4o-mini",
+            100,
+            "Basic",
+            "Basic-Commas",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+            na_mode=na_mode,
         ),
         **for_model(
-            "gpt-4o", 30, "Basic", "Basic-Commas", "More-Expl", "COT", "Red-Green"
+            "gpt-4o",
+            30,
+            "Basic",
+            "Basic-Commas",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+            na_mode=na_mode,
         ),
         **for_model(
-            "claude-3.5", 30, "Basic", "Basic-Commas", "More-Expl", "COT", "Red-Green"
+            "claude-3.5",
+            30,
+            "Basic",
+            "Basic-Commas",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+            na_mode=na_mode,
         ),
     }
     return results
