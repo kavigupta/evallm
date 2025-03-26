@@ -69,6 +69,37 @@ def compute_results(accuracy_summary=True):
         num_repeats_per_dfa=num_repeats_per_dfa,
         num_dfas=1000,
     )
+    model_outcomes = compute_model_outcomes()
+
+    no_prompt = "Basic"
+
+    accuracies = defaultdict(dict)
+    if accuracy_summary:
+        accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
+            r.null_success_rate for r in deterministic_baseline_outcomes
+        ]
+        for ngram in range(2, 2 + 5):
+            accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
+                r.kgram_success_rates_each[ngram - 2]
+                for r in deterministic_baseline_outcomes
+            ]
+        accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
+            sample_dfa_spec,
+            num_states,
+            num_symbols,
+            num_sequence_symbols,
+            num_repeats_per_dfa,
+            num_dfas=1000,
+        )
+    for model, prompt in model_outcomes:
+        accuracies[model][prompt] = [
+            r.success_rate_binary_ignore_na if accuracy_summary else r.success_rate_each
+            for r in model_outcomes[model, prompt]
+        ]
+    return accuracies
+
+
+def compute_model_outcomes():
     model_outcomes = {
         **for_model_and_prompt("llama3-8B", 1000, "Basic"),
         **for_model_and_prompt("llama3-70B", 1000, "Basic"),
@@ -113,32 +144,7 @@ def compute_results(accuracy_summary=True):
         **for_model_and_prompt("o1-preview", 10, "Basic"),
     }
 
-    no_prompt = "Basic"
-
-    accuracies = defaultdict(dict)
-    if accuracy_summary:
-        accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
-            r.null_success_rate for r in deterministic_baseline_outcomes
-        ]
-        for ngram in range(2, 2 + 5):
-            accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
-                r.kgram_success_rates_each[ngram - 2]
-                for r in deterministic_baseline_outcomes
-            ]
-        accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
-            sample_dfa_spec,
-            num_states,
-            num_symbols,
-            num_sequence_symbols,
-            num_repeats_per_dfa,
-            num_dfas=1000,
-        )
-    for model, prompt in model_outcomes:
-        accuracies[model][prompt] = [
-            r.success_rate_binary_ignore_na if accuracy_summary else r.success_rate_each
-            for r in model_outcomes[model, prompt]
-        ]
-    return accuracies
+    return model_outcomes
 
 
 def display_prompt(p):
