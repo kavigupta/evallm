@@ -185,7 +185,9 @@ def main_table_of_results(transducer_results, sequence_completion_results):
     print(table)
 
 
-def multi_prompt_table_of_results(transducer_results, sequence_completion_results):
+def multi_prompt_table_of_results(
+    transducer_results, sequence_completion_results, *, bold_best=True
+):
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
     prompts = ["Basic", "More-Expl", "COT", "Red-Green"]
@@ -230,7 +232,7 @@ def multi_prompt_table_of_results(transducer_results, sequence_completion_result
                 ),
             )
 
-            format_by_prompt[best_p] = r"\bf "
+            format_by_prompt[best_p] = r"\bf " if bold_best else ""
             table += f"{name} & "
             for prompt in prompts:
                 if prompt in group[name]:
@@ -268,7 +270,7 @@ def best_prompt(results):
     return sanitize_names({k: results[k][best_prompt_key[k]] for k in results})
 
 
-def multi_prompts(results):
+def multi_prompts(results, *, minimum_number_prompts=2):
     results = {
         k: {
             p.replace("$_T$", "").replace("$_S$", ""): for_kp
@@ -277,7 +279,7 @@ def multi_prompts(results):
         }
         for k, for_k in results.items()
     }
-    return {k: v for k, v in results.items() if len(v) > 1}
+    return {k: v for k, v in results.items() if len(v) >= minimum_number_prompts}
 
 
 def plot_transducer_vs_sequence_completion(results_sc, results_t):
