@@ -143,7 +143,21 @@ def compute_model_outcomes():
             "COT",
             "Red-Green",
         ),
-        **for_model_and_prompt("o1-preview", 10, "Basic"),
+        # **for_model_and_prompt("o1-preview", 10, "Basic"),
+        **for_model_and_prompt(
+            "o3-mini",
+            30,
+            "Basic",
+            "More-Expl",
+            "COT",
+            # "Red-Green",
+        ),
+        **for_model_and_prompt(
+            "o3-mini",
+            100,
+            #     # "Basic",
+            "Red-Green",
+        ),
     }
 
     return model_outcomes
