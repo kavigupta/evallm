@@ -157,7 +157,7 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     if model == "claude-3-5-sonnet-20241022":
         # anthropic has extremely low rate limits
         num_parallel = 1
-    if model.startswith("o1") or model.startswith("o3"):
+    if model.startswith("o1"):
         # expensive so lets not churn through $20 instantly
         num_parallel = 1
     assert isinstance(prompt, (list, tuple))
