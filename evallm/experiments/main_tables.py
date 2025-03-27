@@ -54,6 +54,7 @@ metadata_for_models = {
     "claude-3.5": ModelMetadata("?", True, False),
     # "o1-preview": ModelMetadata("?", True, False),
     "o3-mini": ModelMetadata("?", True, False),
+    "deepseq-r1": ModelMetadata("?", True, False),
 }
 
 metadata_baseline = ModelMetadata("--", False, False)
@@ -97,6 +98,8 @@ grouped_models = {
         "claude-3.5",
         # "o1-preview",
         "o3-mini",
+        # TODO move this
+        "deepseq-r1",
     ],
 }
 

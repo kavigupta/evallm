@@ -35,6 +35,11 @@ def anthropic_key():
     return key(path)
 
 
+def nvidia_key():
+    path = ".nvidiakey"
+    return key(path)
+
+
 openai_client = OpenAI(
     api_key=openai_key(),
     base_url="https://api.openai.com/v1",
@@ -43,6 +48,11 @@ openai_client = OpenAI(
 anthropic_client = Anthropic(
     api_key=anthropic_key(),
     # base_url="https://api.anthropic.com/v1",
+)
+
+nvidia_client = OpenAI(
+    api_key=nvidia_key(),
+    base_url="https://integrate.api.nvidia.com/v1",
 )
 
 
@@ -87,6 +97,8 @@ model_specs = {
     "o3-mini-2025-01-31": ModelSpec(client=openai_client, is_chat=True),
     # anthropic models
     "claude-3-5-sonnet-20241022": ModelSpec(client=anthropic_client, is_chat=True),
+    # nvidia models
+    "deepseek-ai/deepseek-r1": ModelSpec(client=nvidia_client, is_chat=True),
 }
 
 
@@ -114,6 +126,15 @@ def anthropic_create(*, messages, **kwargs):
     return [SimpleNamespace(message=message)]
 
 
+def nvidia_create(*, messages, **kwargs):
+    completion = nvidia_client.chat.completions.create(
+        messages=messages,
+        **kwargs,
+    )
+    print(completion)
+    return completion.choices
+
+
 def get_create_method(model):
     client = model_specs[model].client
     if client == openai_client:
@@ -122,6 +143,8 @@ def get_create_method(model):
         ).choices
     if client == anthropic_client:
         return anthropic_create
+    if client == nvidia_client:
+        return nvidia_create
     raise NotImplementedError(f"Model {model} does not support chat")
 
 
@@ -157,13 +180,13 @@ def run_prompt(model: str, prompt: List[str], kwargs: dict):
     if model == "claude-3-5-sonnet-20241022":
         # anthropic has extremely low rate limits
         num_parallel = 1
-    if model.startswith("o1"):
+    if model.startswith("o1") or model == "deepseek-ai/deepseek-r1":
         # expensive so lets not churn through $20 instantly
         num_parallel = 1
     assert isinstance(prompt, (list, tuple))
     client = model_specs[model].client
     if model_specs[model].is_chat:
-        assert client in (openai_client, anthropic_client)
+        assert client in (openai_client, anthropic_client, nvidia_client)
         with multiprocessing.Pool(num_parallel) as p:
             map_fn = (
                 p.map
@@ -210,5 +233,8 @@ def create_openai_completion(model, kwargs, prompt):
         kwargs = kwargs.copy()
         del kwargs["max_tokens"]  # this causes issues
         del kwargs["temperature"]  # non-default temperature is not supported
+    if model == "deepseek-ai/deepseek-r1":
+        kwargs = kwargs.copy()
+        del kwargs["max_tokens"]
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)

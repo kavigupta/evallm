@@ -19,5 +19,6 @@ model_by_display_key = {
     "gpt-4o": "gpt-4o-2024-05-13",
     # "o1-preview": "o1-preview-2024-09-12",
     "o3-mini": "o3-mini-2025-01-31",
+    "deepseek-r1": "deepseek-ai/deepseek-r1",
     "claude-3.5": "claude-3-5-sonnet-20241022",
 }
