@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="23.999998in"
+   height="36in"
+   viewBox="0 0 609.59996 914.40003"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1.2 (0a00cf5339, 2022-02-04)"
+   sodipodi:docname="verifai-poster-png.svg"
+   inkscape:export-filename="./verifai-poster.png"
+   inkscape:export-xdpi="166.66667"
+   inkscape:export-ydpi="166.66667"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     units="in"
+     width="24in"
+     inkscape:zoom="0.25524684"
+     inkscape:cx="524.98201"
+     inkscape:cy="1433.9061"
+     inkscape:window-width="2186"
+     inkscape:window-height="1440"
+     inkscape:window-x="70"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Guides"
+     style="display:none"
+     transform="translate(-1.2207031e-5,1.2207031e-5)">
+    <rect
+       style="color:#000000;overflow:visible;opacity:0.2;fill:#00ff00;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stop-color:#000000"
+       id="rect35080"
+       width="304.79999"
+       height="914.40002"
+       x="6.8774139e-06"
+       y="-1.2254862e-05" />
+    <rect
+       style="color:#000000;overflow:visible;opacity:0.2;fill:#ff00ff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:1;stop-color:#000000"
+       id="rect35080-6"
+       width="304.79999"
+       height="914.40002"
+       x="304.80002"
+       y="-1.2254862e-05"
+       inkscape:transform-center-x="163.05216"
+       inkscape:transform-center-y="-156.41878" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Background"
+     transform="translate(-1.2207031e-5,1.2207031e-5)"
+     sodipodi:insensitive="true">
+    <rect
+       style="color:#000000;overflow:visible;opacity:1;fill:#ffffff;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:0.971728;stop-color:#000000"
+       id="rect201738"
+       width="609.59998"
+       height="914.40002"
+       x="1.2207031e-05"
+       y="-1.2207031e-05" />
+  </g>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-1.2207031e-5,1.2207031e-5)">
+    <image
+       width="608.38324"
+       height="912.57483"
+       preserveAspectRatio="none"
+       xlink:href="verifai-poster.png"
+       id="image1623"
+       x="0.6083681"
+       y="0.91257322" />
+  </g>
+</svg>
