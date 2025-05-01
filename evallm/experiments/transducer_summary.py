@@ -158,6 +158,14 @@ def compute_model_outcomes():
             #     # "Basic",
             "Red-Green",
         ),
+        **for_model_and_prompt(
+            "deepseq-r1",
+            30,
+            "Basic",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+        ),
     }
 
     return model_outcomes

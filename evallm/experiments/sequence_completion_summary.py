@@ -133,6 +133,16 @@ def results_for_models(na_mode="ignore"):
             "Red-Green",
             na_mode=na_mode,
         ),
+        **for_model(
+            "deepseek-r1",
+            30,
+            "Basic",
+            "Basic-Commas",
+            "More-Expl",
+            "COT",
+            "Red-Green",
+            na_mode=na_mode,
+        ),
     }
     return results
 
