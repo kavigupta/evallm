@@ -1,9 +1,9 @@
 # Following https://sebastian-petrus.medium.com/how-to-run-mistral-nemo-12b-locally-step-by-step-002fc35dbaa1
 # adapted slightly
 # You will need to run `pip install vllm` then run the command
-# python -m vllm.entrypoints.openai.api_server --model /scratch/kavig/mistral_models/Nemo-Instruct --port 52372 --max-model-len 4096
+# python -m vllm.entrypoints.openai.api_server --model ~/mistral_models/Nemo-Instruct --port 52372 --max-model-len 4096
 # or
-# python -m vllm.entrypoints.openai.api_server --model /scratch/kavig/mistral_models/Nemo-Base --port 52372 --max-model-len 4096
+# python -m vllm.entrypoints.openai.api_server --model ~/mistral_models/Nemo-Base --port 52372 --max-model-len 4096
 
 from pathlib import Path
 

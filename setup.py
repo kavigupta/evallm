@@ -6,12 +6,10 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="evallm",
     version="0.0.55",
-    author="Kavi Gupta, Armando Solar-Lezama",
-    author_email="kavig+evallm@mit.edu",
+    author="Anonymous Authors",
     description="Evaluate LLMs using DFAs.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/kavigupta/evallm",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3.10",

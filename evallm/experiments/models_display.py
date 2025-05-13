@@ -1,10 +1,12 @@
+import os
+
 model_by_display_key = {
     "llama3-8B": "meta-llama/Meta-Llama-3-8B",
     "llama3-70B": "meta-llama/Meta-Llama-3-70B",
     "llama3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
     "mistral-nemo-minitron-8B": "nvidia/Mistral-NeMo-Minitron-8B-Base",
-    "mistral-nemo-base-12B": "/scratch/kavig/mistral_models/Nemo-Base",
-    "mistral-nemo-instruct-12B": "/scratch/kavig/mistral_models/Nemo-Instruct",
+    "mistral-nemo-base-12B": os.path.expanduser("~/mistral_models/Nemo-Base"),
+    "mistral-nemo-instruct-12B": os.path.expanduser("~/mistral_models/Nemo-Instruct"),
     "starcoder2-15b": "bigcode/starcoder2-15b",
     "codestral-22B": "mistralai/Codestral-22B-v0.1",
     "deepseek-coder-33b-instruct": "deepseek-ai/deepseek-coder-33b-instruct",

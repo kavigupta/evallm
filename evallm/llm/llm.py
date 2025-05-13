@@ -11,14 +11,12 @@ from anthropic import Anthropic, InternalServerError
 from openai import OpenAI, RateLimitError
 from permacache import permacache
 
-sketch5_client = OpenAI(
-    api_key="EMPTY",
-    base_url="http://sketch5.csail.mit.edu:52372/v1",
-)
-
+KEY_DIR = "/mnt/md0"
+if not os.path.exists(KEY_DIR):
+    KEY_DIR = os.path.expanduser("~")
 
 def key(path):
-    openai_key_path = f"/mnt/md0/{path}"
+    openai_key_path = f"{KEY_DIR}/{path}"
     if not os.path.exists(openai_key_path):
         return "EMPTY"
     with open(openai_key_path) as f:
@@ -45,6 +43,11 @@ anthropic_client = Anthropic(
     # base_url="https://api.anthropic.com/v1",
 )
 
+local_client = OpenAI(
+    api_key="EMPTY",
+    base_url=key(".local-vllm-server"),
+)
+
 
 @dataclass
 class ModelSpec:
@@ -55,29 +58,29 @@ class ModelSpec:
 model_specs = {
     "none": ModelSpec(client=None, is_chat=False),
     # open source completion models
-    "meta-llama/Meta-Llama-3-8B": ModelSpec(client=sketch5_client, is_chat=False),
-    "meta-llama/Meta-Llama-3-70B": ModelSpec(client=sketch5_client, is_chat=False),
-    "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
+    "meta-llama/Meta-Llama-3-8B": ModelSpec(client=local_client, is_chat=False),
+    "meta-llama/Meta-Llama-3-70B": ModelSpec(client=local_client, is_chat=False),
+    "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=local_client, is_chat=False),
     "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
-        client=sketch5_client, is_chat=False
+        client=local_client, is_chat=False
     ),
-    "/scratch/kavig/mistral_models/Nemo-Instruct": ModelSpec(
-        client=sketch5_client, is_chat=False
+    os.path.expanduser("~/mistral_models/Nemo-Instruct"): ModelSpec(
+        client=local_client, is_chat=False
     ),
-    "/scratch/kavig/mistral_models/Nemo-Base": ModelSpec(
-        client=sketch5_client, is_chat=False
+    os.path.expanduser("~/mistral_models/Nemo-Base"): ModelSpec(
+        client=local_client, is_chat=False
     ),
-    "google/gemma-7b": ModelSpec(client=sketch5_client, is_chat=False),
-    "tiiuae/falcon-7b": ModelSpec(client=sketch5_client, is_chat=False),
+    "google/gemma-7b": ModelSpec(client=local_client, is_chat=False),
+    "tiiuae/falcon-7b": ModelSpec(client=local_client, is_chat=False),
     # open source code models
-    "bigcode/starcoder2-15b": ModelSpec(client=sketch5_client, is_chat=False),
-    "mistralai/Codestral-22B-v0.1": ModelSpec(client=sketch5_client, is_chat=False),
+    "bigcode/starcoder2-15b": ModelSpec(client=local_client, is_chat=False),
+    "mistralai/Codestral-22B-v0.1": ModelSpec(client=local_client, is_chat=False),
     "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(
-        client=sketch5_client, is_chat=False
+        client=local_client, is_chat=False
     ),
-    "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=sketch5_client, is_chat=False),
-    "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
-    "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=sketch5_client, is_chat=False),
+    "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=local_client, is_chat=False),
+    "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=local_client, is_chat=False),
+    "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=local_client, is_chat=False),
     # openai models
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
     "gpt-3.5-turbo-0125": ModelSpec(client=openai_client, is_chat=True),
