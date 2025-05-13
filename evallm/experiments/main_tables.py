@@ -165,7 +165,7 @@ def main_table_of_results(transducer_results, sequence_completion_results):
     table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
     # model name, parameters, finetuning, coding model, transducer results, sequence completion results
     table += r"\begin{tabular}{l|ccc|ccccc}" + "\n"
-    # table += r"\hline" + "\n"
+    table += r"\hline" + "\n"
     table += (
         r"\bf Model & \bf Size & \bf IT? & \bf Code? & \bf Sequence Completion & \bf SR & \bf Transducer & \bf TR\\"
         + "\n"
@@ -189,6 +189,7 @@ def main_table_of_results(transducer_results, sequence_completion_results):
             # table += r"\vspace{0.1cm}" + "\n"
             if not is_last:
                 table += r"\hline" + "\n"
+    table += r"\hline" + "\n"
     table += r"\end{tabular}" + "\n"
     table += r"}" + "\n"
     print(table)
@@ -209,7 +210,7 @@ def multi_prompt_table_of_results(
     }
     table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
     table += r"\begin{tabular}{l|" + "".join("c" * len(prompts)) + "}" + "\n"
-    # table += r"\hline" + "\n"
+    table += r"\hline" + "\n"
     table += (
         r"\bf Model & "
         + " & ".join([r"\bf " + prompt for prompt in prompts])
@@ -255,6 +256,7 @@ def multi_prompt_table_of_results(
             if not is_last:
                 table += r"\hline" + "\n"
 
+    table += r"\hline" + "\n"
     table += r"\end{tabular}" + "\n"
     table += r"}" + "\n"
     print(table)
