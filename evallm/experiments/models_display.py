@@ -5,8 +5,8 @@ model_by_display_key = {
     "llama3-70B": "meta-llama/Meta-Llama-3-70B",
     "llama3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
     "mistral-nemo-minitron-8B": "nvidia/Mistral-NeMo-Minitron-8B-Base",
-    "mistral-nemo-base-12B": os.path.expanduser("~/mistral_models/Nemo-Base"),
-    "mistral-nemo-instruct-12B": os.path.expanduser("~/mistral_models/Nemo-Instruct"),
+    "mistral-nemo-base-12B": "mistral_models/Nemo-Base",
+    "mistral-nemo-instruct-12B": "mistral_models/Nemo-Instruct",
     "starcoder2-15b": "bigcode/starcoder2-15b",
     "codestral-22B": "mistralai/Codestral-22B-v0.1",
     "deepseek-coder-33b-instruct": "deepseek-ai/deepseek-coder-33b-instruct",
@@ -23,3 +23,14 @@ model_by_display_key = {
     "o3-mini": "o3-mini-2025-01-31",
     "claude-3.5": "claude-3-5-sonnet-20241022",
 }
+
+in_homedir = {"mistral_models/Nemo-Base", "mistral_models/Nemo-Instruct"}
+
+
+def full_path(path):
+    if path in in_homedir:
+        print(path)
+        path = os.path.expanduser(f"~/{path}")
+        print(path)
+        return path
+    return path

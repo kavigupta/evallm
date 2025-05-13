@@ -8,6 +8,7 @@ import numpy as np
 import tqdm.auto as tqdm
 from permacache import permacache
 
+from evallm.experiments.models_display import full_path
 from evallm.infer_dfa.brute_force_transducer import brute_force_accuracy
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
@@ -148,6 +149,25 @@ def run_multiple(model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
 
 
 @permacache(
+    os.path.join(cache_dir, "run_transducer_experiment_old"),
+    key_function=dict(prompter=repr),
+    shelf_type="individual-file",
+)
+def run_transducer_experiment_new(
+    model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
+):
+    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
+    _, results = run_multiple(
+        model=full_path(model),
+        num_repeats_per_dfa=num_repeats_per_dfa,
+        sample_dfa_spec=sample_dfa_spec,
+        prompter=prompter,
+        num_dfas=num_dfas,
+    )
+    return results
+
+
+@permacache(
     os.path.join(cache_dir, "run_transducer_experiment"),
     key_function=dict(prompter=repr),
     shelf_type="individual-file",
@@ -155,15 +175,13 @@ def run_multiple(model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
 def run_transducer_experiment(
     model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
 ):
-    print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
-    _, results = run_multiple(
-        model=model,
-        num_repeats_per_dfa=num_repeats_per_dfa,
-        sample_dfa_spec=sample_dfa_spec,
-        prompter=prompter,
-        num_dfas=num_dfas,
+    return run_transducer_experiment_new(
+        full_path(model),
+        sample_dfa_spec,
+        prompter,
+        num_repeats_per_dfa,
+        num_dfas,
     )
-    return results
 
 
 @permacache(

@@ -6,6 +6,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.enumerate_dfa.pack_dfa import pack_dfa
+from evallm.experiments.models_display import full_path
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
     common_suffix_heuristic,
     multiple_ngrams,
@@ -138,17 +139,30 @@ def compute_model_scores(num_seeds, setting, model, prompt_fn, *, na_mode="ignor
 
 
 @permacache(
+    os.path.join(cache_dir, "compute_model_score_cached_old"),
+    key_function=dict(prompt=lambda prompt: prompt.hash_prompt()),
+    shelf_type="individual-file",
+)
+def compute_model_score_cached_new(num_seeds, setting, model, prompt):
+    results = {0: [], 0.5: [], 1: []}
+    for seed in tqdm.trange(num_seeds):
+        scores = compute_model_score(
+            seed, setting=setting, model=model, prompt=prompt
+        )
+        for k, v in scores.items():
+            results[k].append(v)
+    return {k: np.array(v) for k, v in results.items()}
+
+
+@permacache(
     os.path.join(cache_dir, "compute_model_score_cached"),
     key_function=dict(prompt=lambda prompt: prompt.hash_prompt()),
     shelf_type="individual-file",
 )
 def compute_model_score_cached(num_seeds, setting, model, prompt):
-    results = {0: [], 0.5: [], 1: []}
-    for seed in tqdm.trange(num_seeds):
-        scores = compute_model_score(seed, setting=setting, model=model, prompt=prompt)
-        for k, v in scores.items():
-            results[k].append(v)
-    return {k: np.array(v) for k, v in results.items()}
+    return compute_model_score_cached_new(
+        num_seeds, setting=setting, model=full_path(model), prompt=prompt
+    )
 
 
 @permacache(
