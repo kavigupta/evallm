@@ -29,8 +29,5 @@ in_homedir = {"mistral_models/Nemo-Base", "mistral_models/Nemo-Instruct"}
 
 def full_path(path):
     if path in in_homedir:
-        print(path)
         path = os.path.expanduser(f"~/{path}")
-        print(path)
-        return path
     return path
