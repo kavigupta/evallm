@@ -149,11 +149,11 @@ def run_multiple(model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
 
 
 @permacache(
-    os.path.join(cache_dir, "run_transducer_experiment_old"),
+    os.path.join(cache_dir, "run_transducer_experiment"),
     key_function=dict(prompter=repr),
     shelf_type="individual-file",
 )
-def run_transducer_experiment_new(
+def run_transducer_experiment(
     model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
 ):
     print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
@@ -165,23 +165,6 @@ def run_transducer_experiment_new(
         num_dfas=num_dfas,
     )
     return results
-
-
-@permacache(
-    os.path.join(cache_dir, "run_transducer_experiment"),
-    key_function=dict(prompter=repr),
-    shelf_type="individual-file",
-)
-def run_transducer_experiment(
-    model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
-):
-    return run_transducer_experiment_new(
-        full_path(model),
-        sample_dfa_spec,
-        prompter,
-        num_repeats_per_dfa,
-        num_dfas,
-    )
 
 
 @permacache(
