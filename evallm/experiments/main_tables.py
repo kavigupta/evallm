@@ -12,6 +12,8 @@ from evallm.experiments.transducer_plotting import (
     setup_plot,
 )
 
+stretch = 1.25
+
 
 @dataclass
 class ModelMetadata:
@@ -160,10 +162,10 @@ def main_table_of_results(transducer_results, sequence_completion_results):
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
 
-    table = ""
+    table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
     # model name, parameters, finetuning, coding model, transducer results, sequence completion results
-    table += r"\begin{tabular}{|l|c|c|c|c|c|c|c|c|}" + "\n"
-    table += r"\hline" + "\n"
+    table += r"\begin{tabular}{l|ccc|ccccc}" + "\n"
+    # table += r"\hline" + "\n"
     table += (
         r"\bf Model & \bf Size & \bf IT? & \bf Code? & \bf Sequence Completion & \bf SR & \bf Transducer & \bf TR\\"
         + "\n"
@@ -171,9 +173,9 @@ def main_table_of_results(transducer_results, sequence_completion_results):
     for group_name, group in grouped_models.items():
         # double line rule for each header group
         table += r"\hline" + "\n"
-        table += r"\multicolumn{8}{|c|}{ \bf " + group_name + r"} \\" + "\n"
+        table += r"\multicolumn{8}{c}{ \bf " + group_name + r"} \\" + "\n"
         table += r"\hline" + "\n"
-        for name in group:
+        for name, is_last in zip(group, [False] * (len(group) - 1) + [True]):
             metadata = (
                 metadata_baseline
                 if group_name == "Baselines"
@@ -184,8 +186,11 @@ def main_table_of_results(transducer_results, sequence_completion_results):
                 f"{display_result(sequence_completion_results, name)} & {display_result(transducer_results, name)} \\\\"
                 + "\n"
             )
-            table += r"\hline" + "\n"
+            # table += r"\vspace{0.1cm}" + "\n"
+            if not is_last:
+                table += r"\hline" + "\n"
     table += r"\end{tabular}" + "\n"
+    table += r"}" + "\n"
     print(table)
 
 
@@ -202,29 +207,31 @@ def multi_prompt_table_of_results(
         "Sequence Completion": sequence_completion_results,
         "Transducer": transducer_results,
     }
-    table = ""
-    table += r"\begin{tabular}{|l|" + "|".join("c" * len(prompts)) + "|}" + "\n"
-    table += r"\hline" + "\n"
+    table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
+    table += r"\begin{tabular}{l|" + "".join("c" * len(prompts)) + "}" + "\n"
+    # table += r"\hline" + "\n"
     table += (
         r"\bf Model & "
         + " & ".join([r"\bf " + prompt for prompt in prompts])
         + r" \\"
         + "\n"
     )
-    table += r"\hline" + "\n"
+    # table += r"\hline" + "\n"
     for group_name, group in results.items():
         # double line rule for each header group
         table += r"\hline" + "\n"
         table += (
             r"\multicolumn{"
             + str(len(prompts) + 1)
-            + r"}{|l|}{ \bf "
+            + r"}{l}{ \bf "
+            # + r"\vspace{0.1cm}"
             + group_name
+            # + r"\vspace{0.1cm}"
             + r"} \\"
             + "\n"
         )
         table += r"\hline" + "\n"
-        for name in group:
+        for name, is_last in zip(group, [False] * (len(group) - 1) + [True]):
             assert all(p in prompts for p in group[name]), group[name].keys()
             format_by_prompt = {}
             best_p = max(
@@ -245,9 +252,11 @@ def multi_prompt_table_of_results(
                 else:
                     table += "-- & "
             table = table[:-2] + r"\\" + "\n"
-            table += r"\hline" + "\n"
+            if not is_last:
+                table += r"\hline" + "\n"
 
     table += r"\end{tabular}" + "\n"
+    table += r"}" + "\n"
     print(table)
 
 
