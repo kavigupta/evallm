@@ -91,10 +91,6 @@ def main():
                 "kavi" not in f
             ), f"Found 'kavi' in {os.path.join(root, f)}. Please remove it from the export."
         for file in files:
-            if root.startswith(output_path + "/cache") and file.endswith(".pkl"):
-                # not much we can do about this, but it seems extreme for anyone to dig through
-                # the cache files to deanonymize. There's much easier ways to do it.
-                continue
             with open(os.path.join(root, file), "rb") as f:
                 contents = f.read().lower()
                 assert (
