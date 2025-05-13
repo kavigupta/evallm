@@ -147,7 +147,7 @@ def compute_model_score_cached(num_seeds, setting, model, prompt):
     results = {0: [], 0.5: [], 1: []}
     for seed in tqdm.trange(num_seeds):
         scores = compute_model_score(
-            seed, setting=setting, model=model, prompt=prompt
+            seed, setting=setting, model=full_path(model), prompt=prompt
         )
         for k, v in scores.items():
             results[k].append(v)
