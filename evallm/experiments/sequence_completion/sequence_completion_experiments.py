@@ -6,6 +6,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 from evallm.enumerate_dfa.pack_dfa import pack_dfa
+from evallm.experiments.models_display import full_path
 from evallm.experiments.sequence_completion.ngram_suffix_heuristic import (
     common_suffix_heuristic,
     multiple_ngrams,
@@ -145,7 +146,9 @@ def compute_model_scores(num_seeds, setting, model, prompt_fn, *, na_mode="ignor
 def compute_model_score_cached(num_seeds, setting, model, prompt):
     results = {0: [], 0.5: [], 1: []}
     for seed in tqdm.trange(num_seeds):
-        scores = compute_model_score(seed, setting=setting, model=model, prompt=prompt)
+        scores = compute_model_score(
+            seed, setting=setting, model=full_path(model), prompt=prompt
+        )
         for k, v in scores.items():
             results[k].append(v)
     return {k: np.array(v) for k, v in results.items()}

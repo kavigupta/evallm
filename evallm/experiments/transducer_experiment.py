@@ -8,6 +8,7 @@ import numpy as np
 import tqdm.auto as tqdm
 from permacache import permacache
 
+from evallm.experiments.models_display import full_path
 from evallm.infer_dfa.brute_force_transducer import brute_force_accuracy
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.prompting.transducer_prompt import BasicInstructionTransducerPrompter
@@ -157,7 +158,7 @@ def run_transducer_experiment(
 ):
     print(f"Model: {model}, Sampling: {sample_dfa_spec}, Prompter: {prompter}")
     _, results = run_multiple(
-        model=model,
+        model=full_path(model),
         num_repeats_per_dfa=num_repeats_per_dfa,
         sample_dfa_spec=sample_dfa_spec,
         prompter=prompter,

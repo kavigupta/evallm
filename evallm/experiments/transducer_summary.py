@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from evallm.experiments.models_display import model_by_display_key
+from evallm.experiments.models_display import full_path, model_by_display_key
 from evallm.experiments.transducer_experiment import (
     current_dfa_sample_spec,
     run_brute_force_transducer,
@@ -47,7 +47,7 @@ prompt_by_key = {
 
 def for_model_and_prompt(model, num_dfas, *prompts):
     model_key = model_by_display_key[model]
-    if model_specs[model_key].is_chat:
+    if model_specs[full_path(model_key)].is_chat:
         prompt_kind = "chat"
     else:
         prompt_kind = "non-chat"
