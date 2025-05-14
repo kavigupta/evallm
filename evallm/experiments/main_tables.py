@@ -493,3 +493,97 @@ def reorderings(flat_table, same_model=False, only_best_prompt=False):
             print(
                 f"{i1} is better than {i2} on full accuracy; despite being worse on ignore-na accuracy"
             )
+
+
+def compute_non_directional_p_value(a, b):
+    if isinstance(b, float):
+        assert np.isnan(b)
+        return 0
+    a, b = np.array(a), np.array(b)
+    if a.mean() < b.mean():
+        # guarantee a > b
+        a, b = b, a
+    min_len = min(len(a), len(b))
+    a, b = a[:min_len], b[:min_len]
+    delta = a - b
+    p = (
+        np.random.RandomState(0).choice(delta, size=(10_000, len(delta))).mean(1) < 0
+    ).mean()
+    return p * 2
+
+
+def all_p_values(flat_res):
+    return {
+        (k1, k2): compute_non_directional_p_value(flat_res[k1], flat_res[k2])
+        for k1 in flat_res
+        for k2 in flat_res
+    }
+
+
+def plot_significance(ax, flat_res, ps):
+    # pylint: disable=consider-using-enumerate,cyclic-import
+    from evallm.experiments.results_by_difficulty.plotting import (
+        THEME_COLORS,
+        modify_color,
+    )
+
+    very_significant, significant, not_significant = [
+        modify_color(THEME_COLORS[idx], 0.5, 0.9) for idx in (0, 1, 3)
+    ]
+    # significant = blue
+    # not_significant = red
+    outer = 0.05
+    alpha = 0.75
+    sorted_keys = sorted(flat_res, key=lambda k: np.mean(flat_res[k]))[::-1]
+    for row in range(len(sorted_keys)):
+        for col in range(len(sorted_keys)):
+            p = ps[sorted_keys[row], sorted_keys[col]]
+            if col >= row:
+                color = "white"
+            elif p < 0.01:
+                color = very_significant
+            elif p < 0.05:
+                color = significant
+            else:
+                color = not_significant
+            ax.fill_between(
+                [col + outer, col - outer + 1],
+                [row + outer] * 2,
+                [row - outer + 1] * 2,
+                color=color,
+                alpha=alpha,
+                lw=0,
+            )
+    ax.set_xticks(0.5 + np.arange(len(sorted_keys)), sorted_keys, rotation=90)
+    ax.set_yticks(0.5 + np.arange(len(sorted_keys)), sorted_keys)
+    pad = 4
+    ax.set_ylim(len(sorted_keys), -pad)
+    ax.set_xlim(0, len(sorted_keys) + pad)
+
+    dx = 0.2
+    for row_col in range(len(sorted_keys)):
+        ax.text(
+            s=sorted_keys[row_col],
+            x=row_col + dx,
+            y=row_col + 1 - dx,
+            rotation=45,
+            size=7,
+            ha="left",
+            va="bottom",
+        )
+
+    # create a legend
+    legend_elements = [
+        mpl.patches.Patch(color=very_significant, label="$p < 0.01$", alpha=alpha),
+        mpl.patches.Patch(
+            color=significant, label=r"$0.01 \leq p < 0.05$", alpha=alpha
+        ),
+        mpl.patches.Patch(color=not_significant, label=r"$0.05 \leq p$", alpha=alpha),
+    ]
+    ax.legend(
+        handles=legend_elements,
+        loc="upper right",
+        # bbox_to_anchor=(1, 1),
+        fontsize=7,
+        title="Significance",
+    )
