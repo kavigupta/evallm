@@ -521,12 +521,12 @@ def all_p_values(flat_res):
 
 
 def plot_significance(ax, flat_res, ps):
+    # pylint: disable=consider-using-enumerate,cyclic-import
     from evallm.experiments.results_by_difficulty.plotting import (
         THEME_COLORS,
         modify_color,
     )
 
-    # pylint: disable=consider-using-enumerate
     very_significant, significant, not_significant = [
         modify_color(THEME_COLORS[idx], 0.5, 0.9) for idx in (0, 1, 3)
     ]
