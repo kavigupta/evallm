@@ -33,7 +33,11 @@ For nemo specifically, you should run `python scripts/nemo.py` to download the f
 
 ### The simple way
 
-Use the instructions in `scripts/lib_example.py` to run the benchmark on your own model. This allows you to run the benchmark on your own model without needing to modify any code, and you can use any technique you want to take a prompt string and get a response string. The main downside to this approach is it does not integrate into any of the rest of the analyses in the codebase.
+Follow the pattern established in `scripts/lib_example.py` to run the benchmark on your own model.
+
+This allows you to run the benchmark on your own model without needing to modify any code, and you can use any technique you want to take a prompt string and get a response string.
+
+The main downside to this approach is it does not integrate into any of the rest of the analyses in the codebase.
 
 ### The way that integrates with the rest of the codebase
 
