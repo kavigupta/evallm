@@ -57,11 +57,16 @@ class Prompter(ABC):
                 prompt=prompts,
                 kwargs=self.prompt_kwargs(),
             ).choices
+        scores = self.score_all(answers, completions)
+        return completions, metas, prompts, scores
+
+    def score_all(self, answers, completions):
         scores = [
             self.score_completion(answer, choice)
             for answer, choice in zip(answers, completions)
         ]
-        return completions, metas, prompts, scores
+
+        return scores
 
     def metas_prompts_answers(self, dfa, rng, is_chat, num_samples):
         metas, prompts, answers = zip(
