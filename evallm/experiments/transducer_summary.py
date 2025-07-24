@@ -45,7 +45,7 @@ prompt_by_key = {
 }
 
 
-def for_model_and_prompt(model, num_dfas, *prompts):
+def for_model_and_prompt(model, num_dfas, *prompts, wrapper=lambda x: x):
     model_key = model_by_display_key[model]
     if model_specs[full_path(model_key)].is_chat:
         prompt_kind = "chat"
@@ -55,7 +55,7 @@ def for_model_and_prompt(model, num_dfas, *prompts):
         (model, prompt): run_transducer_experiment(
             model_key,
             sample_dfa_spec,
-            prompt_by_key[prompt][prompt_kind],
+            wrapper(prompt_by_key[prompt][prompt_kind]),
             num_repeats_per_dfa=num_repeats_per_dfa,
             num_dfas=num_dfas,
         )
@@ -93,6 +93,17 @@ def compute_results(accuracy_summary=True):
             num_repeats_per_dfa,
             num_dfas=1000,
         )
+    model_accs = compute_model_results(
+        model_outcomes, accuracy_summary=accuracy_summary
+    )
+    assert (set(model_accs) & set(accuracies)) == set()
+    accuracies.update(model_accs)
+
+    return accuracies
+
+
+def compute_model_results(model_outcomes, *, accuracy_summary):
+    accuracies = defaultdict(dict)
     for model, prompt in model_outcomes:
         accuracies[model][prompt] = [
             r.success_rate_binary_ignore_na if accuracy_summary else r.success_rate_each
