@@ -333,3 +333,34 @@ class RedGreenPrompt(MoreExplanationPromptCOT):
 
     def instructions_before_prefix(self):
         return "\n\nComplete the following path:"
+
+
+class WithTemperatureSequenceCompletionPrompt(SequenceCompletionPrompt):
+    """
+    A sequence completion prompt that allows for temperature settings.
+    """
+
+    def __init__(self, underlying_prompt, temperature=0.0):
+        self.underlying_prompt = underlying_prompt
+        self.temperature = temperature
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        raise NotImplementedError(
+            "This prompt does not support for_setting. Use the underlying prompt's for_setting."
+        )
+
+    def hash_prompt(self):
+        return f"WithTemperatureSequenceCompletionPrompt({self.underlying_prompt.hash_prompt()}, {self.temperature})"
+
+    def display_prompt(self, dfa, sequences, prefix, is_chat):
+        return self.underlying_prompt.display_prompt(dfa, sequences, prefix, is_chat)
+
+    def score_response(self, dfa, sequences, prefix, response):
+        return self.underlying_prompt.score_response(dfa, sequences, prefix, response)
+
+    def model_kwargs(self):
+        kwargs = self.underlying_prompt.model_kwargs()
+        kwargs = kwargs.copy()
+        kwargs["temperature"] = self.temperature
+        return kwargs

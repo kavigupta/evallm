@@ -35,13 +35,13 @@ prompts_by_key = {
 }
 
 
-def for_model(model, count, *prompts, na_mode):
+def for_model(model, count, *prompts, na_mode, wrapper=lambda x: x):
     return {
         (model, prompt): compute_model_scores(
             count,
             current_setting,
             model_by_display_key[model],
-            prompts_by_key[prompt],
+            wrapper(prompts_by_key[prompt]),
             na_mode=na_mode,
         )
         for prompt in prompts
