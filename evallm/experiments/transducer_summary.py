@@ -112,6 +112,7 @@ def compute_model_outcomes():
         **for_model_and_prompt("deepseek-coder-33b-instruct", 1000, "Basic"),
         **for_model_and_prompt("qwen-2.5-coder-7B", 1000, "Basic"),
         **for_model_and_prompt("qwen-2.5-coder-instruct-7B", 1000, "Basic"),
+        **for_model_and_prompt("qwen-2.5-32B", 1000, "Basic"),
         **for_model_and_prompt("qwen-2.5-coder-instruct-32B", 1000, "Basic"),
         **for_model_and_prompt("mistral-nemo-minitron-8B", 1000, "Basic"),
         **for_model_and_prompt("mistral-nemo-base-12B", 1000, "Basic"),

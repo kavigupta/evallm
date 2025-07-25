@@ -56,9 +56,7 @@ def results_for_models(na_mode="ignore"):
         **for_model(
             "llama3.1-8B-Instruct", 1000, "Basic", "Basic-Commas", na_mode=na_mode
         ),
-        **for_model(
-            "llama3.1-70B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
-        ),
+        **for_model("llama3.1-70B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
             "mistral-nemo-minitron-8B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
         ),
@@ -83,6 +81,7 @@ def results_for_models(na_mode="ignore"):
         **for_model(
             "qwen-2.5-coder-instruct-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
         ),
+        **for_model("qwen-2.5-32B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
             "qwen-2.5-coder-instruct-32B",
             1000,
