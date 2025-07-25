@@ -4,6 +4,7 @@ model_by_display_key = {
     "llama3-8B": "meta-llama/Meta-Llama-3-8B",
     "llama3-70B": "meta-llama/Meta-Llama-3-70B",
     "llama3.1-8B-Instruct": "meta-llama/Llama-3.1-8B-Instruct",
+    "llama3.1-8B": "meta-llama/Llama-3.1-8B",
     "llama3.1-70B": "meta-llama/Meta-Llama-3.1-70B",
     "mistral-nemo-minitron-8B": "nvidia/Mistral-NeMo-Minitron-8B-Base",
     "mistral-nemo-base-12B": "mistral_models/Nemo-Base",

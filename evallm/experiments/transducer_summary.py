@@ -107,6 +107,7 @@ def compute_model_outcomes():
         **for_model_and_prompt("llama3-70B", 1000, "Basic"),
         **for_model_and_prompt("llama3.1-8B-Instruct", 1000, "Basic"),
         **for_model_and_prompt("llama3.1-70B", 1000, "Basic"),
+        **for_model_and_prompt("llama3.1-8B", 1000, "Basic"),
         **for_model_and_prompt("starcoder2-15b", 100, "Basic"),
         **for_model_and_prompt("codestral-22B", 1000, "Basic"),
         **for_model_and_prompt("deepseek-coder-33b-instruct", 1000, "Basic"),
