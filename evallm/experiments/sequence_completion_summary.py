@@ -81,6 +81,7 @@ def results_for_models(na_mode="ignore"):
         **for_model(
             "qwen-2.5-coder-instruct-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
         ),
+        **for_model("qwen-2.5-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("qwen-2.5-32B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
             "qwen-2.5-coder-instruct-32B",

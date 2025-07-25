@@ -81,6 +81,7 @@ model_specs = {
     ),
     "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=local_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=local_client, is_chat=False),
+    "Qwen/Qwen2.5-7B": ModelSpec(client=local_client, is_chat=False),
     "Qwen/Qwen2.5-32B": ModelSpec(client=local_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=local_client, is_chat=False),
     # openai models

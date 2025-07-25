@@ -13,6 +13,7 @@ model_by_display_key = {
     "deepseek-coder-33b-instruct": "deepseek-ai/deepseek-coder-33b-instruct",
     "qwen-2.5-coder-7B": "Qwen/Qwen2.5-Coder-7B",
     "qwen-2.5-coder-instruct-7B": "Qwen/Qwen2.5-Coder-7B-Instruct",
+    "qwen-2.5-7B": "Qwen/Qwen2.5-7B",
     "qwen-2.5-32B": "Qwen/Qwen2.5-32B",
     "qwen-2.5-coder-instruct-32B": "Qwen/Qwen2.5-Coder-32B-Instruct",
     "gemma-7b": "google/gemma-7b",
