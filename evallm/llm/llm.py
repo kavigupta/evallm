@@ -61,7 +61,7 @@ model_specs = {
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Meta-Llama-3-70B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=local_client, is_chat=False),
-    "meta-llama/Llama-3.1-70B": ModelSpec(client=local_client, is_chat=False),
+    "meta-llama/Meta-Llama-3.1-70B": ModelSpec(client=local_client, is_chat=False),
     "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
         client=local_client, is_chat=False
     ),
