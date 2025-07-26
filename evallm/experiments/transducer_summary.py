@@ -87,41 +87,65 @@ def for_model_and_prompt(
 def compute_results(
     accuracy_summary=True, *, num_sequence_symbols=num_sequence_symbols_default
 ):
-    deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
-        "none",
-        sample_dfa_spec,
-        BasicInstructionTransducerPrompter(num_sequence_symbols, strip=True),
-        num_repeats_per_dfa=num_repeats_per_dfa,
-        num_dfas=1000,
+    accuracies = compute_deterministic_baseline_outcomes(
+        num_sequence_symbols=num_sequence_symbols, accuracy_summary=accuracy_summary
     )
     model_outcomes = compute_model_outcomes()
-
-    no_prompt = "Basic"
-
-    accuracies = defaultdict(dict)
-    if accuracy_summary:
-        accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
-            r.null_success_rate for r in deterministic_baseline_outcomes
-        ]
-        for ngram in range(2, 2 + 5):
-            accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
-                r.kgram_success_rates_each[ngram - 2]
-                for r in deterministic_baseline_outcomes
-            ]
-        accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
-            sample_dfa_spec,
-            num_states,
-            num_symbols,
-            num_sequence_symbols,
-            num_repeats_per_dfa,
-            num_dfas=1000,
-        )
     model_accs = compute_model_results(
         model_outcomes, accuracy_summary=accuracy_summary
     )
     assert (set(model_accs) & set(accuracies)) == set()
     accuracies.update(model_accs)
 
+    return accuracies
+
+
+def compute_deterministic_baseline_outcomes(
+    *,
+    num_sequence_symbols,
+    accuracy_summary=True,
+    num_dfas=1000,
+    include_brute_force=True,
+    include_null=True,
+    include_infinity_gram=False,
+    min_gram=2,
+    max_gram=6,
+):
+    deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
+        "none",
+        sample_dfa_spec,
+        BasicInstructionTransducerPrompter(num_sequence_symbols, strip=True),
+        num_repeats_per_dfa=num_repeats_per_dfa,
+        num_dfas=num_dfas,
+    )
+
+    no_prompt = "Basic"
+
+    accuracies = defaultdict(dict)
+    if accuracy_summary:
+        if include_null:
+            accuracies[r"\textsc{Null}$_T$"][no_prompt] = [
+                r.null_success_rate for r in deterministic_baseline_outcomes
+            ]
+        for ngram in range(min_gram, 1 + max_gram):
+            accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
+                r.kgram_success_rates_each[ngram - 2]
+                for r in deterministic_baseline_outcomes
+            ]
+        if include_infinity_gram:
+            accuracies[rf"$\infty$-\textsc{{Gram}}$_T$"][no_prompt] = [
+                r.kgram_success_rates_each[-1]
+                for r in deterministic_baseline_outcomes
+            ]
+        if include_brute_force:
+            accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
+                sample_dfa_spec,
+                num_states,
+                num_symbols,
+                num_sequence_symbols,
+                num_repeats_per_dfa,
+                num_dfas=num_dfas,
+            )
     return accuracies
 
 
