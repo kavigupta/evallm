@@ -61,6 +61,8 @@ model_specs = {
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Meta-Llama-3-70B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=local_client, is_chat=False),
+    "meta-llama/Meta-Llama-3.1-70B": ModelSpec(client=local_client, is_chat=False),
+    "meta-llama/Llama-3.1-8B": ModelSpec(client=local_client, is_chat=False),
     "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
         client=local_client, is_chat=False
     ),
@@ -80,6 +82,8 @@ model_specs = {
     ),
     "Qwen/Qwen2.5-Coder-7B": ModelSpec(client=local_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-7B-Instruct": ModelSpec(client=local_client, is_chat=False),
+    "Qwen/Qwen2.5-7B": ModelSpec(client=local_client, is_chat=False),
+    "Qwen/Qwen2.5-32B": ModelSpec(client=local_client, is_chat=False),
     "Qwen/Qwen2.5-Coder-32B-Instruct": ModelSpec(client=local_client, is_chat=False),
     # openai models
     "gpt-3.5-turbo-instruct": ModelSpec(client=openai_client, is_chat=False),
