@@ -380,3 +380,31 @@ class RedGreenRoomPrompt1(TransducerPrompter):
     def score_completion(self, output, choice):
         numeric = self.get_numeric_answer(choice.message.content)
         return numeric_answer_to_confusion(output, numeric)
+
+
+class WithTemperatureTransducerPrompter(TransducerPrompter):
+    def __init__(self, underlying_prompter, temperature):
+        super().__init__(underlying_prompter.num_symbols)
+        self.underlying_prompter = underlying_prompter
+        self.temperature = temperature
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        raise NotImplementedError(
+            "WithTemperatureTransducerPrompter cannot be used directly. Wrap it around another prompter."
+        )
+
+    def display(self):
+        return f"WithTemperatureTransducerPrompter({self.underlying_prompter.display()}, temperature={self.temperature})"
+
+    def display_prompt(self, inp, out, is_chat):
+        return self.underlying_prompter.display_prompt(inp, out, is_chat)
+
+    def prompt_kwargs(self):
+        kwargs = self.underlying_prompter.prompt_kwargs()
+        kwargs = kwargs.copy()
+        kwargs["temperature"] = self.temperature
+        return kwargs
+
+    def score_completion(self, output, choice):
+        return self.underlying_prompter.score_completion(output, choice)
