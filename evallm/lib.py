@@ -6,7 +6,7 @@ from evallm.experiments.sequence_completion.sequence_completion_experiments impo
     get_examples as sequence_completion_get_examples,
 )
 from evallm.experiments.transducer_summary import (
-    prompt_by_key as transducer_prompt_by_key,
+    prompt_by_key_default as transducer_prompt_by_key,
     sample_dfa_spec as default_transducer_sample_dfa_spec,
     num_repeats_per_dfa as default_transducer_num_repeats_per_dfa,
 )

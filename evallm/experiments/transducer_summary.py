@@ -21,31 +21,52 @@ from evallm.prompting.transducer_prompt import (
 
 num_states = 3
 num_symbols = 3
-num_sequence_symbols = 30
+num_sequence_symbols_default = 30
 num_repeats_per_dfa = 30
 sample_dfa_spec = current_dfa_sample_spec(num_states=num_states)
-setting_kwargs = dict(
-    num_sequence_symbols=num_sequence_symbols,
-    sample_dfa_spec=sample_dfa_spec,
-    num_states=num_states,
+
+
+def prompt_by_key_and_settings(*, num_sequence_symbols):
+    setting_kwargs = dict(
+        num_sequence_symbols=num_sequence_symbols,
+        sample_dfa_spec=sample_dfa_spec,
+        num_states=num_states,
+    )
+
+    return {
+        "Basic": {
+            "non-chat": BasicSequencePromptNoChat.for_setting(setting_kwargs),
+            "chat": BasicSequencePrompt.for_setting(setting_kwargs),
+        },
+        "More-Expl": {
+            "chat": BasicSequencePromptSlightlyMoreExplanation.for_setting(
+                setting_kwargs
+            )
+        },
+        "COT": {
+            "chat": SequencePromptWithExplanationChainOfThought.for_setting(
+                setting_kwargs
+            )
+        },
+        "Red-Green": {"chat": RedGreenRoomPrompt1.for_setting(setting_kwargs)},
+    }
+
+
+prompt_by_key_default = prompt_by_key_and_settings(
+    num_sequence_symbols=num_sequence_symbols_default
 )
 
-prompt_by_key = {
-    "Basic": {
-        "non-chat": BasicSequencePromptNoChat.for_setting(setting_kwargs),
-        "chat": BasicSequencePrompt.for_setting(setting_kwargs),
-    },
-    "More-Expl": {
-        "chat": BasicSequencePromptSlightlyMoreExplanation.for_setting(setting_kwargs)
-    },
-    "COT": {
-        "chat": SequencePromptWithExplanationChainOfThought.for_setting(setting_kwargs)
-    },
-    "Red-Green": {"chat": RedGreenRoomPrompt1.for_setting(setting_kwargs)},
-}
 
-
-def for_model_and_prompt(model, num_dfas, *prompts, wrapper=lambda x: x):
+def for_model_and_prompt(
+    model,
+    num_dfas,
+    *prompts,
+    wrapper=lambda x: x,
+    num_sequence_symbols=num_sequence_symbols_default,
+):
+    prompt_by_key = prompt_by_key_and_settings(
+        num_sequence_symbols=num_sequence_symbols
+    )
     model_key = model_by_display_key[model]
     if model_specs[full_path(model_key)].is_chat:
         prompt_kind = "chat"
@@ -63,7 +84,9 @@ def for_model_and_prompt(model, num_dfas, *prompts, wrapper=lambda x: x):
     }
 
 
-def compute_results(accuracy_summary=True):
+def compute_results(
+    accuracy_summary=True, *, num_sequence_symbols=num_sequence_symbols_default
+):
     deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
         "none",
         sample_dfa_spec,
