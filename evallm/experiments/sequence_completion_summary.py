@@ -35,9 +35,11 @@ prompts_by_key = {
 }
 
 
+# pylint: disable=dangerous-default-value
 def for_model(
     model, count, *prompts, na_mode, wrapper=lambda x: x, setting=current_setting
 ):
+    setting = setting.copy()
     return {
         (model, prompt): compute_model_scores(
             count,
@@ -143,6 +145,7 @@ def results_for_models(na_mode="ignore"):
     return results
 
 
+# pylint: disable=dangerous-default-value
 def results_for_baseline(
     setting=current_setting,
     include_non_ngram=True,
@@ -150,6 +153,7 @@ def results_for_baseline(
     max_ngram=6,
     amount_baselines=1000,
 ):
+    setting = setting.copy()
     results = {}
 
     if include_non_ngram:
