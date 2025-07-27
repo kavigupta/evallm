@@ -35,11 +35,15 @@ prompts_by_key = {
 }
 
 
-def for_model(model, count, *prompts, na_mode, wrapper=lambda x: x):
+# pylint: disable=dangerous-default-value
+def for_model(
+    model, count, *prompts, na_mode, wrapper=lambda x: x, setting=current_setting
+):
+    setting = setting.copy()
     return {
         (model, prompt): compute_model_scores(
             count,
-            current_setting,
+            setting,
             model_by_display_key[model],
             wrapper(prompts_by_key[prompt]),
             na_mode=na_mode,
@@ -141,26 +145,34 @@ def results_for_models(na_mode="ignore"):
     return results
 
 
-def results_for_baseline():
-    amount_baselines = 1000
-
+# pylint: disable=dangerous-default-value
+def results_for_baseline(
+    setting=current_setting,
+    include_non_ngram=True,
+    min_ngram=2,
+    max_ngram=6,
+    amount_baselines=1000,
+):
+    setting = setting.copy()
     results = {}
 
-    results[r"\textsc{Random}$_S$", "Basic"] = compute_random_baseline_scores(
-        amount_baselines, setting=current_setting
-    )
+    if include_non_ngram:
 
-    results[r"\textsc{Common-Suffix}$_S$", "Basic"] = compute_common_suffix_heuristic(
-        amount_baselines, setting=current_setting
-    )
+        results[r"\textsc{Random}$_S$", "Basic"] = compute_random_baseline_scores(
+            amount_baselines, setting=setting
+        )
 
-    results[r"\textsc{BruteForce}$_S$", "Basic"] = compute_brute_force_scores(
-        100, current_setting
-    )
+        results[r"\textsc{Common-Suffix}$_S$", "Basic"] = (
+            compute_common_suffix_heuristic(amount_baselines, setting=setting)
+        )
 
-    for ngram in (2, 3, 4, 5, 6):
+        results[r"\textsc{BruteForce}$_S$", "Basic"] = compute_brute_force_scores(
+            100, setting
+        )
+
+    for ngram in range(min_ngram, max_ngram + 1):
         results[rf"{ngram}-\textsc{{Gram}}$_S$", "Basic"] = compute_true_ngrams(
-            ngram, amount_baselines, current_setting
+            ngram, amount_baselines, setting
         )
 
     return results
