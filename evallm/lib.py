@@ -1,18 +1,28 @@
 from types import SimpleNamespace
 from typing import Counter
+
 import numpy as np
+
 from evallm.experiments.sequence_completion.sequence_completion_experiments import (
     collate_model_responses,
-    get_examples as sequence_completion_get_examples,
 )
-from evallm.experiments.transducer_summary import (
-    prompt_by_key_default as transducer_prompt_by_key,
-    sample_dfa_spec as default_transducer_sample_dfa_spec,
-    num_repeats_per_dfa as default_transducer_num_repeats_per_dfa,
+from evallm.experiments.sequence_completion.sequence_completion_experiments import (
+    get_examples as sequence_completion_get_examples,
 )
 from evallm.experiments.sequence_completion_summary import (
     current_setting as sequence_completion_default_setting,
+)
+from evallm.experiments.sequence_completion_summary import (
     prompts_by_key as sequence_completion_prompts_by_key,
+)
+from evallm.experiments.transducer_summary import (
+    num_repeats_per_dfa as default_transducer_num_repeats_per_dfa,
+)
+from evallm.experiments.transducer_summary import (
+    prompt_by_key_default as transducer_prompt_by_key,
+)
+from evallm.experiments.transducer_summary import (
+    sample_dfa_spec as default_transducer_sample_dfa_spec,
 )
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.sample_dfa.sample_dfa import sample_dfa

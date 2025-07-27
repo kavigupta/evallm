@@ -133,18 +133,19 @@ def compute_deterministic_baseline_outcomes(
                 for r in deterministic_baseline_outcomes
             ]
         if include_infinity_gram:
-            accuracies[rf"$\infty$-\textsc{{Gram}}$_T$"][no_prompt] = [
-                r.kgram_success_rates_each[-1]
-                for r in deterministic_baseline_outcomes
+            accuracies[r"$\infty$-\textsc{Gram}$_T$"][no_prompt] = [
+                r.kgram_success_rates_each[-1] for r in deterministic_baseline_outcomes
             ]
         if include_brute_force:
-            accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = run_brute_force_transducer(
-                sample_dfa_spec,
-                num_states,
-                num_symbols,
-                num_sequence_symbols,
-                num_repeats_per_dfa,
-                num_dfas=num_dfas,
+            accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = (
+                run_brute_force_transducer(
+                    sample_dfa_spec,
+                    num_states,
+                    num_symbols,
+                    num_sequence_symbols,
+                    num_repeats_per_dfa,
+                    num_dfas=num_dfas,
+                )
             )
     return accuracies
 
