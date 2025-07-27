@@ -15,6 +15,7 @@ KEY_DIR = "/mnt/md0"
 if not os.path.exists(KEY_DIR):
     KEY_DIR = os.path.expanduser("~")
 
+
 def key(path):
     openai_key_path = f"{KEY_DIR}/{path}"
     if not os.path.exists(openai_key_path):
