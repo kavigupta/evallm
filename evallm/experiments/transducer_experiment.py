@@ -152,6 +152,7 @@ def run_multiple(model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
     os.path.join(cache_dir, "run_transducer_experiment"),
     key_function=dict(prompter=repr),
     shelf_type="individual-file",
+    driver="pickle.gz",
 )
 def run_transducer_experiment(
     model, sample_dfa_spec, prompter, num_repeats_per_dfa, num_dfas
