@@ -15,14 +15,18 @@ from evallm.experiments.sequence_completion.sequence_completion_prompt import (
 )
 from evallm.experiments.sequence_completion_summary import current_setting
 
-prompt_prefix = "How many 'a' characters appear in each line? Return your answers as a python list within <answer> tags, e.g., <answer>[1, 2, 3]</answer>"
+prompt_prefix = (
+    "How many 'a' characters appear in each line? Return your answers"
+    " as a python list within <answer> tags, e.g., <answer>[1, 2, 3]</answer>"
+)
 
 
 def evaluate(res):
     for t in ANSWER_PATTERN.findall(res):
         try:
             return json.loads(t)
-        except Exception as e:
+        # pylint: disable=broad-except
+        except Exception:
             pass
     return None
 
