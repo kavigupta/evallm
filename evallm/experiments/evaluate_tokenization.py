@@ -1,12 +1,10 @@
 import json
 
-from permacache import permacache
-
 import numpy as np
 import tqdm.auto as tqdm
+from permacache import permacache
 
 import evallm
-
 from evallm.experiments.sequence_completion.sequence_completion_experiments import (
     get_examples,
 )
