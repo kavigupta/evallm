@@ -6,6 +6,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 import evallm
+from evallm.experiments.models_display import full_path
 
 from ..cachedir import cache_dir
 
@@ -16,21 +17,37 @@ prompt_template = (
 
 
 def evaluate_model_regexp_matching(model, regexp, test_str):
-    prompt = prompt_template.format(regexp=regexp) + "\n" + test_str
+    prompt = prompt_template.format(regexp=regexp) + "\n" + test_str + "\n"
+    is_chat = evallm.llm.llm.model_specs[full_path(model)].is_chat
+    if not is_chat:
+        prompt += "Answer (YES or NO): "
+
+    if is_chat:
+        prompt = {"system": "", "user": prompt}
     [response] = evallm.llm.run_prompt(
-        model,
-        [{"system": "", "user": prompt}],
+        full_path(model),
+        [prompt],
         {"max_tokens": 10, "temperature": 0.0},
     ).choices
-    assert response.finish_reason == "stop"
-    response = response.message.content
+    if is_chat:
+        response = response.message.content
+    else:
+        response = response.text
+    print(repr(response))
+    response = response.upper()
+    response = [s.strip() for s in response.split("\n") if s.strip()]
+    if not response:
+        return -1
+    response = response[0]
     is_yes = "YES" in response
     is_no = "NO" in response
+    if not is_yes and not is_no:
+        return -1
     assert is_yes != is_no
     return is_yes
 
 
-regexp_for_demo = r"^ab(aab)+$"
+regexp_for_demo = r"^ab(abc)+$"
 
 
 def sample_string_for_demo(seed):
@@ -40,11 +57,12 @@ def sample_string_for_demo(seed):
     """
     rng = np.random.RandomState(seed)
     repeats = rng.choice(4) + 1
-    s = "ab" + "aab" * repeats
-    s = list(s)
-    idx = rng.choice(len(s))
-    s[idx] = rng.choice(["a", "b"])
-    s = "".join(s)
+    s = "ab" + "abc" * repeats
+    if rng.rand() < 0.5:
+        s = list(s)
+        idx = rng.choice(len(s))
+        s[idx] = rng.choice(sorted(set("abc") - {s[idx]}))
+        s = "".join(s)
     return s
 
 
