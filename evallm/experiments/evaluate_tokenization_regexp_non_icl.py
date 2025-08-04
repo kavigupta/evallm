@@ -6,6 +6,7 @@ import tqdm.auto as tqdm
 from permacache import permacache
 
 import evallm
+from evallm.experiments.models_display import full_path
 
 from ..cachedir import cache_dir
 
@@ -17,14 +18,14 @@ prompt_template = (
 
 def evaluate_model_regexp_matching(model, regexp, test_str):
     prompt = prompt_template.format(regexp=regexp) + "\n" + test_str + "\n"
-    is_chat = evallm.llm.llm.model_specs[model].is_chat
+    is_chat = evallm.llm.llm.model_specs[full_path(model)].is_chat
     if not is_chat:
         prompt += "Answer (YES or NO): "
 
     if is_chat:
         prompt = {"system": "", "user": prompt}
     [response] = evallm.llm.run_prompt(
-        model,
+        full_path(model),
         [prompt],
         {"max_tokens": 10, "temperature": 0.0},
     ).choices
@@ -32,7 +33,7 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
         response = response.message.content
     else:
         response = response.text
-    # print(repr(response))
+    print(repr(response))
     response = response.upper()
     response = [s.strip() for s in response.split("\n") if s.strip()]
     if not response:
