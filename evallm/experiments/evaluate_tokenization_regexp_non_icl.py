@@ -17,13 +17,21 @@ prompt_template = (
 
 def evaluate_model_regexp_matching(model, regexp, test_str):
     prompt = prompt_template.format(regexp=regexp) + "\n" + test_str
+    is_chat = evallm.llm.llm.model_specs[model].is_chat
+
+    if is_chat:
+        prompt = {"system": "", "user": prompt}
     [response] = evallm.llm.run_prompt(
         model,
-        [{"system": "", "user": prompt}],
+        [prompt],
         {"max_tokens": 10, "temperature": 0.0},
     ).choices
-    # assert response.finish_reason == "stop"
-    response = response.message.content
+    if hasattr(response, "finish_reason"):
+        assert response.finish_reason == "stop"
+    if is_chat:
+        response = response.message.content
+    else:
+        response = response.text
     is_yes = "YES" in response
     is_no = "NO" in response
     assert is_yes != is_no
