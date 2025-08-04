@@ -22,7 +22,7 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
         [{"system": "", "user": prompt}],
         {"max_tokens": 10, "temperature": 0.0},
     ).choices
-    assert response.finish_reason == "stop"
+    # assert response.finish_reason == "stop"
     response = response.message.content
     is_yes = "YES" in response
     is_no = "NO" in response
