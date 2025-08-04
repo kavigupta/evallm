@@ -30,8 +30,11 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
         response = response.message.content
     else:
         response = response.text
+    response = response.upper()
     is_yes = "YES" in response
     is_no = "NO" in response
+    if not is_yes and not is_no:
+        return -1
     assert is_yes != is_no
     return is_yes
 
