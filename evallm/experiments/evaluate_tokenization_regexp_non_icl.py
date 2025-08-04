@@ -9,7 +9,10 @@ import evallm
 
 from ..cachedir import cache_dir
 
-prompt_template = "I will give you a string. Tell me whether it matches the following regular expression: '{regexp}' (without quotes). Just answer YES or NO."
+prompt_template = (
+    "I will give you a string. Tell me whether it matches the following regular"
+    " expression: '{regexp}' (without quotes). Just answer YES or NO."
+)
 
 
 def evaluate_model_regexp_matching(model, regexp, test_str):
@@ -27,18 +30,22 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
     return is_yes
 
 
-regexp = r"^ab(aab)+$"
+regexp_for_demo = r"^ab(aab)+$"
 
 
-def sample_string(seed):
+def sample_string_for_demo(seed):
+    """
+    Note: this sampling procedure depends on the regexp, the results are technically correct
+    no matter what but if the regexp changes, we don't have ~50% positive examples.
+    """
     rng = np.random.RandomState(seed)
     repeats = rng.choice(4) + 1
-    str = "ab" + "aab" * repeats
-    str = list(str)
-    idx = rng.choice(len(str))
-    str[idx] = rng.choice(["a", "b"])
-    str = "".join(str)
-    return str
+    s = "ab" + "aab" * repeats
+    s = list(s)
+    idx = rng.choice(len(s))
+    s[idx] = rng.choice(["a", "b"])
+    s = "".join(s)
+    return s
 
 
 @permacache(
@@ -53,9 +60,9 @@ def evaluate_model_regexp_matching_multiple(model, count):
     results_true = []
     results_pred = []
     for i in tqdm.trange(count):
-        st = sample_string(i)
-        results_pred.append(evaluate_model_regexp_matching(model, regexp, st))
-        results_true.append(bool(re.match(regexp, st)))
+        st = sample_string_for_demo(i)
+        results_pred.append(evaluate_model_regexp_matching(model, regexp_for_demo, st))
+        results_true.append(bool(re.match(regexp_for_demo, st)))
     results_pred = np.array(results_pred)
     results_true = np.array(results_true)
     return results_pred, results_true
