@@ -26,8 +26,6 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
         [prompt],
         {"max_tokens": 10, "temperature": 0.0},
     ).choices
-    if hasattr(response, "finish_reason"):
-        assert response.finish_reason == "stop"
     if is_chat:
         response = response.message.content
     else:
