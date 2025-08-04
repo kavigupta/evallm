@@ -16,7 +16,7 @@ prompt_template = (
 
 
 def evaluate_model_regexp_matching(model, regexp, test_str):
-    prompt = prompt_template.format(regexp=regexp) + "\n" + test_str
+    prompt = prompt_template.format(regexp=regexp) + "\n" + test_str + "\n"
     is_chat = evallm.llm.llm.model_specs[model].is_chat
 
     if is_chat:
