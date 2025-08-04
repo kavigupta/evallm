@@ -30,7 +30,7 @@ def evaluate_model_regexp_matching(model, regexp, test_str):
     return is_yes
 
 
-regexp_for_demo = r"^ab(aab)+$"
+regexp_for_demo = r"^ab(abc)+$"
 
 
 def sample_string_for_demo(seed):
@@ -40,11 +40,12 @@ def sample_string_for_demo(seed):
     """
     rng = np.random.RandomState(seed)
     repeats = rng.choice(4) + 1
-    s = "ab" + "aab" * repeats
-    s = list(s)
-    idx = rng.choice(len(s))
-    s[idx] = rng.choice(["a", "b"])
-    s = "".join(s)
+    s = "ab" + "abc" * repeats
+    if rng.rand() < 0.5:
+        s = list(s)
+        idx = rng.choice(len(s))
+        s[idx] = rng.choice(sorted(set("abc") - {s[idx]}))
+        s = "".join(s)
     return s
 
 
