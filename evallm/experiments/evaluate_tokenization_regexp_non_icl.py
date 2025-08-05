@@ -2,11 +2,13 @@ import os
 import re
 
 import numpy as np
+import pandas as pd
 import tqdm.auto as tqdm
 from permacache import permacache
 
 import evallm
-from evallm.experiments.models_display import full_path
+from evallm.experiments.main_tables import models_considered
+from evallm.experiments.models_display import full_path, model_by_display_key
 
 from ..cachedir import cache_dir
 
@@ -89,3 +91,49 @@ def evaluate_model_regexp_matching_multiple(model, count):
 def summary(results_pred, results_true):
     print(f"Percent positive: {results_true.mean():.0%}")
     print(f"Percent correct : {(results_true == results_pred).mean():.0%}")
+
+
+def table_of_results():
+    all_model_results = {
+        model_key: evaluate_model_regexp_matching_multiple(
+            model_by_display_key[model_key], count=100
+        )
+        for model_key in model_by_display_key
+    }
+    all_model_nr = {k: (p == -1).mean() for k, (p, t) in all_model_results.items()}
+    all_model_accs = {
+        k: (p == t).mean() / (p != -1).mean() if (p != -1).any() else 0
+        for k, (p, t) in all_model_results.items()
+    }
+    all_model_accs_keys = list(all_model_accs)
+    all_model_accs_values = [
+        dict(acc=all_model_accs[k], non_response=all_model_nr[k])
+        for k in all_model_accs_keys
+    ]
+    table = pd.DataFrame(all_model_accs_values, index=all_model_accs_keys)
+    table = table.loc[sorted(table.index, key=models_considered.index)]
+    return table
+
+
+def text_table(table, non_response_threshold):
+    for k in table[table.non_response < non_response_threshold].index:
+        render = f"{k:30s} {table.acc[k]:4.0%}"
+        if table.non_response[k] > 0:
+            render += f" [Non-response: {table.non_response[k]:.0%}]"
+        print(render)
+
+
+def latex_table(table, non_response_threshold):
+    table = table[table.non_response < non_response_threshold]
+    print(r"\begin{tabular}{l r r}")
+    print(r"\toprule")
+    print(r"Model & Accuracy & Non-response \\")
+    print(r"\midrule")
+    for k in table.index:
+        non_response = (
+            f"{table.non_response[k]:.0%}" if table.non_response[k] > 0 else ""
+        )
+        render = f"{k} & {table.acc[k]:.0%} & {non_response} \\\\".replace("%", "\\%")
+        print(render)
+    print(r"\bottomrule")
+    print(r"\end{tabular}")
