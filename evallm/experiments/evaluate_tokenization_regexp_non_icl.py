@@ -95,10 +95,8 @@ def summary(results_pred, results_true):
 
 def table_of_results():
     all_model_results = {
-        model_key: evaluate_model_regexp_matching_multiple(
-            model_by_display_key[model_key], count=100
-        )
-        for model_key in model_by_display_key
+        model_key: evaluate_model_regexp_matching_multiple(res, count=100)
+        for model_key, res in model_by_display_key.items()
     }
     all_model_nr = {k: (p == -1).mean() for k, (p, t) in all_model_results.items()}
     all_model_accs = {
