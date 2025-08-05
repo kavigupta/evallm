@@ -58,7 +58,7 @@ class ModelSpec:
 
 model_specs = {
     "none": ModelSpec(client=None, is_chat=False),
-    # open source completion models
+    # open weight completion models
     "meta-llama/Meta-Llama-3-8B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Meta-Llama-3-70B": ModelSpec(client=local_client, is_chat=False),
     "meta-llama/Llama-3.1-8B-Instruct": ModelSpec(client=local_client, is_chat=False),
@@ -75,7 +75,7 @@ model_specs = {
     ),
     "google/gemma-7b": ModelSpec(client=local_client, is_chat=False),
     "tiiuae/falcon-7b": ModelSpec(client=local_client, is_chat=False),
-    # open source code models
+    # open weight code models
     "bigcode/starcoder2-15b": ModelSpec(client=local_client, is_chat=False),
     "mistralai/Codestral-22B-v0.1": ModelSpec(client=local_client, is_chat=False),
     "deepseek-ai/deepseek-coder-33b-instruct": ModelSpec(

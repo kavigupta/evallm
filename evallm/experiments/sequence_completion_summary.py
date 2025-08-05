@@ -54,7 +54,7 @@ def for_model(
 
 def results_for_models(na_mode="ignore"):
     results = {
-        # open source completion
+        # open weight completion
         **for_model("llama3-8B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("llama3-70B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
@@ -73,7 +73,7 @@ def results_for_models(na_mode="ignore"):
         ),
         **for_model("gemma-7b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("falcon-7b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
-        # open source code
+        # open weight code
         **for_model("starcoder2-15b", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("codestral-22B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
@@ -98,7 +98,7 @@ def results_for_models(na_mode="ignore"):
         **for_model(
             "qwen-2.5-coder-7B", 1000, "Basic", "Basic-Commas", na_mode=na_mode
         ),
-        # closed source
+        # closed weight
         **for_model("gpt-3.5-instruct", 100, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("gpt-3.5-chat", 100, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model(
