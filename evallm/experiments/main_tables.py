@@ -77,7 +77,7 @@ grouped_models = {
         r"\textsc{Common-Suffix}",
         random_null,
     ],
-    "Open Source Completion": [
+    "Open Weight Completion": [
         "llama3-8B",
         "llama3-70B",
         "llama3.1-8B-Instruct",
@@ -91,7 +91,7 @@ grouped_models = {
         "gemma-7b",
         "falcon-7b",
     ],
-    "Open Source Code": [
+    "Open Weight Code": [
         "starcoder2-15b",
         "codestral-22B",
         "deepseek-coder-33b-instruct",
@@ -309,8 +309,8 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
 
     category_to_color = {
         "Baselines": "#009bff",
-        "Open Source Completion": "#7a00ff",
-        "Open Source Code": "#ff9500",
+        "Open Weight Completion": "#7a00ff",
+        "Open Weight Code": "#ff9500",
         "Proprietary": "#ff0062",
     }
 
