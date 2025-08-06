@@ -53,17 +53,8 @@ def produce_sc_results(**kwargs):
         **for_model_sc(
             "claude-3.5",
             30,
-            # "Basic", "Basic-Commas", "More-Expl",
+            # "Basic", "More-Expl" not included becasue they are NaN
             "COT",
-            # "Red-Green",
-            na_mode="ignore",
-            **kwargs,
-        ),
-        **for_model_sc(
-            "claude-3.5",
-            30,
-            # "Basic", "Basic-Commas", "More-Expl",
-            # "COT",
             "Red-Green",
             na_mode="ignore",
             **kwargs,
