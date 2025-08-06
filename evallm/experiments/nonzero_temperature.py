@@ -35,7 +35,7 @@ def produce_transducer_results(**kwargs):
     }
 
     return {
-        mod: {prompt: res for prompt, res in prompts_res.items()}
+        mod: dict(prompts_res.items())
         for mod, prompts_res in compute_model_results_t(
             r, accuracy_summary=True
         ).items()
