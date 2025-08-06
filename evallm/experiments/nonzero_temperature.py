@@ -15,6 +15,7 @@ from evallm.utils.bootstrap import boostrap_mean
 
 
 def produce_transducer_results(**kwargs):
+    # pylint: disable=duplicate-code
     r = {
         **for_model_t(
             "mistral-nemo-minitron-8B",
