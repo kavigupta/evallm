@@ -3,10 +3,7 @@ import unittest
 import numpy as np
 from parameterized import parameterized
 
-from evallm.enumerate_dfa.enumerate import (
-    all_state_permutations,
-    enumerate_packed_dfas,
-)
+from evallm.enumerate_dfa.enumerate import all_state_permutations, enumerate_packed_dfas
 from evallm.enumerate_dfa.pack_dfa import pack_dfa, unpack_dfa
 from evallm.sample_dfa.naive_sample import naively_sample_dfa
 from evallm.sample_dfa.transduce import transduce
