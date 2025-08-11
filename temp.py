@@ -28,5 +28,5 @@ def render_frac(x):
 
 #for i in range(10):
 res_5 = small_experiment("gpt-5-2025-08-07", 10)
-print([f"{x.kgram_success_rates_each[6 - 2] * 30:.0f}/30" for x in res_5])
-print([render_frac(x) for x in res_5])
+print("6Gram", [f"{x.kgram_success_rates_each[6 - 2] * 30:.0f}/30" for x in res_5])
+print("GPT-5", [render_frac(x) for x in res_5])
