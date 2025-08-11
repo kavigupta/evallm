@@ -221,11 +221,6 @@ def compute_model_outcomes():
             #     # "Basic",
             "Red-Green",
         ),
-        **for_model_and_prompt(
-            "gpt-5",
-            5,
-            "Red-Green",
-        )
     }
 
     return model_outcomes
