@@ -93,6 +93,7 @@ model_specs = {
     "gpt-4o-2024-05-13": ModelSpec(client=openai_client, is_chat=True),
     "o1-preview-2024-09-12": ModelSpec(client=openai_client, is_chat=True),
     "o3-mini-2025-01-31": ModelSpec(client=openai_client, is_chat=True),
+    "gpt-5-2025-08-07": ModelSpec(client=openai_client, is_chat=True),
     # anthropic models
     "claude-3-5-sonnet-20241022": ModelSpec(client=anthropic_client, is_chat=True),
 }
@@ -217,6 +218,10 @@ def create_openai_completion(model, kwargs, prompt):
         prompt = {"user": prompt["user"]}
         kwargs = kwargs.copy()
         del kwargs["max_tokens"]  # this causes issues
+        del kwargs["temperature"]  # non-default temperature is not supported
+    if model.startswith("gpt-5"):
+        kwargs = kwargs.copy()
+        del kwargs["max_tokens"] # same as o1/o3
         del kwargs["temperature"]  # non-default temperature is not supported
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
