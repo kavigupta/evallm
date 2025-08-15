@@ -67,10 +67,10 @@ model_specs = {
     "nvidia/Mistral-NeMo-Minitron-8B-Base": ModelSpec(
         client=local_client, is_chat=False
     ),
-    os.path.expanduser("~/mistral_models/Nemo-Instruct"): ModelSpec(
+    "mistral_models/Nemo-Instruct": ModelSpec(
         client=local_client, is_chat=False
     ),
-    os.path.expanduser("~/mistral_models/Nemo-Base"): ModelSpec(
+    "mistral_models/Nemo-Base": ModelSpec(
         client=local_client, is_chat=False
     ),
     "google/gemma-7b": ModelSpec(client=local_client, is_chat=False),
@@ -224,4 +224,6 @@ def create_openai_completion(model, kwargs, prompt):
         del kwargs["max_tokens"] # same as o1/o3
         del kwargs["temperature"]  # non-default temperature is not supported
     create = get_create_method(model)
+    if model in {"mistral_models/Nemo-Base", "mistral_models/Nemo-Instruct"}:
+        model = os.path.expanduser("~/" + model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
