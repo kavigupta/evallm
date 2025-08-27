@@ -28,7 +28,7 @@ def produce_transducer_results(**kwargs):
             30,
             "Basic",
             "More-Expl",
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
             **kwargs,
         ),
@@ -55,7 +55,7 @@ def produce_sc_results(**kwargs):
             "claude-3.5",
             30,
             # "Basic", "More-Expl" not included becasue they are NaN
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
             na_mode="ignore",
             **kwargs,
