@@ -60,6 +60,7 @@ metadata_for_models = {
     "claude-3.5": ModelMetadata("?", True, False),
     # "o1-preview": ModelMetadata("?", True, False),
     "o3-mini": ModelMetadata("?", True, False),
+    "gpt-5": ModelMetadata("?", True, False),
 }
 
 metadata_baseline = ModelMetadata("--", False, False)
@@ -107,6 +108,7 @@ grouped_models = {
         "claude-3.5",
         # "o1-preview",
         "o3-mini",
+        "gpt-5",
     ],
 }
 
@@ -208,7 +210,7 @@ def multi_prompt_table_of_results(
 ):
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
-    prompts = ["Basic", "More-Expl", "COT", "Red-Green"]
+    prompts = ["Basic", "Basic-COT", "More-Expl", "COT", "Red-Green"]
     prompts = [rf"\textsc{{{prompt}}}" for prompt in prompts]
     # model name, *prompts
     # Transducer Results then Sequence Completion Results
