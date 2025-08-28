@@ -47,7 +47,7 @@ def prompt_by_key_and_settings(*, num_sequence_symbols):
                 setting_kwargs
             )
         },
-        "COT": {
+        "More-Expl-COT": {
             "chat": SequencePromptWithExplanationChainOfThought.for_setting(
                 setting_kwargs
             )
@@ -191,7 +191,7 @@ def compute_model_outcomes():
             100,
             "Basic",
             "More-Expl",
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
         ),
         **for_model_and_prompt(
@@ -199,7 +199,7 @@ def compute_model_outcomes():
             30,
             "Basic",
             "More-Expl",
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
         ),
         **for_model_and_prompt(
@@ -207,7 +207,7 @@ def compute_model_outcomes():
             30,
             "Basic",
             "More-Expl",
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
         ),
         # **for_model_and_prompt("o1-preview", 10, "Basic"),
@@ -216,7 +216,7 @@ def compute_model_outcomes():
             30,
             "Basic",
             "More-Expl",
-            "COT",
+            "More-Expl-COT",
             # "Red-Green",
         ),
         **for_model_and_prompt(
