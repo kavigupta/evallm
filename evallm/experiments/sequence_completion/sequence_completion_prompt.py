@@ -259,7 +259,7 @@ class MoreExplanationPromptCOT(MoreExplanationPrompt):
 
 
 class SequencePromptDirectAlien2COT(SequencePromptDirectAlien2):
-    version = 1
+    version = 2
 
     @classmethod
     def for_setting(cls, setting_kwargs):
@@ -269,15 +269,15 @@ class SequencePromptDirectAlien2COT(SequencePromptDirectAlien2):
         )
 
     def hash_prompt(self):
-        return f"SequencePromptDirectAlien2COT({self.max_out_characters}, {self.version})"
+        return (
+            f"SequencePromptDirectAlien2COT({self.max_out_characters}, {self.version})"
+        )
 
     def end_of_preamble(self):
         return MoreExplanationPromptCOT.end_of_preamble(self)
 
     def score_response(self, dfa, sequences, prefix, response):
-        return MoreExplanationPromptCOT.score_response(
-            self, dfa, sequences, prefix, response
-        )
+        return score_response_cot(dfa, sequences, prefix, response)
 
     def model_kwargs(self):
         return MoreExplanationPromptCOT.model_kwargs(self)
