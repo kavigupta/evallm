@@ -27,7 +27,7 @@ class SequenceCompletionPrompt(ABC):
 
 
 def score_response_sequence_direct(dfa, sequences, prefix, response):
-    del sequences # not used
+    del sequences  # not used
     prediction = ""
     for tok in response:
         if tok in dfa.input_symbols:
@@ -149,6 +149,7 @@ class SequencePromptDirectAlien2WithCommas(SequencePromptDirectAlien2):
 
     def terminate_prefix(self):
         return ","
+
 
 class MoreExplanationPrompt(SequencePromptDirectAlien):
 
