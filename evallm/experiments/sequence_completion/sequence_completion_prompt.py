@@ -142,54 +142,6 @@ class SequencePromptDirectAlien2WithCommas(SequencePromptDirectAlien2):
     def terminate_prefix(self):
         return ","
 
-
-class SequencePromptDirectAlien2WithCommasSequence(
-    SequencePromptDirectAlien2WithCommas
-):
-    version = 2
-
-    def hash_prompt(self):
-        return f"SequencePromptDirectAlien2WithCommasSequence({self.max_out_characters}, {self.version})"
-
-    def preamble(self):
-        return (
-            "The following sequences of characters come from an alien language that follows a simple grammar."
-            + " Infer the alien grammar using the example sequences. Then, add a suffix to the final sequence"
-            + f" using between 1 and {self.max_out_characters} characters such that the full sequence"
-            + " follows the grammar. Output only the necessary suffix to complete the final sequence, and nothing else."
-            + "\n"
-        )
-
-
-class SequencePromptDirectAlien3(SequencePromptDirectAlien):
-    def hash_prompt(self):
-        return f"SequencePromptDirectAlien3({self.max_out_characters})"
-
-    def instructions_before_prefix(self):
-        return (
-            "\n\nWrite a grammatical suffix for the following string."
-            + " Do not explain your answer. Only output the suffix, and nothing else:"
-        )
-
-
-class SequencePromptDirectAlien3WithSpaces(SequencePromptDirectAlien3):
-
-    def hash_prompt(self):
-        return f"SequencePromptDirectAlien3WithSpaces({self.max_out_characters})"
-
-    def format_sequence(self, dfa, sequence):
-        return " ".join(sequence)
-
-
-class SequencePromptDirectAlienWithSpaces(SequencePromptDirectAlien):
-
-    def hash_prompt(self):
-        return f"SequencePromptDirectAlienWithSpaces({self.max_out_characters})"
-
-    def format_sequence(self, dfa, sequence):
-        return " ".join(sequence)
-
-
 class MoreExplanationPrompt(SequencePromptDirectAlien):
 
     def __init__(self, max_out_characters, num_states):
