@@ -227,9 +227,14 @@ def compute_model_outcomes():
         ),
         **for_model_and_prompt(
             "gpt-5",
-            10,
+            30,
             "Basic",
+        ),
+        **for_model_and_prompt(
+            "gpt-5",
+            10,
             "Basic-COT",
+            # "More-Expl",
             "More-Expl-COT",
             "Red-Green",
         ),

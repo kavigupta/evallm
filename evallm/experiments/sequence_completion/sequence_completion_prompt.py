@@ -113,9 +113,12 @@ class SequencePromptDirectAlien2(SequencePromptDirectAlien):
             "The following strings come from an alien language that follows a simple grammar."
             + " Infer the alien grammar using the example strings. Then, add a suffix to the final string"
             + f" using between 1 and {self.max_out_characters} characters such that the full string"
-            + " follows the grammar. Output only the necessary suffix to complete the final string, and nothing else."
+            + f" follows the grammar. {self.end_of_preamble()}"
             + "\n"
         )
+
+    def end_of_preamble(self):
+        return "Output only the necessary suffix to complete the final string, and nothing else."
 
     def instructions_before_prefix(self):
         return ""
@@ -141,6 +144,7 @@ class SequencePromptDirectAlien2WithCommas(SequencePromptDirectAlien2):
 
     def terminate_prefix(self):
         return ","
+
 
 class MoreExplanationPrompt(SequencePromptDirectAlien):
 
@@ -244,6 +248,31 @@ class MoreExplanationPromptCOT(MoreExplanationPrompt):
 
     def model_kwargs(self):
         return {"max_tokens": 4090, "temperature": 0.0}
+
+
+class SequencePromptDirectAlien2COT(SequencePromptDirectAlien2):
+    version = 1
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+        )
+
+    def hash_prompt(self):
+        return f"SequencePromptDirectAlien2COT({self.max_out_characters}, {self.version})"
+
+    def end_of_preamble(self):
+        return MoreExplanationPromptCOT.end_of_preamble(self)
+
+    def score_response(self, dfa, sequences, prefix, response):
+        return MoreExplanationPromptCOT.score_response(
+            self, dfa, sequences, prefix, response
+        )
+
+    def model_kwargs(self):
+        return MoreExplanationPromptCOT.model_kwargs(self)
 
 
 class RedGreenPrompt(MoreExplanationPromptCOT):
