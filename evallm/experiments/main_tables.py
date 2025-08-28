@@ -209,6 +209,9 @@ def multi_prompt_table_of_results(
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
     prompts = ["Basic", "Basic-COT", "More-Expl", "More-Expl-COT", "Red-Green"]
+    num_basic_prompts = len([p for p in prompts if "Basic" in p])
+    assert all(x.startswith("Basic") for x in prompts[:num_basic_prompts])
+    num_non_basic_prompts = len(prompts) - num_basic_prompts
     prompts = [rf"\textsc{{{prompt}}}" for prompt in prompts]
     # model name, *prompts
     # Transducer Results then Sequence Completion Results
@@ -217,7 +220,7 @@ def multi_prompt_table_of_results(
         "Transducer": transducer_results,
     }
     table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
-    table += r"\begin{tabular}{l|" + "".join("c" * len(prompts)) + "}" + "\n"
+    table += r"\begin{tabular}{l|" + "c" * num_basic_prompts + "|" + "c" * num_non_basic_prompts + "}" + "\n"
     table += r"\hline" + "\n"
     table += (
         r"\bf Model & "
