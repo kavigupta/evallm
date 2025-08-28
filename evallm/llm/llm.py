@@ -221,7 +221,7 @@ def create_openai_completion(model, kwargs, prompt):
         del kwargs["temperature"]  # non-default temperature is not supported
     if model.startswith("gpt-5"):
         kwargs = kwargs.copy()
-        del kwargs["max_tokens"] # same as o1/o3
+        del kwargs["max_tokens"]  # same as o1/o3
         del kwargs["temperature"]  # non-default temperature is not supported
     create = get_create_method(model)
     return create(model=model, messages=to_messages(prompt), **kwargs)
