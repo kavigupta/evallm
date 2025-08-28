@@ -234,7 +234,7 @@ def compute_model_outcomes():
             "gpt-5",
             10,
             "Basic-COT",
-            # "More-Expl",
+            "More-Expl",
             "More-Expl-COT",
             "Red-Green",
         ),
