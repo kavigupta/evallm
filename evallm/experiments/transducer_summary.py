@@ -16,6 +16,7 @@ from evallm.prompting.transducer_prompt import (
     BasicSequencePromptNoChat,
     BasicSequencePromptSlightlyMoreExplanation,
     RedGreenRoomPrompt1,
+    SequencePromptBasicChainOfThought,
     SequencePromptWithExplanationChainOfThought,
 )
 
@@ -37,6 +38,9 @@ def prompt_by_key_and_settings(*, num_sequence_symbols):
         "Basic": {
             "non-chat": BasicSequencePromptNoChat.for_setting(setting_kwargs),
             "chat": BasicSequencePrompt.for_setting(setting_kwargs),
+        },
+        "Basic-COT": {
+            "chat": SequencePromptBasicChainOfThought.for_setting(setting_kwargs)
         },
         "More-Expl": {
             "chat": BasicSequencePromptSlightlyMoreExplanation.for_setting(

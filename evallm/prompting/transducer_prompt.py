@@ -296,6 +296,17 @@ class SequencePromptWithExplanationChainOfThought(SequencePromptWithExplanation)
         }
 
 
+class SequencePromptBasicChainOfThought(SequencePromptWithExplanationChainOfThought):
+
+    version = 1
+
+    def display(self):
+        return f"SequencePromptBasicChainOfThought({self.num_symbols}, {self.num_states}, {self.version})"
+
+    def prefix(self):
+        return "You are a sequence completion model."
+
+
 class RedGreenRoomPrompt1(TransducerPrompter):
 
     version = 1
