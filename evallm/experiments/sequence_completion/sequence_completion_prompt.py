@@ -26,6 +26,21 @@ class SequenceCompletionPrompt(ABC):
         pass
 
 
+def score_response_sequence_direct(dfa, sequences, prefix, response):
+    del sequences # not used
+    prediction = ""
+    for tok in response:
+        if tok in dfa.input_symbols:
+            prediction += tok
+        elif tok == " ":
+            continue
+        else:
+            break
+    if not prediction:
+        return 0.5
+    return dfa.accepts_input([*prefix, *prediction])
+
+
 class SequencePromptDirect(SequenceCompletionPrompt):
     """
     Sequence prompt that directly displays the sequences to complete.
@@ -59,17 +74,7 @@ class SequencePromptDirect(SequenceCompletionPrompt):
         pass
 
     def score_response(self, dfa, sequences, prefix, response):
-        prediction = ""
-        for tok in response:
-            if tok in dfa.input_symbols:
-                prediction += tok
-            elif tok == " ":
-                continue
-            else:
-                break
-        if not prediction:
-            return 0.5
-        return dfa.accepts_input([*prefix, *prediction])
+        return score_response_sequence_direct(dfa, sequences, prefix, response)
 
 
 class SequencePromptDirectAlien(SequencePromptDirect):
@@ -214,6 +219,14 @@ class MoreExplanationPrompt2(SequencePromptDirectAlien):
 ANSWER_PATTERN = re.compile(r"<answer>([^<]+)</answer>")
 
 
+def score_response_cot(dfa, sequences, prefix, response):
+    match = ANSWER_PATTERN.search(response)
+    if match is None:
+        return 0.5
+    prediction = match.group(1)
+    return score_response_sequence_direct(dfa, sequences, prefix, prediction)
+
+
 class MoreExplanationPromptCOT(MoreExplanationPrompt):
 
     version = 3
@@ -236,11 +249,7 @@ class MoreExplanationPromptCOT(MoreExplanationPrompt):
         )
 
     def score_response(self, dfa, sequences, prefix, response):
-        match = ANSWER_PATTERN.search(response)
-        if match is None:
-            return 0.5
-        prediction = match.group(1)
-        return super().score_response(dfa, sequences, prefix, prediction)
+        return score_response_cot(dfa, sequences, prefix, response)
 
     def model_kwargs(self):
         return {"max_tokens": 4090, "temperature": 0.0}
