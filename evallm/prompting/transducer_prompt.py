@@ -266,7 +266,7 @@ class SequencePromptWithExplanation(BasicSequencePrompt):
             + ' I input. 1 indicates that the input string thus far results in a "valid" state, and 0'
             + " indicates that it does not. I collect the inputs and outputs into an input sequence and"
             + " an output sequence. Infer the underlying DFA model to predict the next integer in the"
-            + f" output sequence."
+            + " output sequence."
         )
 
     def terminal_instruction(self):
@@ -305,6 +305,7 @@ class SequencePromptBasicChainOfThought(SequencePromptWithExplanationChainOfThou
 
     def prefix(self):
         return "You are a sequence completion model."
+
 
 class RedGreenRoomPrompt1(TransducerPrompter):
 
