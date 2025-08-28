@@ -230,7 +230,7 @@ def compute_model_outcomes():
             10,
             "Basic",
             "Basic-COT",
-            "COT",
+            "More-Expl-COT",
             "Red-Green",
         ),
     }
