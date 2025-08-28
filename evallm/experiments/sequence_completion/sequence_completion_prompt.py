@@ -118,9 +118,12 @@ class SequencePromptDirectAlien2(SequencePromptDirectAlien):
             "The following strings come from an alien language that follows a simple grammar."
             + " Infer the alien grammar using the example strings. Then, add a suffix to the final string"
             + f" using between 1 and {self.max_out_characters} characters such that the full string"
-            + " follows the grammar. Output only the necessary suffix to complete the final string, and nothing else."
+            + f" follows the grammar. {self.end_of_preamble()}"
             + "\n"
         )
+
+    def end_of_preamble(self):
+        return "Output only the necessary suffix to complete the final string, and nothing else."
 
     def instructions_before_prefix(self):
         return ""
