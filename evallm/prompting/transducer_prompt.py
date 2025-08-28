@@ -247,20 +247,26 @@ class SequencePromptWithExplanation(BasicSequencePrompt):
         assert is_chat, "for now, we only support chat systems for this prompter"
         return dict(
             system="",
-            user="A DFA is a finite-state machine that accepts or rejects a given string of symbols,"
-            + " by running through a n-state sequence uniquely determined by the string."
-            + "\n\n"
-            + f"I have a {self.num_states}-state DFA model that outputs either 0 or 1 after each element"
-            + ' I input. 1 indicates that the input string thus far results in a "valid" state, and 0'
-            + " indicates that it does not. I collect the inputs and outputs into an input sequence and"
-            + " an output sequence. Infer the underlying DFA model to predict the next integer in the"
-            + f" output sequence. {self.terminal_instruction()}"
+            user=self.prefix()
+            + f" {self.terminal_instruction()}"
             + "\n\n"
             + "Input sequence: "
             + "".join([f"{x}, " for x in inp])[0:-2]
             + "\n"
             + "Output sequence: "
             + "".join([f"{int(x)}, " for x in out[:-1]]),
+        )
+
+    def prefix(self):
+        return (
+            "A DFA is a finite-state machine that accepts or rejects a given string of symbols,"
+            + " by running through a n-state sequence uniquely determined by the string."
+            + "\n\n"
+            + f"I have a {self.num_states}-state DFA model that outputs either 0 or 1 after each element"
+            + ' I input. 1 indicates that the input string thus far results in a "valid" state, and 0'
+            + " indicates that it does not. I collect the inputs and outputs into an input sequence and"
+            + " an output sequence. Infer the underlying DFA model to predict the next integer in the"
+            + " output sequence."
         )
 
     def terminal_instruction(self):
