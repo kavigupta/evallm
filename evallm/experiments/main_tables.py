@@ -208,7 +208,7 @@ def multi_prompt_table_of_results(
 ):
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
-    prompts = ["Basic", "More-Expl", "More-Expl-COT", "Red-Green"]
+    prompts = ["Basic", "Basic-COT", "More-Expl", "More-Expl-COT", "Red-Green"]
     prompts = [rf"\textsc{{{prompt}}}" for prompt in prompts]
     # model name, *prompts
     # Transducer Results then Sequence Completion Results

@@ -11,6 +11,7 @@ from evallm.experiments.sequence_completion.sequence_completion_prompt import (
     MoreExplanationPromptCOT,
     RedGreenPrompt,
     SequencePromptDirectAlien2,
+    SequencePromptDirectAlien2COT,
     SequencePromptDirectAlien2WithCommas,
 )
 from evallm.experiments.transducer_experiment import current_dfa_sample_spec
@@ -28,6 +29,7 @@ current_setting = dict(
 
 prompts_by_key = {
     "Basic": SequencePromptDirectAlien2.for_setting,
+    "Basic-COT": SequencePromptDirectAlien2COT.for_setting,
     "Basic-Commas": SequencePromptDirectAlien2WithCommas.for_setting,
     "More-Expl": MoreExplanationPrompt2.for_setting,
     "More-Expl-COT": MoreExplanationPromptCOT.for_setting,

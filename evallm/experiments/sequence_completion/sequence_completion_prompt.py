@@ -259,6 +259,31 @@ class MoreExplanationPromptCOT(MoreExplanationPrompt):
         return {"max_tokens": 4090, "temperature": 0.0}
 
 
+class SequencePromptDirectAlien2COT(SequencePromptDirectAlien2):
+    version = 2
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        return cls(
+            max_out_characters=setting_kwargs["num_sequence_symbols"]
+            - setting_kwargs["num_sequence_symbols_prompt"],
+        )
+
+    def hash_prompt(self):
+        return (
+            f"SequencePromptDirectAlien2COT({self.max_out_characters}, {self.version})"
+        )
+
+    def end_of_preamble(self):
+        return MoreExplanationPromptCOT.end_of_preamble(self)
+
+    def score_response(self, dfa, sequences, prefix, response):
+        return score_response_cot(dfa, sequences, prefix, response)
+
+    def model_kwargs(self):
+        return MoreExplanationPromptCOT.model_kwargs(self)
+
+
 class RedGreenPrompt(MoreExplanationPromptCOT):
 
     version = 1
