@@ -296,6 +296,16 @@ def best_prompt(results):
     return sanitize_names({k: results[k][best_prompt_key[k]] for k in results})
 
 
+def best_prompt_among_basics(results):
+    results = {
+        model: {
+            prompt: result for prompt, result in for_model.items() if "Basic" in prompt
+        }
+        for model, for_model in results.items()
+    }
+    return best_prompt(results)
+
+
 def multi_prompts(results, *, minimum_number_prompts=2):
     results = {
         k: {
@@ -317,8 +327,8 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "Proprietary": "#ff0062",
     }
 
-    summary_t = best_prompt(results_t)
-    summary_sc = best_prompt(results_sc)
+    summary_t = best_prompt_among_basics(results_t)
+    summary_sc = best_prompt_among_basics(results_sc)
 
     summary_t = replace_null_random(summary_t)
     summary_sc = replace_null_random(summary_sc)
