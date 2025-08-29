@@ -211,6 +211,9 @@ def multi_prompt_table_of_results(
     check_all_accounted(transducer_results)
     check_all_accounted(sequence_completion_results)
     prompts = ["Basic", "Basic-COT", "More-Expl", "More-Expl-COT", "Red-Green"]
+    num_basic_prompts = len([p for p in prompts if "Basic" in p])
+    assert all(x.startswith("Basic") for x in prompts[:num_basic_prompts])
+    num_non_basic_prompts = len(prompts) - num_basic_prompts
     prompts = [rf"\textsc{{{prompt}}}" for prompt in prompts]
     # model name, *prompts
     # Transducer Results then Sequence Completion Results
@@ -219,7 +222,7 @@ def multi_prompt_table_of_results(
         "Transducer": transducer_results,
     }
     table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
-    table += r"\begin{tabular}{l|" + "".join("c" * len(prompts)) + "}" + "\n"
+    table += r"\begin{tabular}{l|" + "c" * num_basic_prompts + "|" + "c" * num_non_basic_prompts + "}" + "\n"
     table += r"\hline" + "\n"
     table += (
         r"\bf Model & "
@@ -295,6 +298,16 @@ def best_prompt(results):
     return sanitize_names({k: results[k][best_prompt_key[k]] for k in results})
 
 
+def best_prompt_among_basics(results):
+    results = {
+        model: {
+            prompt: result for prompt, result in for_model.items() if "Basic" in prompt
+        }
+        for model, for_model in results.items()
+    }
+    return best_prompt(results)
+
+
 def multi_prompts(results, *, minimum_number_prompts=2):
     results = {
         k: {
@@ -316,8 +329,8 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "Proprietary": "#ff0062",
     }
 
-    summary_t = best_prompt(results_t)
-    summary_sc = best_prompt(results_sc)
+    summary_t = best_prompt_among_basics(results_t)
+    summary_sc = best_prompt_among_basics(results_sc)
 
     summary_t = replace_null_random(summary_t)
     summary_sc = replace_null_random(summary_sc)
