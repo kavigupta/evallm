@@ -165,6 +165,14 @@ def compute_model_results(model_outcomes, *, accuracy_summary):
 
 
 def compute_model_outcomes():
+    all_prompts = (
+        "Basic",
+        "Basic-COT",
+        "More-Expl",
+        "DFA-COT",
+        "Red-Green",
+    )
+
     model_outcomes = {
         **for_model_and_prompt("llama3-8B", 1000, "Basic"),
         **for_model_and_prompt("llama3-70B", 1000, "Basic"),
@@ -186,49 +194,14 @@ def compute_model_outcomes():
         **for_model_and_prompt("falcon-7b", 1000, "Basic"),
         **for_model_and_prompt("gpt-3.5-instruct", 100, "Basic"),
         **for_model_and_prompt("gpt-3.5-chat", 100, "Basic"),
-        **for_model_and_prompt(
-            "gpt-4o-mini",
-            100,
-            "Basic",
-            "Basic-COT",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-        ),
-        **for_model_and_prompt(
-            "gpt-4o",
-            30,
-            "Basic",
-            "Basic-COT",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-        ),
-        **for_model_and_prompt(
-            "claude-3.5",
-            30,
-            "Basic",
-            "Basic-COT",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-        ),
+        **for_model_and_prompt("gpt-4o-mini", 100, *all_prompts),
+        **for_model_and_prompt("gpt-4o", 30, *all_prompts),
+        **for_model_and_prompt("claude-3.5", 30, *all_prompts),
         # **for_model_and_prompt("o1-preview", 10, "Basic"),
         **for_model_and_prompt(
-            "o3-mini",
-            30,
-            "Basic",
-            "Basic-COT",
-            "More-Expl",
-            "DFA-COT",
-            # "Red-Green",
+            "o3-mini", 30, "Basic", "Basic-COT", "More-Expl", "DFA-COT"
         ),
-        **for_model_and_prompt(
-            "o3-mini",
-            100,
-            #     # "Basic",
-            "Red-Green",
-        ),
+        **for_model_and_prompt("o3-mini", 100, "Red-Green"),
     }
 
     return model_outcomes
