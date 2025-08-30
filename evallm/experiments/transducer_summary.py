@@ -235,7 +235,7 @@ def compute_model_outcomes():
             "Basic",
             "Basic-COT",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             "Red-Green",
         ),
     }

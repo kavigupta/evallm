@@ -154,7 +154,7 @@ def results_for_models(na_mode="ignore"):
             "Basic-COT",
             # "Basic-Commas",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             "Red-Green",
             na_mode=na_mode,
         ),
