@@ -47,7 +47,7 @@ def prompt_by_key_and_settings(*, num_sequence_symbols):
                 setting_kwargs
             )
         },
-        "More-Expl-COT": {
+        "DFA-COT": {
             "chat": SequencePromptWithExplanationChainOfThought.for_setting(
                 setting_kwargs
             )
@@ -192,7 +192,7 @@ def compute_model_outcomes():
             "Basic",
             "Basic-COT",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             "Red-Green",
         ),
         **for_model_and_prompt(
@@ -201,7 +201,7 @@ def compute_model_outcomes():
             "Basic",
             "Basic-COT",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             "Red-Green",
         ),
         **for_model_and_prompt(
@@ -210,7 +210,7 @@ def compute_model_outcomes():
             "Basic",
             "Basic-COT",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             "Red-Green",
         ),
         # **for_model_and_prompt("o1-preview", 10, "Basic"),
@@ -220,7 +220,7 @@ def compute_model_outcomes():
             "Basic",
             "Basic-COT",
             "More-Expl",
-            "More-Expl-COT",
+            "DFA-COT",
             # "Red-Green",
         ),
         **for_model_and_prompt(
