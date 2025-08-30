@@ -202,6 +202,7 @@ def compute_model_outcomes():
             "o3-mini", 30, "Basic", "Basic-COT", "More-Expl", "DFA-COT"
         ),
         **for_model_and_prompt("o3-mini", 100, "Red-Green"),
+        **for_model_and_prompt("gpt-5", 30, *all_prompts),
     }
 
     return model_outcomes

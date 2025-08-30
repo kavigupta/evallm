@@ -115,6 +115,12 @@ def results_for_models(na_mode="ignore"):
         **for_model("gpt-4o", 30, *all_prompts, na_mode=na_mode),
         **for_model("claude-3.5", 30, *all_prompts, na_mode=na_mode),
         **for_model("o3-mini", 30, *all_prompts, na_mode=na_mode),
+        **for_model(
+            "gpt-5",
+            30,
+            *[p for p in all_prompts if p != "Basic-Commas"],
+            na_mode=na_mode,
+        ),
     }
     return results
 

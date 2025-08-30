@@ -60,6 +60,7 @@ metadata_for_models = {
     "claude-3.5": ModelMetadata("?", True, False),
     # "o1-preview": ModelMetadata("?", True, False),
     "o3-mini": ModelMetadata("?", True, False),
+    "gpt-5": ModelMetadata("?", True, False),
 }
 
 metadata_baseline = ModelMetadata("--", False, False)
@@ -107,6 +108,7 @@ grouped_models = {
         "claude-3.5",
         # "o1-preview",
         "o3-mini",
+        "gpt-5",
     ],
 }
 
@@ -374,9 +376,10 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "gemma-7b": (-1, -1, 0.1),
         "falcon-7b": (-1, -1, 0.1),
         "starcoder2-15b": (-1, 1, 1),
-        "deepseek-coder-33b-instruct": (1, -1, 1),
-        "claude-3.5": (1, -1, 1),
+        "deepseek-coder-33b-instruct": (1, -0.5, 1),
+        "claude-3.5": (1, -0.5, 1),
         random_null: (1, 1, 0.1),
+        "gpt-5": (1, -1, 1),
     }
 
     texts = []
