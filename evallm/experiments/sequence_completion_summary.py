@@ -118,12 +118,7 @@ def results_for_models(na_mode="ignore"):
         **for_model(
             "gpt-5",
             30,
-            "Basic",
-            "Basic-COT",
-            # "Basic-Commas",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
+            *[p for p in all_prompts if p != "Basic-Commas"],
             na_mode=na_mode,
         ),
     }
