@@ -55,6 +55,14 @@ def for_model(
 
 
 def results_for_models(na_mode="ignore"):
+    all_prompts = (
+        "Basic",
+        "Basic-COT",
+        "Basic-Commas",
+        "More-Expl",
+        "DFA-COT",
+        "Red-Green",
+    )
     results = {
         # open weight completion
         **for_model("llama3-8B", 1000, "Basic", "Basic-Commas", na_mode=na_mode),
@@ -103,50 +111,10 @@ def results_for_models(na_mode="ignore"):
         # closed weight
         **for_model("gpt-3.5-instruct", 100, "Basic", "Basic-Commas", na_mode=na_mode),
         **for_model("gpt-3.5-chat", 100, "Basic", "Basic-Commas", na_mode=na_mode),
-        **for_model(
-            "gpt-4o-mini",
-            100,
-            "Basic",
-            "Basic-COT",
-            "Basic-Commas",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-            na_mode=na_mode,
-        ),
-        **for_model(
-            "gpt-4o",
-            30,
-            "Basic",
-            "Basic-COT",
-            "Basic-Commas",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-            na_mode=na_mode,
-        ),
-        **for_model(
-            "claude-3.5",
-            30,
-            "Basic",
-            "Basic-COT",
-            "Basic-Commas",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-            na_mode=na_mode,
-        ),
-        **for_model(
-            "o3-mini",
-            30,
-            "Basic",
-            "Basic-COT",
-            "Basic-Commas",
-            "More-Expl",
-            "DFA-COT",
-            "Red-Green",
-            na_mode=na_mode,
-        ),
+        **for_model("gpt-4o-mini", 100, *all_prompts, na_mode=na_mode),
+        **for_model("gpt-4o", 30, *all_prompts, na_mode=na_mode),
+        **for_model("claude-3.5", 30, *all_prompts, na_mode=na_mode),
+        **for_model("o3-mini", 30, *all_prompts, na_mode=na_mode),
         **for_model(
             "gpt-5",
             30,
