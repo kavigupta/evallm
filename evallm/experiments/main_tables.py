@@ -376,9 +376,10 @@ def plot_transducer_vs_sequence_completion(results_sc, results_t):
         "gemma-7b": (-1, -1, 0.1),
         "falcon-7b": (-1, -1, 0.1),
         "starcoder2-15b": (-1, 1, 1),
-        "deepseek-coder-33b-instruct": (1, -1, 1),
-        "claude-3.5": (1, -1, 1),
+        "deepseek-coder-33b-instruct": (1, -0.5, 1),
+        "claude-3.5": (1, -0.5, 1),
         random_null: (1, 1, 0.1),
+        "gpt-5": (1, -1, 1),
     }
 
     texts = []
