@@ -149,7 +149,7 @@ def results_for_models(na_mode="ignore"):
         ),
         **for_model(
             "gpt-5",
-            10,
+            30,
             "Basic",
             "Basic-COT",
             # "Basic-Commas",
