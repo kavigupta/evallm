@@ -29,11 +29,11 @@ default_transducer_sample_dfa_spec = current_dfa_sample_spec(
 )
 
 
-def prompt_by_key_and_settings(*, num_sequence_symbols):
+def prompt_by_key_and_settings(*, num_sequence_symbols, num_states):
     setting_kwargs = dict(
         num_sequence_symbols=num_sequence_symbols,
-        sample_dfa_spec=default_transducer_sample_dfa_spec,
-        num_states=num_states_default,
+        sample_dfa_spec=current_dfa_sample_spec(num_states=num_states),
+        num_states=num_states,
     )
 
     return {
@@ -59,7 +59,7 @@ def prompt_by_key_and_settings(*, num_sequence_symbols):
 
 
 prompt_by_key_default = prompt_by_key_and_settings(
-    num_sequence_symbols=num_sequence_symbols_default
+    num_sequence_symbols=num_sequence_symbols_default, num_states=num_states_default
 )
 
 
@@ -69,9 +69,10 @@ def for_model_and_prompt(
     *prompts,
     wrapper=lambda x: x,
     num_sequence_symbols=num_sequence_symbols_default,
+    num_states=num_states_default,
 ):
     prompt_by_key = prompt_by_key_and_settings(
-        num_sequence_symbols=num_sequence_symbols
+        num_sequence_symbols=num_sequence_symbols, num_states=num_states
     )
     model_key = model_by_display_key[model]
     if model_specs[full_path(model_key)].is_chat:
