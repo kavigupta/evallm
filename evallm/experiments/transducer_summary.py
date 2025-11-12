@@ -20,18 +20,20 @@ from evallm.prompting.transducer_prompt import (
     SequencePromptWithExplanationChainOfThought,
 )
 
-num_states = 3
+num_states_default = 3
 num_symbols = 3
 num_sequence_symbols_default = 30
 num_repeats_per_dfa = 30
-sample_dfa_spec = current_dfa_sample_spec(num_states=num_states)
+default_transducer_sample_dfa_spec = current_dfa_sample_spec(
+    num_states=num_states_default
+)
 
 
 def prompt_by_key_and_settings(*, num_sequence_symbols):
     setting_kwargs = dict(
         num_sequence_symbols=num_sequence_symbols,
-        sample_dfa_spec=sample_dfa_spec,
-        num_states=num_states,
+        sample_dfa_spec=default_transducer_sample_dfa_spec,
+        num_states=num_states_default,
     )
 
     return {
@@ -79,7 +81,7 @@ def for_model_and_prompt(
     return {
         (model, prompt): run_transducer_experiment(
             model_key,
-            sample_dfa_spec,
+            default_transducer_sample_dfa_spec,
             wrapper(prompt_by_key[prompt][prompt_kind]),
             num_repeats_per_dfa=num_repeats_per_dfa,
             num_dfas=num_dfas,
@@ -107,6 +109,7 @@ def compute_results(
 def compute_deterministic_baseline_outcomes(
     *,
     num_sequence_symbols,
+    num_states=num_states_default,
     accuracy_summary=True,
     num_dfas=1000,
     include_brute_force=True,
@@ -117,7 +120,7 @@ def compute_deterministic_baseline_outcomes(
 ):
     deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
         "none",
-        sample_dfa_spec,
+        default_transducer_sample_dfa_spec,
         BasicInstructionTransducerPrompter(num_sequence_symbols, strip=True),
         num_repeats_per_dfa=num_repeats_per_dfa,
         num_dfas=num_dfas,
@@ -143,7 +146,7 @@ def compute_deterministic_baseline_outcomes(
         if include_brute_force:
             accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = (
                 run_brute_force_transducer(
-                    sample_dfa_spec,
+                    default_transducer_sample_dfa_spec,
                     num_states,
                     num_symbols,
                     num_sequence_symbols,

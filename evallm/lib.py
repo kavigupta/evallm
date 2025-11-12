@@ -15,14 +15,12 @@ from evallm.experiments.sequence_completion_summary import (
 from evallm.experiments.sequence_completion_summary import (
     prompts_by_key as sequence_completion_prompts_by_key,
 )
+from evallm.experiments.transducer_summary import default_transducer_sample_dfa_spec
 from evallm.experiments.transducer_summary import (
     num_repeats_per_dfa as default_transducer_num_repeats_per_dfa,
 )
 from evallm.experiments.transducer_summary import (
     prompt_by_key_default as transducer_prompt_by_key,
-)
-from evallm.experiments.transducer_summary import (
-    sample_dfa_spec as default_transducer_sample_dfa_spec,
 )
 from evallm.prompting.prompter import TrivialProblemError
 from evallm.sample_dfa.sample_dfa import sample_dfa
