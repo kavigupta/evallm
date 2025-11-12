@@ -222,7 +222,14 @@ def multi_prompt_table_of_results(
         "Transducer": transducer_results,
     }
     table = r"{\renewcommand{\arraystretch}{$stretch}".replace("$stretch", str(stretch))
-    table += r"\begin{tabular}{l|" + "c" * num_basic_prompts + "|" + "c" * num_non_basic_prompts + "}" + "\n"
+    table += (
+        r"\begin{tabular}{l|"
+        + "c" * num_basic_prompts
+        + "|"
+        + "c" * num_non_basic_prompts
+        + "}"
+        + "\n"
+    )
     table += r"\hline" + "\n"
     table += (
         r"\bf Model & "
