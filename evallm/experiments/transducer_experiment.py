@@ -78,7 +78,11 @@ class TransducerExperimentResult:
             success_rates.append(
                 np.mean(
                     [
-                        successes[k] if k < len(successes) else successes[-1]
+                        (
+                            successes[k]
+                            if k < len(successes)
+                            else (successes[-1] if successes else 0.5)
+                        )
                         for successes in self.kgram_successes_each
                     ]
                 )
