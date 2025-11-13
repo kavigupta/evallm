@@ -82,7 +82,7 @@ def for_model_and_prompt(
     return {
         (model, prompt): run_transducer_experiment(
             model_key,
-            default_transducer_sample_dfa_spec,
+            current_dfa_sample_spec(num_states=num_states),
             wrapper(prompt_by_key[prompt][prompt_kind]),
             num_repeats_per_dfa=num_repeats_per_dfa,
             num_dfas=num_dfas,
@@ -121,7 +121,7 @@ def compute_deterministic_baseline_outcomes(
 ):
     deterministic_baseline_outcomes = run_transducer_experiment_just_stats(
         "none",
-        default_transducer_sample_dfa_spec,
+        current_dfa_sample_spec(num_states=num_states),
         BasicInstructionTransducerPrompter(num_sequence_symbols, strip=True),
         num_repeats_per_dfa=num_repeats_per_dfa,
         num_dfas=num_dfas,
@@ -147,7 +147,7 @@ def compute_deterministic_baseline_outcomes(
         if include_brute_force:
             accuracies[r"\textsc{BruteForce}$_T$"][no_prompt] = (
                 run_brute_force_transducer(
-                    default_transducer_sample_dfa_spec,
+                    current_dfa_sample_spec(num_states=num_states),
                     num_states,
                     num_symbols,
                     num_sequence_symbols,
