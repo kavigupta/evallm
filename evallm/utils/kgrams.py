@@ -4,6 +4,8 @@ def longest_terminal_repeated_kgrams(s):
     """
     k = 1
     indices = [i + 1 for i in range(len(s) - 1) if s[i] == s[-1]]
+    if not indices:
+        return []
     results = []
     while True:
         results.append((k, s[-k:], [i - k for i in indices]))
