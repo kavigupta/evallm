@@ -11,9 +11,7 @@ class TestLongestKgram(unittest.TestCase):
         )
 
     def test_no_repeats(self):
-        self.assertEqual(
-            evallm.utils.longest_terminal_repeated_kgrams("abcdefg"), [(1, "g", [])]
-        )
+        self.assertEqual(evallm.utils.longest_terminal_repeated_kgrams("abcdefg"), [])
 
     def test_with_repeated_character(self):
         self.assertEqual(
