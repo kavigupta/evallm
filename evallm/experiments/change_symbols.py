@@ -1,18 +1,20 @@
 from typing import List
-from matplotlib import pyplot as plt
+
 import numpy as np
+from matplotlib import pyplot as plt
+
+from evallm.experiments.models_display import model_by_display_key
 from evallm.experiments.transducer_experiment import (
     current_dfa_sample_spec,
     run_transducer_experiment,
 )
 from evallm.experiments.transducer_plotting import setup_plot
 from evallm.prompting.transducer_prompt import BasicSequencePromptNoChat, RemappedPrompt
-from evallm.experiments.models_display import model_by_display_key
 
 from .transducer_summary import (
-    num_states_default,
-    num_sequence_symbols_default,
     num_repeats_per_dfa,
+    num_sequence_symbols_default,
+    num_states_default,
 )
 
 
@@ -71,7 +73,9 @@ def plot_symbol_correlations(results):
     # place x-axis on top
     ax.xaxis.set_ticks_position("top")
     ax.xaxis.set_label_position("top")
-    ax.tick_params(axis="x", which="both", top=True, bottom=False, labeltop=True, labelbottom=False)
+    ax.tick_params(
+        axis="x", which="both", top=True, bottom=False, labeltop=True, labelbottom=False
+    )
     for i in range(len(labels)):
         for j in range(len(labels)):
             ax.text(j, i, f"{matr[i, j]:.2f}", ha="center", va="center", color="k")
