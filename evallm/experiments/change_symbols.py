@@ -41,7 +41,7 @@ def change_symbols_experiment(
             num_repeats_per_dfa=num_repeats_per_dfa,
             num_dfas=num_dfas,
         )
-        return np.array([r.success_rate_each for r in result]).flatten() < 1
+        return np.array([r.success_rate_each for r in result]).mean(1)
 
     def result_for_remap(chars):
         remapped_prompt = RemappedPrompt(
