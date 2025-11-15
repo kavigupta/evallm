@@ -425,3 +425,37 @@ class WithTemperatureTransducerPrompter(TransducerPrompter):
 
     def score_completion(self, output, choice):
         return self.underlying_prompter.score_completion(output, choice)
+
+
+class RemappedPrompt(TransducerPrompter):
+    version = 0
+
+    def __init__(self, underlying_prompter, input_remap, output_remap):
+        super().__init__(underlying_prompter.num_symbols)
+        self.underlying_prompter = underlying_prompter
+        self.input_remap = input_remap
+        self.output_remap = output_remap
+        self.output_remap_reversed = {v: k for k, v in output_remap.items()}
+
+    @classmethod
+    def for_setting(cls, setting_kwargs):
+        raise NotImplementedError(
+            "RemappedPrompt cannot be used directly. Wrap it around another prompter."
+        )
+
+    def display(self):
+        return f"RemappedPrompt({self.version}, {self.underlying_prompter.display()}, input_remap={self.input_remap}, output_remap={self.output_remap})"
+
+    def display_prompt(self, inp, out, is_chat):
+        remapped_inp = [self.input_remap[x] for x in inp]
+        remapped_out = [self.output_remap[x] for x in out]
+        return self.underlying_prompter.display_prompt(
+            remapped_inp, remapped_out, is_chat
+        )
+
+    def prompt_kwargs(self):
+        return self.underlying_prompter.prompt_kwargs()
+
+    def score_completion(self, output, choice):
+        output = self.output_remap_reversed[output]
+        return self.underlying_prompter.score_completion(output, choice)
