@@ -74,7 +74,7 @@ def plot_symbol_correlations(results):
     ax.tick_params(axis="x", which="both", top=True, bottom=False, labeltop=True, labelbottom=False)
     for i in range(len(labels)):
         for j in range(len(labels)):
-            text = ax.text(j, i, f"{matr[i, j]:.2f}", ha="center", va="center", color="k")
+            ax.text(j, i, f"{matr[i, j]:.2f}", ha="center", va="center", color="k")
     ax.set_title("Correlation of Errors Between Symbol Sets")
     fig.colorbar(im)
     plt.show()
