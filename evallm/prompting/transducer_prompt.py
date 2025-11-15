@@ -444,7 +444,10 @@ class RemappedPrompt(TransducerPrompter):
         )
 
     def display(self):
-        return f"RemappedPrompt({self.version}, {self.underlying_prompter.display()}, input_remap={self.input_remap}, output_remap={self.output_remap})"
+        return (
+            f"RemappedPrompt({self.version}, {self.underlying_prompter.display()},"
+            + f" input_remap={self.input_remap}, output_remap={self.output_remap})"
+        )
 
     def display_prompt(self, inp, out, is_chat):
         remapped_inp = [self.input_remap[x] for x in inp]

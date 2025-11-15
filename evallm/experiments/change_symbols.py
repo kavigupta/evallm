@@ -23,7 +23,6 @@ def change_symbols_experiment(
     *,
     num_states: int = num_states_default,
     num_sequence_symbols: int = num_sequence_symbols_default,
-    num_repeats_per_dfa: int = num_repeats_per_dfa,
     num_dfas: int,
     other_symbol_sets: List[str],
 ):
