@@ -80,4 +80,3 @@ def plot_symbol_correlations(results):
             ax.text(j, i, f"{matr[i, j]:.2f}", ha="center", va="center", color="k")
     ax.set_title("Correlation of Errors Between Symbol Sets")
     fig.colorbar(im)
-    plt.show()
