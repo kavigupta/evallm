@@ -17,6 +17,7 @@ from evallm.experiments.transducer_plotting import setup_plot
 blue = "#009bff"
 green = "#26d94a"
 red = "#ff0062"
+orange = "#e59d39"
 
 
 def transducer_example_csv(

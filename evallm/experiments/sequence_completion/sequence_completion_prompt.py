@@ -28,6 +28,13 @@ class SequenceCompletionPrompt(ABC):
 
 def score_response_sequence_direct(dfa, sequences, prefix, response):
     del sequences  # not used
+    prediction = extract_sequence_from_response(dfa, response)
+    if not prediction:
+        return 0.5
+    return dfa.accepts_input([*prefix, *prediction])
+
+
+def extract_sequence_from_response(dfa, response):
     prediction = ""
     for tok in response:
         if tok in dfa.input_symbols:
@@ -36,9 +43,7 @@ def score_response_sequence_direct(dfa, sequences, prefix, response):
             continue
         else:
             break
-    if not prediction:
-        return 0.5
-    return dfa.accepts_input([*prefix, *prediction])
+    return prediction
 
 
 class SequencePromptDirect(SequenceCompletionPrompt):
