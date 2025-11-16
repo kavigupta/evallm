@@ -1,7 +1,10 @@
 import os
+from collections import Counter
 
-from permacache import permacache
+import matplotlib.pyplot as plt
+import numpy as np
 import tqdm.auto as tqdm
+from permacache import permacache
 
 from evallm.experiments.sequence_completion.sequence_completion_experiments import (
     get_examples,
@@ -10,15 +13,11 @@ from evallm.experiments.sequence_completion.sequence_completion_experiments impo
 from evallm.experiments.sequence_completion.sequence_completion_prompt import (
     extract_sequence_from_response,
 )
-from ..sequence_completion_summary import prompts_by_key, current_setting
-from ..models_display import model_by_display_key
 
 from ...cachedir import cache_dir
-
-from ..example import blue, green, red, orange
-import matplotlib.pyplot as plt
-import numpy as np
-from collections import Counter
+from ..example import blue, green, orange, red
+from ..models_display import model_by_display_key
+from ..sequence_completion_summary import current_setting, prompts_by_key
 
 
 def is_a_suffix(candidate, positive_examples):
@@ -78,8 +77,8 @@ def predict_novelty_for_examples(num_seeds, setting, model_key, prompt):
     return all_is_correct, all_classifications
 
 
-def predict_novelty_for_example(seed, current_setting, model_key, prompt):
-    dfa, io = get_examples(seed, current_setting)
+def predict_novelty_for_example(seed, setting, model_key, prompt):
+    dfa, io = get_examples(seed, setting)
     responses = run_model(model_key, prompt, dfa, io)
 
     is_correct = [
@@ -191,7 +190,7 @@ def plot_novelty_results(is_correct, classifications, ax, control_classifs=None)
         )
         # xtick label: for the two main columns show percent (of main total), for control show 'Random'
         x_center = xpos_left + side_width / 2.0
-        if label == "Correct" or label == "Incorrect":
+        if label in ("Correct", "Incorrect"):
             pct = sum(counts_side.values()) / total_main
             xticks.append(x_center)
             xticklabels.append(f"{label} ({pct:.1%})".replace("%", r"\%"))
