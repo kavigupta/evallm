@@ -137,7 +137,7 @@ def compute_deterministic_baseline_outcomes(
             ]
         for ngram in range(min_gram, 1 + max_gram):
             accuracies[rf"{ngram}-\textsc{{Gram}}$_T$"][no_prompt] = [
-                r.kgram_success_rates_each[ngram - 2]
+                ngram_success_rate(r, ngram)
                 for r in deterministic_baseline_outcomes
             ]
         if include_infinity_gram:
@@ -157,6 +157,11 @@ def compute_deterministic_baseline_outcomes(
             )
     return accuracies
 
+def ngram_success_rate(r, ngram):
+    successes = r.kgram_success_rates_each
+    if ngram - 2 < len(successes):
+        return successes[ngram - 2]
+    return successes[-1]
 
 def compute_model_results(model_outcomes, *, accuracy_summary):
     accuracies = defaultdict(dict)
