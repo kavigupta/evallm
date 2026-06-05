@@ -1,0 +1,377 @@
+% !TEX program = lualatex
+%% Randomly Sampled Language Reasoning Problems Elucidate Limitations of
+%% In-Context Learning.  Talk deck.
+%% Build with LuaLaTeX (system fonts via fontspec):
+%%   latexmk  (uses the bundled latexmkrc)  --  or  --  make
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{beamerthemeevallm}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{colortbl} % \cellcolor in the results table
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows.meta, positioning, automata}
+\usepackage{pifont} % \ding{51} checkmark (Type1 Dingbats, font-independent)
+\newcommand{\yes}{\textcolor{ecgreen}{\ding{51}}}
+
+%% Render math in Computer Modern (Latin Modern Math) instead of the sans beamer
+%% default, at a uniform normal weight. Operator names go through \eqname for
+%% true Latin Modern small caps (the body font, Futura, has no small-caps shape).
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\newfontfamily\cmsc{Latin Modern Roman}
+\newcommand{\eqname}[1]{\text{\normalfont\cmsc\scshape #1}}
+
+%% ---------------------------------------------------------------- alphabet
+%% The three DFA symbols, colored consistently with the paper's figures
+%% (a = blue, b = orange, c = purple), corresponding to 0, 1, 2.
+\newcommand{\symA}{\textcolor{ecblue}{\texttt{a}}}
+\newcommand{\symB}{\textcolor{ecorange}{\texttt{b}}}
+\newcommand{\symC}{\textcolor{ecpurple}{\texttt{c}}}
+\definecolor{evallmProp}{RGB}{200,30,60}
+
+%% ---------------------------------------------------------------- metadata
+\title{Randomly Sampled Language Reasoning Problems Elucidate Limitations of In-Context Learning}
+\author{Kavi Gupta\textsuperscript{\hl{1}} \and Kate Sanders\textsuperscript{\hl{2}} \and Armando Solar-Lezama\textsuperscript{\hl{1}}}
+\institute{\textsuperscript{\hl{1}}MIT CSAIL \quad\textbar\quad \textsuperscript{\hl{2}}Johns Hopkins University}
+\date{NeuS 2026}
+
+\begin{document}
+
+%% ---------------------------------------------------------------- title
+{
+\setbeamertemplate{footline}{}
+\begin{frame}[plain]
+  \vfill
+  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+  \vspace{0.3em}
+  {\color{evallmHighlight}\hrule height 2pt}
+  \vfill
+  {\usebeamerfont{author}\insertauthor\par}
+  \vspace{0.3em}
+  {\small\insertinstitute \quad\textbar\quad \insertdate\par}
+  \vfill
+\end{frame}
+}
+
+%% ================================================================ QUESTION
+\headerslide{The Question}
+
+%% ---------------------------------------------------------------- motivation
+\begin{frame}{In-context learning}
+  \begin{itemize}[<+->]
+    \item LLMs have a lot of value in \hl{parametric knowledge}
+    \item However, novel situations require \hl{on-the-fly learning}
+    \item But is this \hl{true learning}, or leveraging algorithms it has learned parametrically?
+    \item Existing ICL novelty studies \hl{perturb complex tasks}
+    \item We want to isolate novelty alone, without confounds from task complexity
+  \end{itemize}
+\end{frame}
+
+%% ---------------------------------------------------------------- the ideal task
+\begin{frame}{The ideal task}
+  A task that isolates ICL needs three properties:
+  \vspace{0.6em}
+  \begin{enumerate}[<+->]
+    \item \hl{A language task}: LLMs are first and foremost language models,
+          so this is their fairest arena.
+    \item \hl{Drawn at random}: the process of hand writing a task inherently
+          and unavoidably is biased towards the canonical
+          \begin{itemize}[<+->]
+            \item In particular, we want to draw from a \hl{parsimoniously defined}
+                space of languages, to avoid any bias whatsoever
+          \end{itemize}
+    \item \hl{Baselines that do not model the world}: to isolate the effect of novelty, we need
+          baselines that have no world model
+  \end{enumerate}
+  \vfill
+  \onslide<+->{\hl{Our answer:} regular languages languages recognized by $k$-state DFAs.}
+\end{frame}
+
+%% ================================================================ SETUP
+\headerslide{Randomly Sampled Languages}
+
+%% ---------------------------------------------------------------- why 3-state DFAs
+\begin{frame}{Why 3-state DFAs?}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{itemize}[<+->]
+        \item Regular languages are the \hl{simplest} class in the Chomsky hierarchy
+        \item Difficulty $=$ \hl{number of states}: the working memory a model
+              must maintain.
+        \item \hl{2-state} DFAs have \hl{no hidden state} (states $=$ outputs
+              $\{0,1\}$)
+        \item \hl{3-state} DFAs are the \hl{simplest nontrivial} case
+        \item Caveat: only \hl{78{,}786} of them. No mathematical guarantee of novelty
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \centering
+      \resizebox{0.95\linewidth}{!}{%
+      \begin{tikzpicture}[
+          >=Stealth, node distance=26mm,
+          state/.style={circle, draw=evallmText, line width=1pt,
+            minimum size=11mm, font=\large},
+          accept/.style={state, double, double distance=1pt},
+          every edge/.style={draw, line width=1pt}]
+        \node[accept] (s0) at (90:24mm) {0};
+        \node[state]  (s1) at (210:24mm) {1};
+        \node[state]  (s2) at (-30:24mm) {2};
+
+        %% self-loops on a (blue): s+0 = s
+        \draw[ecblue, ->] (s0) edge[loop above] node[above]{\symA} (s0);
+        \draw[ecblue, ->] (s1) edge[loop left]  node[left]{\symA}  (s1);
+        \draw[ecblue, ->] (s2) edge[loop right] node[right]{\symA} (s2);
+
+        %% b (orange): +1 -> 0->1->2->0
+        \draw[ecorange, ->] (s0) to[bend left=16] node[auto, inner sep=2pt]{\symB} (s1);
+        \draw[ecorange, ->] (s1) to[bend left=16] node[auto, inner sep=2pt]{\symB} (s2);
+        \draw[ecorange, ->] (s2) to[bend left=16] node[auto, inner sep=2pt]{\symB} (s0);
+
+        %% c (purple): +2 -> 0->2->1->0.  Each c edge is anti-parallel to a b
+        %% edge on the same side; using the SAME bend direction makes the two
+        %% arcs bow to opposite physical sides, so the auto-placed labels land
+        %% on opposite sides and never overlap.
+        \draw[ecpurple, ->] (s0) to[bend left=16] node[auto, inner sep=2pt]{\symC} (s2);
+        \draw[ecpurple, ->] (s2) to[bend left=16] node[auto, inner sep=2pt]{\symC} (s1);
+        \draw[ecpurple, ->] (s1) to[bend left=16] node[auto, inner sep=2pt]{\symC} (s0);
+      \end{tikzpicture}}
+      \par\vspace{0.7em}
+      {\scriptsize A 3-state DFA: ``sum of symbols (\symA\,$=0$, \symB\,$=1$,
+       \symC\,$=2$) divisible by 3.'' State \texttt{0} (double ring) accepts.}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+% %% ================================================================ TASKS
+% \headerslide{Tasks}
+
+% %% ---------------------------------------------------------------- seq completion
+% \begin{frame}{Task 1: Sequence Completion}
+%   \begin{columns}[T]
+%     \begin{column}{0.52\textwidth}
+%       \begin{itemize}[<+->]
+%         \item Show \hl{30 example strings} in the language.
+%         \item Give a \hl{prefix}; the model must \hl{complete} it (1--5 symbols)
+%               so the whole string is accepted.
+%         \item Mirrors how foundation models are \hl{trained}: masked / next-token
+%               prediction.
+%         \item Scored by whether the completion yields a \hl{valid string}.
+%       \end{itemize}
+%     \end{column}
+%     \begin{column}{0.48\textwidth}
+%       \onslide<2->{%
+%       \centering
+%       \ttfamily\large
+%       \begin{tabular}{l c}
+%         \symB\,\symB\,\symC\,\symA\,\symC\,\symB\,\symC\,\symA & \yes\\[2pt]
+%         \symB\,\symB\,\symA\,\symA\,\symB\,\symA\,\symA\,\symC & \yes\\[2pt]
+%         \symA\,\symB\,\symC\,\symB\,\symA\,\symA\,\symC\,\symA & \yes\\[6pt]
+%         \symC\,\symB\,\symA\,\symC\,?\,?\,?\,? & \yes\\
+%       \end{tabular}}
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+% %% ---------------------------------------------------------------- transducer
+% \begin{frame}{Task 2: Transducer}
+%   \begin{columns}[T]
+%     \begin{column}{0.52\textwidth}
+%       \begin{itemize}[<+->]
+%         \item Annotate \hl{every position} with an output: is the prefix so far
+%               accepted?
+%         \item Predict the \hl{final, masked} output.
+%         \item More \hl{transparent}: the intermediate labels expose an
+%               (imperfect) proxy for hidden state.
+%         \item Isolates \hl{pattern recognition} from world modeling.
+%       \end{itemize}
+%     \end{column}
+%     \begin{column}{0.48\textwidth}
+%       \onslide<2->{%
+%       \centering
+%       \ttfamily\large
+%       \setlength{\tabcolsep}{3pt}
+%       \begin{tabular}{cccccccccc}
+%         \symA&\symB&\symB&\symC&\symB&\symC&\symC&\symC&\symA&\symB\\
+%         1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & \hl{?}\\
+%       \end{tabular}
+%       \vspace{1em}
+%       \par {\normalfont\footnotesize The model predicts the last bit:
+%       is the full string in the language?}}
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+% %% ---------------------------------------------------------------- baselines
+% \begin{frame}{Baselines: learning without world modeling}
+%   \begin{itemize}[<+->]
+%     \item \hl{\textsc{Random}} / \hl{\textsc{Null}} --- pure chance / best
+%           constant guess.
+%     \item \hl{\textsc{Common-Suffix}} --- copy the most frequent matching suffix.
+%     \item \hl{\textsc{$n$-Gram}} --- vote among continuations seen after the same
+%           last $n{-}1$ symbols. \emph{No access to DFA state.}
+%     \item \hl{\textsc{Brute-Force}} --- enumerate all 3-state DFAs consistent
+%           with the examples. An (expensive) upper bound.
+%   \end{itemize}
+%   \vfill
+%   \onslide<+->{\small Crucially, $n$-grams are \hl{representable by transformers} ---
+%   so an LLM \emph{should} be able to match them.}
+% \end{frame}
+
+% %% ---------------------------------------------------------------- prompts
+% \begin{frame}{Prompting formats}
+%   \begin{columns}[T]
+%     \begin{column}{0.5\textwidth}
+%       \textbf{Main (pure ICL):}
+%       \begin{itemize}[<+->]
+%         \item \hl{\textsc{Basic}} --- just the examples, predict the next token.
+%         \item \hl{\textsc{Basic-CoT}} --- same, but think step by step.
+%       \end{itemize}
+%     \end{column}
+%     \begin{column}{0.5\textwidth}
+%       \onslide<3->{\textbf{Controls (structure revealed):}}
+%       \begin{itemize}[<+(3)->]
+%         \item \hl{\textsc{More-Expl}} --- ``these come from a grammar.''
+%         \item \hl{\textsc{DFA-CoT}} --- ``it is a 3-state DFA,'' reason it out.
+%         \item \hl{\textsc{Red-Green}} --- the same task as a word problem.
+%       \end{itemize}
+%     \end{column}
+%   \end{columns}
+%   \vfill
+%   \onslide<+->{\small We report the \hl{max over \textsc{Basic} and
+%   \textsc{Basic-CoT}} --- giving each model its best shot.}
+% \end{frame}
+
+% %% ================================================================ RESULTS
+% \headerslide{Results}
+
+% %% ---------------------------------------------------------------- models
+% \begin{frame}{Models evaluated}
+%   \begin{itemize}
+%     \item \hl{Open-weight:} Llama 3 / 3.1 (8B--70B), Qwen 2.5 (7B--32B), Mistral
+%           Nemo, Gemma, Falcon\ldots
+%     \item \hl{Open-weight code:} StarCoder2, Codestral, DeepSeek-Coder, Qwen
+%           2.5-Coder.
+%     \item \hl{Proprietary:} GPT-3.5 / 4o / 5, o3-mini, Claude 3.5 Sonnet.
+%   \end{itemize}
+%   \vfill
+%   Evaluated on up to \hl{1000 distinct DFAs} each, temperature 0.
+% \end{frame}
+
+% %% ---------------------------------------------------------------- main table
+% \begin{frame}{LLMs uniformly underperform $n$-gram models}
+%   \centering
+%   \small
+%   \setlength{\arrayrulewidth}{0.4pt}
+%   \begin{tabular}{l c c}
+%     \toprule
+%     \textbf{Model} & \textbf{Seq.\ Completion} & \textbf{Transducer}\\
+%     \midrule
+%     \multicolumn{3}{l}{\itshape Baselines}\\
+%     \textsc{Brute-Force} & 100.0 & 96.4\\
+%     \rowcolor{evallmHighlight!16}\textsc{6-Gram} & \textbf{91.7} & \textbf{93.5}\\
+%     \rowcolor{evallmHighlight!16}\textsc{5-Gram} & 91.2 & 93.4\\
+%     \rowcolor{evallmHighlight!16}\textsc{4-Gram} & 89.6 & 91.1\\
+%     \textsc{3-Gram} & 87.0 & 87.0\\
+%     \textsc{Random}/\textsc{Null} & 53.3 & 68.9\\
+%     \midrule
+%     \multicolumn{3}{l}{\itshape Best LLMs}\\
+%     qwen-2.5-coder-7B          & 79.5 & 86.8\\
+%     mistral-nemo-minitron-8B   & 78.7 & 88.6\\
+%     claude-3.5                 & 82.8 & 86.9\\
+%     o3-mini                    & 81.1 & 74.7\\
+%     gpt-5                      & 77.9 & 83.6\\
+%     \bottomrule
+%   \end{tabular}
+%   \vfill
+%   {\small Best LLM (82.8 / 88.6) trails even the \hl{4-Gram} (89.6 / 91.1).
+%   All $n{\geq}4$ comparisons are statistically significant.}
+% \end{frame}
+
+% %% ---------------------------------------------------------------- scatter
+% \begin{frame}{No LLM reaches the $n$-gram frontier}
+%   \framesubtitle{Transducer vs.\ Sequence Completion accuracy}
+%   \centering
+%   \begin{tikzpicture}[font=\scriptsize]
+%     %% coordinate transform: x = (val-50)/5 cm ; y = (val-65)*6/35 cm
+%     %% (computed inline per point via \pgfmathsetmacro below)
+%     %% "better than all LLMs on both tasks" region
+%     \fill[evallmHighlight!14] (7.6,4.286) rectangle (10.4,6.3);
+%     \node[evallmHighlight, anchor=north east, align=right, font=\tiny]
+%       at (10.3,6.2) {better than all\\LLMs on both};
+%     %% axes
+%     \draw[->, black!60] (-0.2,0) -- (10.6,0) node[below left]{Seq.\ Completion};
+%     \draw[->, black!60] (0,-0.2) -- (0,6.4) node[above right, rotate=90, anchor=south west]{Transducer};
+%     %% x ticks 50..100
+%     \foreach \v in {50,60,70,80,90,100}{
+%       \pgfmathsetmacro\xc{(\v-50)/5}
+%       \draw[black!50] (\xc,0) -- (\xc,-0.08) node[below]{\v};}
+%     %% y ticks 70..100
+%     \foreach \v in {70,80,90,100}{
+%       \pgfmathsetmacro\yc{(\v-65)*6/35}
+%       \draw[black!50] (0,\yc) -- (-0.08,\yc) node[left]{\v};}
+%     %% --- baselines (blue) ---
+%     \foreach \x/\y/\lab/\pos in {100/96.4/BruteForce/{above left},
+%         91.7/93.5/{6-Gram}/{right}, 91.2/93.4/{}/{right},
+%         89.6/91.1/{4-Gram}/{right}, 87.0/87.0/{3-Gram}/{below right}}{
+%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
+%       \fill[ecblue] (\xc,\yc) circle (2.4pt);
+%       \node[ecblue, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
+%     %% --- open-weight (purple) ---
+%     \foreach \x/\y/\lab/\pos in {79.5/86.8/{qwen-coder-7B}/{above},
+%         78.7/88.6/{nemo-minitron-8B}/{above}, 73.8/87.5/{llama3-8B}/{left}}{
+%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
+%       \fill[ecpurple] (\xc,\yc) circle (2.4pt);
+%       \node[ecpurple, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
+%     %% --- proprietary (red) ---
+%     \foreach \x/\y/\lab/\pos in {82.8/86.9/{claude-3.5}/{below right},
+%         74.8/83.7/{gpt-4o}/{below}, 81.1/74.7/{o3-mini}/{right},
+%         77.9/83.6/{gpt-5}/{below}}{
+%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
+%       \fill[evallmProp] (\xc,\yc) circle (2.4pt);
+%       \node[evallmProp, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
+%     %% --- random/null ---
+%     \pgfmathsetmacro\xc{(53.3-50)/5}\pgfmathsetmacro\yc{(68.9-65)*6/35}
+%     \fill[black!55] (\xc,\yc) circle (2.4pt);
+%     \node[black!55, above right, inner sep=1.5pt] at (\xc,\yc) {Random/Null};
+%   \end{tikzpicture}
+%   \vfill
+%   {\tiny\textcolor{ecblue}{$\bullet$ baselines}\quad
+%    \textcolor{ecpurple}{$\bullet$ open-weight}\quad
+%    \textcolor{evallmProp}{$\bullet$ proprietary}}
+% \end{frame}
+
+% %% ---------------------------------------------------------------- findings
+% \begin{frame}{What the numbers say}
+%   \begin{itemize}[<+->]
+%     \item Every LLM is \hl{beaten by a 4-Gram} on both tasks --- a model with
+%           \emph{no} hidden state.
+%     \item Scale and fine-tuning \hl{don't rescue it}: 70B $\approx$ 8B, code
+%           models help only on completion.
+%     \item On the transducer, \hl{directly predicting} usually beats chain-of-thought.
+%     \item Revealing the structure (it's a DFA!) gives \hl{little consistent
+%           lift} --- only gpt-5 uses it well.
+%   \end{itemize}
+% \end{frame}
+
+% %% ================================================================ CONCLUSION
+% \headerslide{Takeaway}
+
+% \begin{frame}{Takeaway}
+%   \begin{itemize}[<+->]
+%     \item On \hl{randomly sampled}, genuinely novel languages, LLM in-context
+%           learning \hl{loses to primitive $n$-gram models}.
+%     \item This is \emph{not} a world-modeling failure ($n$-grams model nothing)
+%           nor a transformer limitation ($n$-grams are transformer-representable).
+%     \item LLMs have learned \hl{many individual languages} --- but not a
+%           \hl{general theory of language} they can apply to a new one.
+%     \item ICL is \hl{not yet a substitute} for even the most primitive learning
+%           on novel problems.
+%   \end{itemize}
+% \end{frame}
+
+% %% ================================================================ QUESTIONS
+% \headerslide{Questions?}
+
+\end{document}

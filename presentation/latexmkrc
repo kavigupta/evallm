@@ -1,0 +1,9 @@
+# Force LuaLaTeX so fontspec / system fonts (Futura, Noto Mono) work.
+#
+# latexmk reads this file from the source directory, so command-line tools
+# AND editors (VS Code's LaTeX Workshop, etc.) pick it up automatically.
+# We stay in pdf mode (so the stock "latexmk -pdf" recipe is happy) but
+# redirect the pdflatex command to actually run lualatex.
+$pdf_mode = 1;
+$pdflatex = 'lualatex -interaction=nonstopmode -synctex=1 %O %S';
+@default_files = ('presentation.tex');

@@ -1,0 +1,140 @@
+%% beamerthemeevallm.sty
+%% A minimal black-on-white beamer theme for the Randomly Sampled Language
+%% Reasoning Problems talk. Mirrors the E-Stitch workshop theme.
+%%   Text font:  Futura Medium  (Heavy used for genuine bold)
+%%   Code font:  Noto Mono
+%%   Highlight:  #D55E00  (the colorblind-safe orange used in the paper figures)
+%% Requires LuaLaTeX for fontspec / system fonts.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{beamerthemeevallm}[2026/06/05 evallm beamer theme]
+
+\RequirePackage{fontspec}
+\RequirePackage{tikz}
+\usetikzlibrary{calc}
+\RequirePackage{luacolor}
+\RequirePackage{lua-ul}      % background highlighting that survives line breaks
+
+%% ---------------------------------------------------------------- fonts
+%% Futura Medium ("Futura Md BT") is the dominant weight; Heavy ("Futura Hv
+%% BT") is the only "bold" cut, so nothing reads as too heavy. Both cuts ship
+%% matching italics, which fontspec resolves automatically from the family.
+\setmainfont{Futura Md BT}[BoldFont = Futura Hv BT]
+\setsansfont{Futura Md BT}[BoldFont = Futura Hv BT]
+\setmonofont{Noto Mono}[Scale=MatchLowercase]
+\renewcommand{\familydefault}{\sfdefault}
+
+%% ---------------------------------------------------------------- colors
+%% The accent is the paper's colorblind-safe orange; blue and purple are the
+%% other two DFA-alphabet colors (a/b/c) reused across diagrams.
+\definecolor{evallmHighlight}{HTML}{D55E00}
+\definecolor{evallmText}{HTML}{000000}
+\definecolor{evallmBackground}{HTML}{fff8f0}
+\definecolor{ecblue}{RGB}{0,114,178}%
+\definecolor{ecorange}{RGB}{213,94,0}%
+\definecolor{ecpurple}{RGB}{99,0,204}%
+\definecolor{ecgreen}{RGB}{31,138,59}%
+
+%% ---------------------------------------------------------------- layout
+\useoutertheme{default}
+\useinnertheme{default}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+\setbeamertemplate{enumerate items}[default]
+\setbeamertemplate{sections/subsections in toc}[circle]
+\setbeamersize{text margin left=2.2em, text margin right=2.2em}
+
+%% Black text on white; the accent color marks structure and highlights.
+\setbeamercolor{normal text}{fg=evallmText, bg=evallmBackground}
+\setbeamercolor{background canvas}{bg=evallmBackground}
+\setbeamercolor{structure}{fg=evallmHighlight}
+\setbeamercolor{alerted text}{fg=ecorange}
+
+\setbeamercolor{frametitle}{fg=evallmText, bg=evallmBackground}
+\setbeamercolor{framesubtitle}{fg=evallmHighlight, bg=evallmBackground}
+\setbeamercolor{title}{fg=evallmText}
+\setbeamercolor{subtitle}{fg=evallmHighlight}
+\setbeamercolor{author}{fg=evallmText}
+\setbeamercolor{institute}{fg=evallmText}
+\setbeamercolor{date}{fg=evallmText}
+
+\setbeamercolor{itemize item}{fg=evallmHighlight}
+\setbeamercolor{itemize subitem}{fg=evallmHighlight}
+\setbeamercolor{itemize subsubitem}{fg=evallmHighlight}
+\setbeamercolor{enumerate item}{fg=evallmHighlight}
+\setbeamercolor{section in toc}{fg=evallmText}
+
+\setbeamercolor{block title}{fg=evallmBackground, bg=evallmHighlight}
+\setbeamercolor{block body}{fg=evallmText, bg=evallmHighlight!10}
+
+%% ---------------------------------------------------------------- font sizes
+%% Hierarchy comes from size (and the accent rule), not from heavy weights.
+\setbeamerfont{frametitle}{size=\LARGE}
+\setbeamerfont{framesubtitle}{size=\large}
+\setbeamerfont{title}{size=\Huge}
+\setbeamerfont{subtitle}{size=\large}
+\setbeamerfont{author}{size=\large}
+
+%% ---------------------------------------------------------------- frame title
+%% Flat title with a thin accent rule underneath.
+\setbeamertemplate{frametitle}{%
+  \vspace{0.6em}%
+  {\usebeamerfont{frametitle}\usebeamercolor[fg]{frametitle}\insertframetitle\par}%
+  \ifx\insertframesubtitle\@empty\else
+    {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\par}%
+  \fi
+  \vspace{0.2em}%
+  {\color{evallmHighlight}\hrule height 1.5pt}%
+  \vspace{0.2em}%
+}
+
+%% ---------------------------------------------------------------- footline
+\setbeamertemplate{footline}{}
+
+%% ---------------------------------------------------------------- header
+%% \headerslide{Title} -- a full-bleed section divider: white text centered on
+%% the accent color.
+\newcommand{\headerslide}[1]{%
+  {%
+    \setbeamercolor{background canvas}{bg=evallmHighlight}%
+    \begin{frame}[plain]%
+      \centering
+      \vfill
+      {\usebeamerfont{title}\color{white}#1\par}%
+      \vfill
+    \end{frame}%
+  }%
+}
+
+%% ---------------------------------------------------------------- pop-ups
+%% \popups{<count>}{<comma-separated list>} -- overlays the given callout
+%% boxes evenly along the top-left -> bottom-right diagonal and reveals them one
+%% per overlay step, starting on slide 2.
+\tikzset{
+  evallm popup/.style={fill=evallmHighlight, fill opacity=0.85,
+    text=white, text opacity=1, rounded corners=3pt, inner sep=9pt,
+    font=\large, anchor=center, align=left},
+}
+\newcommand{\popups}[2]{%
+  \begin{tikzpicture}[overlay, remember picture]
+    \coordinate (popstart) at ($(current page.north west)+(1.8cm,-1.8cm)$);
+    \coordinate (popend)   at ($(current page.south east)+(-1.8cm,1.8cm)$);
+    \foreach \popmsg [count=\popk from 0] in {#2}{%
+      \pgfmathsetmacro\popt{\popk/max(1,#1-1)}%
+      \def\popanchor{center}%
+      \ifnum\popk=0 \def\popanchor{north west}\fi
+      \ifnum\popk=\numexpr#1-1\relax \def\popanchor{south east}\fi
+      \node<\the\numexpr\popk+2\relax->[evallm popup, anchor=\popanchor]
+        at ($(popstart)!\popt!(popend)$) {\popmsg};%
+    }%
+  \end{tikzpicture}%
+}
+
+%% ---------------------------------------------------------------- helpers
+%% \hl{...} highlights inline text in the accent color.
+\newcommand{\hl}[1]{{\color{evallmHighlight}#1}}
+
+%% \codehl{...} paints a light accent background behind code, leaving the text
+%% black. Survives line wraps.
+\newcommand{\codehl}[1]{\highLight[evallmHighlight!22]{#1}}
+
+\endinput
