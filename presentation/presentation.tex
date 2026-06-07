@@ -11,7 +11,7 @@
 \usepackage{booktabs}
 \usepackage{colortbl} % \cellcolor in the results table
 \usepackage{tikz}
-\usetikzlibrary{calc, arrows.meta, positioning, automata}
+\usetikzlibrary{calc, arrows.meta, positioning, automata, shapes.geometric}
 \usepackage{pifont} % \ding{51} checkmark (Type1 Dingbats, font-independent)
 \newcommand{\yes}{\textcolor{ecgreen}{\ding{51}}}
 
@@ -144,80 +144,153 @@
   \end{columns}
 \end{frame}
 
-% %% ================================================================ TASKS
-% \headerslide{Tasks}
+%% ================================================================ BASELINES
+\headerslide{Baselines}
 
-% %% ---------------------------------------------------------------- seq completion
-% \begin{frame}{Task 1: Sequence Completion}
-%   \begin{columns}[T]
-%     \begin{column}{0.52\textwidth}
-%       \begin{itemize}[<+->]
-%         \item Show \hl{30 example strings} in the language.
-%         \item Give a \hl{prefix}; the model must \hl{complete} it (1--5 symbols)
-%               so the whole string is accepted.
-%         \item Mirrors how foundation models are \hl{trained}: masked / next-token
-%               prediction.
-%         \item Scored by whether the completion yields a \hl{valid string}.
-%       \end{itemize}
-%     \end{column}
-%     \begin{column}{0.48\textwidth}
-%       \onslide<2->{%
-%       \centering
-%       \ttfamily\large
-%       \begin{tabular}{l c}
-%         \symB\,\symB\,\symC\,\symA\,\symC\,\symB\,\symC\,\symA & \yes\\[2pt]
-%         \symB\,\symB\,\symA\,\symA\,\symB\,\symA\,\symA\,\symC & \yes\\[2pt]
-%         \symA\,\symB\,\symC\,\symB\,\symA\,\symA\,\symC\,\symA & \yes\\[6pt]
-%         \symC\,\symB\,\symA\,\symC\,?\,?\,?\,? & \yes\\
-%       \end{tabular}}
-%     \end{column}
-%   \end{columns}
-% \end{frame}
+%% ---------------------------------------------------------------- random/null
+\begin{frame}{Baseline 1: \textsc{Random} / \textsc{Null}}
+  \begin{itemize}[<+->]
+    \item \hl{\textsc{Random}}: on sequence completion, predict a
+          \hl{random completion}.
+    \item \hl{\textsc{Null}}: on the transducer, pick whichever of \hl{0} and
+          \hl{1} is better.
+    \item These \hl{ignore the examples / context} entirely.
+    \item Establish a \hl{chance baseline}.
+  \end{itemize}
+\end{frame}
 
-% %% ---------------------------------------------------------------- transducer
-% \begin{frame}{Task 2: Transducer}
-%   \begin{columns}[T]
-%     \begin{column}{0.52\textwidth}
-%       \begin{itemize}[<+->]
-%         \item Annotate \hl{every position} with an output: is the prefix so far
-%               accepted?
-%         \item Predict the \hl{final, masked} output.
-%         \item More \hl{transparent}: the intermediate labels expose an
-%               (imperfect) proxy for hidden state.
-%         \item Isolates \hl{pattern recognition} from world modeling.
-%       \end{itemize}
-%     \end{column}
-%     \begin{column}{0.48\textwidth}
-%       \onslide<2->{%
-%       \centering
-%       \ttfamily\large
-%       \setlength{\tabcolsep}{3pt}
-%       \begin{tabular}{cccccccccc}
-%         \symA&\symB&\symB&\symC&\symB&\symC&\symC&\symC&\symA&\symB\\
-%         1 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & \hl{?}\\
-%       \end{tabular}
-%       \vspace{1em}
-%       \par {\normalfont\footnotesize The model predicts the last bit:
-%       is the full string in the language?}}
-%     \end{column}
-%   \end{columns}
-% \end{frame}
+%% ---------------------------------------------------------------- common-suffix
+\begin{frame}{Baseline 2: \textsc{Common-Suffix}}
+  \begin{columns}[T]
+    \begin{column}{0.55\textwidth}
+      \begin{itemize}[<+->]
+        \item A heuristic for the \hl{sequence-completion} task.
+        \item \hl{Ignores the prefix}; just appends a suffix that the examples
+              tend to end with.
+        \item Picks the suffix $S$ maximizing
+              $\bigl(\#\text{examples ending in } S\bigr)\times|S|$, trading
+              frequency against length.
+        \item Pure \hl{surface copying}: no notion of state, no real inference.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.45\textwidth}
+      \centering
+      \onslide<2->{%
+      \ttfamily\large
+      \begin{tabular}{l}
+        \symB\,\symB\,\symC\,\symC\,\hl{\symC\,\symB\,\symA}\\
+        \symA\,\symC\,\symB\,\symB\,\hl{\symC\,\symB\,\symA}\\
+        \symB\,\symA\,\symA\,\symC\,\hl{\symC\,\symB\,\symA}\\[6pt]
+        \symC\,\symB\,\symA\,?\,?\,?\,?\\
+      \end{tabular}}
+      \par\vspace{0.8em}
+      \onslide<3->{%
+      {\normalfont\footnotesize All 3 end in ``\,\symC\,\symB\,\symA\,''
+      ($3\times3=9$), beating ``\,\symC\,\symC\,\symB\,\symA\,'' ($2\times4=8$).}}
+    \end{column}
+  \end{columns}
+\end{frame}
 
-% %% ---------------------------------------------------------------- baselines
-% \begin{frame}{Baselines: learning without world modeling}
-%   \begin{itemize}[<+->]
-%     \item \hl{\textsc{Random}} / \hl{\textsc{Null}} --- pure chance / best
-%           constant guess.
-%     \item \hl{\textsc{Common-Suffix}} --- copy the most frequent matching suffix.
-%     \item \hl{\textsc{$n$-Gram}} --- vote among continuations seen after the same
-%           last $n{-}1$ symbols. \emph{No access to DFA state.}
-%     \item \hl{\textsc{Brute-Force}} --- enumerate all 3-state DFAs consistent
-%           with the examples. An (expensive) upper bound.
-%   \end{itemize}
-%   \vfill
-%   \onslide<+->{\small Crucially, $n$-grams are \hl{representable by transformers} ---
-%   so an LLM \emph{should} be able to match them.}
-% \end{frame}
+%% ---------------------------------------------------------------- n-gram intro
+\begin{frame}{Baseline 3: \textsc{$n$-Gram}}
+  Heuristic on both transducer and sequence completion task.
+\end{frame}
+
+%% ---------------------------------------------------------------- n-gram
+%% Highlight helpers for the interleaved transducer trace below:
+%%   \mt = matched context window, \pulled = pulled next output, \qt = query window
+\newcommand{\mt}[1]{\highLight[ecblue!18]{#1}}
+\newcommand{\pulled}[1]{\highLight[ecgreen!28]{\textbf{#1}}}
+\newcommand{\qt}[1]{\highLight[evallmHighlight!30]{#1}}
+\newcommand{\mask}{\textbf{\textcolor{ecgreen}{?}}}
+\begin{frame}{\textsc{$n$-Gram} on Transducer tasks}
+  \begin{center}
+  \ttfamily\normalsize
+  \begin{tabular}{@{}l@{}}
+    \symB\,\texttt{0}\,\symC\,\texttt{1}\,\symB\,\texttt{0}\,\symC\,\texttt{1}\,\symA\,\texttt{1}\,\symB\,\texttt{0}\,\symB\,\texttt{0}\,\symB\,\texttt{1}\,\symC\,\texttt{0}\,\symA\,\texttt{0}\\[0.7em]
+    \symA\,\texttt{0}\,\symC\,\alt<3->{\mt{\texttt{0}\,\symA\,\texttt{0}\,\symB}}{\texttt{0}\,\symA\,\texttt{0}\,\symB}\,\alt<4->{\pulled{\texttt{0}}}{\texttt{0}}\,\symC\,\texttt{0}\,\symC\,\texttt{1}\,\symB\,\alt<3->{\mt{\texttt{0}\,\symA\,\texttt{0}\,\symB}}{\texttt{0}\,\symA\,\texttt{0}\,\symB}\,\alt<4->{\pulled{\texttt{0}}}{\texttt{0}}\,\symC\,\texttt{0}\\[0.7em]
+    \symB\,\alt<3->{\mt{\texttt{0}\,\symA\,\texttt{0}\,\symB}}{\texttt{0}\,\symA\,\texttt{0}\,\symB}\,\alt<4->{\pulled{\texttt{1}}}{\texttt{1}}\,\symB\,\texttt{0}\,\symC\,\texttt{1}\,\symA\,\texttt{1}\,\symB\,\alt<2->{\qt{\texttt{0}\,\symA\,\texttt{0}\,\symB}}{\texttt{0}\,\symA\,\texttt{0}\,\symB}\,\mask
+  \end{tabular}
+  \end{center}
+  \vspace{0.6em}
+  \small
+  \onslide<1->{Lay out the input/output as interleaved sequences.}\par\medskip
+  \onslide<2->{\textbf{Context:} the last $n{-}1=4$ tokens,
+  \qt{\texttt{0}\,\symA\,\texttt{0}\,\symB}.}\par\smallskip
+  \onslide<3->{Find every \textcolor{ecblue}{earlier occurrence} of that context\only<4->{, and take the \textcolor{ecgreen}{output that follows} each.}}\par\smallskip
+  \onslide<5->{Counts: \texttt{0} appears \textcolor{ecgreen}{twice}, \texttt{1} \textcolor{ecgreen}{once}.}\par\smallskip
+  \onslide<6->{Majority vote $\Rightarrow$ \textcolor{ecgreen}{0} \yes}
+\end{frame}
+
+%% ---------------------------------------------------------------- n-gram (seq. completion)
+\begin{frame}{\textsc{$n$-Gram} on Sequence Completion}
+  \onslide<1->{Complete the \hl{prefix} into the language, from a few accepted
+  example strings (not all 30 shown):}
+  \vspace{0.4em}
+  \begin{center}
+  \ttfamily\normalsize
+  \setlength{\tabcolsep}{2em}\renewcommand{\arraystretch}{1.4}
+  \begin{tabular}{@{}ccc@{}}
+    \symA\,\symA\,\symB\,\symB\,\symA\,\symB\,\symB\,\symC & \symA\,\symA\,\symA\,\symB\,\symA\,\alt<3->{\mt{\symA\,\symC}}{\symA\,\symC}\,\alt<4->{\pulled{\symA}}{\symA} & \symC\,\symC\,\symC\,\alt<3->{\mt{\symA\,\symC}}{\symA\,\symC}\,\alt<4->{\pulled{\symA\,\symB\,\symA}}{\symA\,\symB\,\symA}\\
+    \symC\,\symA\,\symB\,\alt<3->{\mt{\symA\,\symC}}{\symA\,\symC}\,\alt<4->{\pulled{\symA\,\symB\,\symA}}{\symA\,\symB\,\symA} & \symA\,\symB\,\symC\,\symC\,\symA\,\symA\,\symA\,\symB & \symB\,\symB\,\symB\,\symA\,\symB\,\symB\,\symB\,\symA\\
+  \end{tabular}
+  \end{center}
+  \vspace{0.3em}
+  \small
+  \onslide<1->{\textbf{Prefix:}~{\symA\,\symC\,\symB\,\alt<2->{\qt{\symA\,\symC}}{\symA\,\symC}\,\mask}}\par\medskip
+  \onslide<2->{\textbf{Context:} the last $n{-}1=2$ symbols, \qt{\symA\,\symC}.}\par\smallskip
+  \onslide<3->{Find every \textcolor{ecblue}{earlier occurrence} of that context\only<4->{, and copy the \textcolor{ecgreen}{suffix that follows} (any length).}}\par\smallskip
+  \onslide<5->{Counts: \textcolor{ecgreen}{\texttt{aba}} \textcolor{ecgreen}{twice}, \textcolor{ecgreen}{\texttt{a}} once.}\par\smallskip
+  \onslide<6->{Most common $\Rightarrow$ complete with
+  {\symA\,\symC\,\symB\,\symA\,\symC\,\pulled{\symA\,\symB\,\symA}} \yes}
+\end{frame}
+
+%% ---------------------------------------------------------------- brute force
+%% Colored equation terms, each revealed/highlighted on its own overlay beat.
+\newcommand{\cmark}{\text{\ding{51}}}
+%% \hlm: a content-fitted highlight box for math atoms (lua-ul's rule height is
+%% fixed and mis-sizes sub/superscripts and large operators).
+\newcommand{\hlm}[2]{\tikz[baseline=(hh.base)]{\node[fill=#1, inner sep=1.2pt, outer sep=0pt, rounded corners=1.5pt] (hh) {\ensuremath{#2}};}}
+%% \hlmo: pick between a filled box (from overlay #1) and an identically-sized
+%% unfilled box (before). Same dimensions either way, so no reflow/jitter.
+\newcommand{\hlmo}[3]{\alt<#1>{\hlm{#2}{#3}}{\hlm{none}{#3}}}
+\newcommand{\bx}{\hlmo{2-}{ecblue!18}{x}}
+\newcommand{\byh}{\hlmo{3-}{ecpurple!20}{\hat y}}
+\newcommand{\byhsub}{\hlmo{3-}{ecpurple!20}{\scriptstyle\hat y}}
+\newcommand{\bcm}{\hlmo{4-}{ecgreen!28}{\cmark}}
+\newcommand{\bsum}{\hlmo{6-}{evallmHighlight!30}{\displaystyle\sum_{\mathrm{dfa}}}}
+\begin{frame}{Baseline 4: \textsc{Brute-Force}}
+  \onslide<1->{We pick the prediction that \hl{maximizes the chance of being
+  correct}:}
+  \vspace{0.6em}
+  \[
+  \begin{gathered}
+    \operatorname*{arg\,max}_{\byhsub}\; P\!\left(\bcm \;\middle|\; \bx ;\, \byh\right)\\[8pt]
+    \onslide<5->{P\!\left(\cmark \;\middle|\; x ;\, \hat y\right) =
+      \bsum\; P\!\left(\cmark \;\middle|\; x,\mathrm{dfa};\, \hat y\right)\,P(\mathrm{dfa})}
+  \end{gathered}
+  \]
+  \vspace{0.3em}
+  \small
+  \onslide<2->{\hlm{ecblue!18}{x}: the input/output examples.}\par\smallskip
+  \onslide<3->{\hlm{ecpurple!20}{\hat y}: the predicted output.}\par\smallskip
+  \onslide<4->{\hlm{ecgreen!28}{\cmark}: whether the prediction is correct.}\par\smallskip
+  \onslide<5->{Marginalize over every DFA, with $P(\mathrm{dfa})$ taken \hl{uniform}.}\par\smallskip
+  \onslide<6->{The \hlm{evallmHighlight!30}{\textstyle\sum_{\mathrm{dfa}}} is
+  tractable: there are only \hl{78{,}786} 3-state DFAs.}
+\end{frame}
+
+%% ---------------------------------------------------------------- summary
+\begin{frame}{Baselines: a spectrum}
+  \begin{itemize}[<+->]
+    \item \hl{\textsc{Random} / \textsc{Null}}: a \hl{lower bound} (chance,
+          no learning at all).
+    \item \hl{\textsc{Common-Suffix}} and \hl{\textsc{$n$-Gram}}:
+          \hl{non world-modeling} baselines of varying sophistication.
+    \item \hl{\textsc{Brute-Force}}: an \hl{upper bound} (the Bayes-optimal
+          world model).
+  \end{itemize}
+\end{frame}
 
 % %% ---------------------------------------------------------------- prompts
 % \begin{frame}{Prompting formats}
