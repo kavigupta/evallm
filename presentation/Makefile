@@ -1,27 +1,34 @@
 # Randomly Sampled Language Reasoning Problems -- talk (self-contained, LuaLaTeX).
-.PHONY: all pdf prompts watch clean distclean
+.PHONY: all pdf prompts scatter generated watch clean distclean
 
 # Python with the evallm package available (the repo virtualenv by default).
 PYTHON ?= ../env/bin/python
 
 all: pdf
 
-# Regenerate the verbatim prompt listings from the real prompting code whenever
-# the generator changes. The script writes all generated/*.tex files at once;
-# we track one of them as the make target.
-GEN_SENTINEL := generated/prompt_basic.tex
+# Regenerate the verbatim prompt listings and the results scatter from the real
+# code whenever a generator changes. Each script writes its generated/*.tex
+# file(s) at once; we track one output of each as the make target.
+PROMPTS_SENTINEL := generated/prompt_basic.tex
+SCATTER := generated/scatter.tex
+GENERATED := $(PROMPTS_SENTINEL) $(SCATTER)
 
-$(GEN_SENTINEL): generate_prompts.py
+$(PROMPTS_SENTINEL): generate_prompts.py
 	$(PYTHON) generate_prompts.py
 
-prompts: $(GEN_SENTINEL)
+$(SCATTER): generate_scatter.py
+	$(PYTHON) generate_scatter.py
 
-# Compile the slides (after ensuring the generated listings exist).
-pdf: $(GEN_SENTINEL)
+prompts: $(PROMPTS_SENTINEL)
+scatter: $(SCATTER)
+generated: $(GENERATED)
+
+# Compile the slides (after ensuring the generated files exist).
+pdf: $(GENERATED)
 	latexmk
 
 # Recompile on every change.
-watch: $(GEN_SENTINEL)
+watch: $(GENERATED)
 	latexmk -pvc
 
 # Remove LaTeX build artifacts (keeps generated/ listings).

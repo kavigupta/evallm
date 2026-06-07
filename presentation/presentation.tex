@@ -397,8 +397,8 @@
   temperature 0.}
 \end{frame}
 
-% %% ================================================================ RESULTS
-% \headerslide{Results}
+%% ================================================================ RESULTS
+\headerslide{Results}
 
 % %% ---------------------------------------------------------------- main table
 % \begin{frame}{LLMs uniformly underperform $n$-gram models}
@@ -430,58 +430,12 @@
 %   All $n{\geq}4$ comparisons are statistically significant.}
 % \end{frame}
 
-% %% ---------------------------------------------------------------- scatter
-% \begin{frame}{No LLM reaches the $n$-gram frontier}
-%   \framesubtitle{Transducer vs.\ Sequence Completion accuracy}
-%   \centering
-%   \begin{tikzpicture}[font=\scriptsize]
-%     %% coordinate transform: x = (val-50)/5 cm ; y = (val-65)*6/35 cm
-%     %% (computed inline per point via \pgfmathsetmacro below)
-%     %% "better than all LLMs on both tasks" region
-%     \fill[evallmHighlight!14] (7.6,4.286) rectangle (10.4,6.3);
-%     \node[evallmHighlight, anchor=north east, align=right, font=\tiny]
-%       at (10.3,6.2) {better than all\\LLMs on both};
-%     %% axes
-%     \draw[->, black!60] (-0.2,0) -- (10.6,0) node[below left]{Seq.\ Completion};
-%     \draw[->, black!60] (0,-0.2) -- (0,6.4) node[above right, rotate=90, anchor=south west]{Transducer};
-%     %% x ticks 50..100
-%     \foreach \v in {50,60,70,80,90,100}{
-%       \pgfmathsetmacro\xc{(\v-50)/5}
-%       \draw[black!50] (\xc,0) -- (\xc,-0.08) node[below]{\v};}
-%     %% y ticks 70..100
-%     \foreach \v in {70,80,90,100}{
-%       \pgfmathsetmacro\yc{(\v-65)*6/35}
-%       \draw[black!50] (0,\yc) -- (-0.08,\yc) node[left]{\v};}
-%     %% --- baselines (blue) ---
-%     \foreach \x/\y/\lab/\pos in {100/96.4/BruteForce/{above left},
-%         91.7/93.5/{6-Gram}/{right}, 91.2/93.4/{}/{right},
-%         89.6/91.1/{4-Gram}/{right}, 87.0/87.0/{3-Gram}/{below right}}{
-%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
-%       \fill[ecblue] (\xc,\yc) circle (2.4pt);
-%       \node[ecblue, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
-%     %% --- open-weight (purple) ---
-%     \foreach \x/\y/\lab/\pos in {79.5/86.8/{qwen-coder-7B}/{above},
-%         78.7/88.6/{nemo-minitron-8B}/{above}, 73.8/87.5/{llama3-8B}/{left}}{
-%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
-%       \fill[ecpurple] (\xc,\yc) circle (2.4pt);
-%       \node[ecpurple, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
-%     %% --- proprietary (red) ---
-%     \foreach \x/\y/\lab/\pos in {82.8/86.9/{claude-3.5}/{below right},
-%         74.8/83.7/{gpt-4o}/{below}, 81.1/74.7/{o3-mini}/{right},
-%         77.9/83.6/{gpt-5}/{below}}{
-%       \pgfmathsetmacro\xc{(\x-50)/5}\pgfmathsetmacro\yc{(\y-65)*6/35}
-%       \fill[evallmProp] (\xc,\yc) circle (2.4pt);
-%       \node[evallmProp, \pos, inner sep=1.5pt] at (\xc,\yc) {\lab};}
-%     %% --- random/null ---
-%     \pgfmathsetmacro\xc{(53.3-50)/5}\pgfmathsetmacro\yc{(68.9-65)*6/35}
-%     \fill[black!55] (\xc,\yc) circle (2.4pt);
-%     \node[black!55, above right, inner sep=1.5pt] at (\xc,\yc) {Random/Null};
-%   \end{tikzpicture}
-%   \vfill
-%   {\tiny\textcolor{ecblue}{$\bullet$ baselines}\quad
-%    \textcolor{ecpurple}{$\bullet$ open-weight}\quad
-%    \textcolor{evallmProp}{$\bullet$ proprietary}}
-% \end{frame}
+%% ---------------------------------------------------------------- scatter
+%% The tikzpicture is generated from the cached results by generate_scatter.py.
+\begin{frame}{No tested LLM matches \textsc{$n$-Gram} performance}
+  \centering
+  \input{generated/scatter.tex}
+\end{frame}
 
 % %% ---------------------------------------------------------------- findings
 % \begin{frame}{What the numbers say}
