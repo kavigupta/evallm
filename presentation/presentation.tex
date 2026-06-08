@@ -456,14 +456,21 @@
   \centering
   \scriptsize
   \resizebox{\linewidth}{!}{\input{generated/prompt_table.tex}}
-  \par\vspace{0.5em}
+  \par\vspace{0.6em}
   \small
   \begin{itemize}\setlength{\itemsep}{0.3em}
-    \item \onslide<2->{\textbf{Yes!} \hl{o3-mini} and \hl{gpt-5} solve
-          the transducer task when given the structure.}
-    \item \onslide<3->{When told that this is a 3-state DFA, either explicitly
-          (\textsc{DFA-CoT}) or not (\textsc{Red-Green}), gpt-5 \hl{solves it
-          essentially perfectly}.}
+    \item \onslide<2->{Mere knowledge that there is a grammar
+          \textbf{\textcolor{ecgreen}{does not help at all}}.}
+    \item \onslide<3->{Non-reasoning models
+          \textbf{\textcolor{evallmProp}{aren't helped}} by knowing the exact
+          structure.}
+    \item \onslide<4->{Exact structure \hl{helps} o3-mini on transducer}%
+          \onslide<5->{ \hl{but} not on sequence completion.}
+    \item \onslide<6->{Exact structure \textcolor{ecblue}{doesn't benefit} gpt-5
+          on sequence completion}\onslide<7->{ but allows it to
+          \textcolor{ecblue}{perfectly solve} transducer.}
+    \item \onslide<8->{So the lack of performance cannot be attributed to an
+          underlying task difficulty, at least on transducer.}
   \end{itemize}
 \end{frame}
 
@@ -495,6 +502,42 @@
 %           on novel problems.
 %   \end{itemize}
 % \end{frame}
+
+%% ================================================================ DISCUSSION
+\headerslide{Discussion}
+
+%% ---------------------------------------------------------------- caveats
+\begin{frame}{What we are not saying}
+  \begin{itemize}[<+->]
+    \item Not that LLMs are bad, or that they have not learned at all
+    \item Not that ICL is useless, or that it cannot learn anything
+    \item Not that Transformers can't learn \textsc{$n$-Gram}s, or even that they can't learn DFAs
+    \item Not that LLMs know nothing about language, or that they can't learn any languages in-context
+  \end{itemize}
+\end{frame}
+
+%% ---------------------------------------------------------------- caveats
+\begin{frame}{But we can say this}
+  \begin{itemize}[<+->]
+    \item LLMs have not learned a \hl{general theory of language} in their \hl{parameters} that they can apply \hl{in-context} to an \hl{entirely new} language \hl{without knowing anything} about it.
+  \end{itemize}
+\end{frame}
+
+%% ---------------------------------------------------------------- the claim
+%% One sentence, revealed clause by clause (each clause on its own line).
+\begin{frame}{But we can say this}
+  \large
+  \onslide<1->{LLMs have not learned}\\
+  \onslide<2->{\hspace{1.5em}a \hl{general theory of language}}\\
+  \onslide<3->{\hspace{1.5em}in their \hl{parameters}}\\
+  \onslide<4->{\hspace{1.5em}that they can apply \hl{in-context}}\\
+  \onslide<5->{\hspace{1.5em}to an \hl{entirely new} language}\\
+  \onslide<6->{\hspace{1.5em}\hl{without knowing anything} about it.}\\[0.7em]
+  \onslide<7->{Even when}\\
+  \onslide<8->{\hspace{1.5em}languages are \hl{regular}}\\
+  \onslide<9->{\hspace{1.5em}and the only target to beat is an \textsc{$n$-Gram}}\\
+  \onslide<10->{\hspace{1.5em}with \hl{no ability to world model}.}
+\end{frame}
 
 % %% ================================================================ QUESTIONS
 % \headerslide{Questions?}

@@ -10,11 +10,20 @@ Differences from the paper's Table 2, for legibility on a slide:
   * the two pure-ICL columns (Basic / Basic-CoT) are collapsed into one Basic
     column reporting the better of the two (the deck reports each model's best
     pure-ICL shot anyway);
-  * a 6-Gram column is appended as the non-world-modeling baseline to beat.
+  * a 6-Gram column is added as the non-world-modeling baseline to beat;
+  * the two tasks sit side by side (sharing one Model column) instead of
+    stacked, so the table is short and wide rather than tall.
 
-The structure-revealed cells where the reasoning models nearly solve the
-Transducer task (o3-mini / gpt-5 under DFA-CoT and Red-Green) are shaded blue
-(on overlay beat 3, with the matching bullet) to carry the slide's point.
+Shadings carry the slide's point, each timed to its bullet:
+  * green on the whole More-Expl column (merely knowing a grammar exists does not
+    help at all), overlay beat 2;
+  * red on the structure columns (DFA-CoT / Red-Green) of the non-reasoning
+    models (first three rows), in both task blocks (overlay beat 3);
+  * orange on o3-mini -- on the Transducer where structure helps (beat 4) and on
+    Sequence Completion where it does not (beat 5);
+  * blue on gpt-5 (last row) -- on Sequence Completion where exact structure does
+    not benefit it (beat 6) and on the Transducer where it then solves the task
+    essentially perfectly (beat 7).
 
 Writes presentation/generated/prompt_table.tex (a bare tabular, \input in deck).
 """
@@ -25,23 +34,43 @@ import numpy as np
 from evallm.experiments.transducer_summary import transducer_results
 from evallm.experiments.sequence_completion_summary import sequence_completion_results
 from evallm.experiments.main_tables import multi_prompts, stretch
-from evallm.experiments.transducer_plotting import display_acc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "generated", "prompt_table.tex")
 
 # Prompt columns shown (after collapsing Basic/Basic-COT into "Basic").
-COLUMNS = [r"\textsc{Basic}", r"\textsc{More-Expl}", r"\textsc{DFA-COT}", r"\textsc{Red-Green}"]
+PROMPTS = [r"\textsc{Basic}", r"\textsc{More-Expl}", r"\textsc{DFA-COT}", r"\textsc{Red-Green}"]
 BASICS = [r"\textsc{Basic}", r"\textsc{Basic-COT}"]
 GRAM = r"\textsc{$6$-Gram}"
-# Cells to shade: (group, model, prompt) -- reasoning models, structure revealed.
-HIGHLIGHT = {
-    ("Transducer", "o3-mini", r"\textsc{DFA-COT}"),
-    ("Transducer", "o3-mini", r"\textsc{Red-Green}"),
-    ("Transducer", "gpt-5", r"\textsc{DFA-COT}"),
-    ("Transducer", "gpt-5", r"\textsc{Red-Green}"),
+# Short column headers (the full \textsc names are too wide stacked twice over).
+HEAD = {
+    r"\textsc{Basic}": r"\textsc{Basic}",
+    r"\textsc{More-Expl}": r"\textsc{More-Expl}",
+    r"\textsc{DFA-COT}": r"\textsc{DFA-CoT}",
+    r"\textsc{Red-Green}": r"\textsc{Red-Green}",
+    GRAM: GRAM,
 }
-SHADE = r"\cellcolor{ecgreen!22}"
+COLUMNS = PROMPTS + [GRAM]  # the five value columns per task
+# Per-cell shading, each timed to its bullet (overlay beat in \only<...>).
+MORE_EXPL = r"\textsc{More-Expl}"
+STRUCTURE = (r"\textsc{DFA-COT}", r"\textsc{Red-Green}")
+NONREASONING = ("gpt-4o-mini", "gpt-4o", "claude-3.5")
+GREEN = r"\only<2->{\cellcolor{ecgreen!22}}"           # knowing a grammar exists
+RED = r"\only<3->{\cellcolor{evallmProp!18}}"          # structure does not help
+ORANGE_T = r"\only<4->{\cellcolor{evallmHighlight!22}}"  # o3-mini: helped here
+ORANGE_S = r"\only<5->{\cellcolor{evallmHighlight!22}}"  # o3-mini: not here
+BLUE_S = r"\only<6->{\cellcolor{ecblue!22}}"           # gpt-5: no benefit here
+BLUE_T = r"\only<7->{\cellcolor{ecblue!22}}"           # gpt-5: solves it here
+SHADES = {}
+for _g in ("Sequence Completion", "Transducer"):
+    for _m in NONREASONING:
+        for _c in STRUCTURE:
+            SHADES[(_g, _m, _c)] = RED
+for _c in STRUCTURE:
+    SHADES[("Transducer", "o3-mini", _c)] = ORANGE_T
+    SHADES[("Sequence Completion", "o3-mini", _c)] = ORANGE_S
+    SHADES[("Sequence Completion", "gpt-5", _c)] = BLUE_S
+    SHADES[("Transducer", "gpt-5", _c)] = BLUE_T
 
 
 def cell_mean(v):
@@ -51,6 +80,13 @@ def cell_mean(v):
     return float(np.mean(v))
 
 
+def fmt_acc(prefix, v):
+    """Mean accuracy only (no bootstrap CI -- too busy for a slide)."""
+    if isinstance(v, float) and np.isnan(v):
+        return "N/A"
+    return prefix + f"{100 * np.mean(v):.1f}"
+
+
 def gram_value(raw):
     """The 6-Gram baseline result array for a task's raw results dict."""
     (key,) = [k for k in raw if k.startswith("6-")]
@@ -58,44 +94,61 @@ def gram_value(raw):
     return raw[key][prompt]
 
 
+def block_cells(group, name, row, gram):
+    """The five value cells (Basic..6-Gram) for one model in one task block."""
+    # Collapse Basic / Basic-COT into the better-scoring of the two.
+    basic = max((row[b] for b in BASICS if b in row), key=cell_mean,
+                default=float("nan"))
+    values = {r"\textsc{Basic}": basic, GRAM: gram}
+    for c in PROMPTS[1:]:
+        values[c] = row.get(c, float("nan"))
+    # The 6-Gram baseline competes for "best", so a model only takes the bold
+    # when it actually beats the n-gram.
+    best = max(COLUMNS, key=lambda c: cell_mean(values[c]))
+    cells = []
+    for c in COLUMNS:
+        acc = fmt_acc(r"\bf " if c == best else "", values[c])
+        # The whole More-Expl column is shaded green (knowing a grammar exists
+        # does not help); the structure columns carry the per-model shadings.
+        shade = GREEN if c == MORE_EXPL else SHADES.get((group, name, c))
+        if shade:
+            acc = shade + " " + acc
+        cells.append(acc)
+    return cells
+
+
 def main():
     rt, rsc = transducer_results(), sequence_completion_results()
-    groups = [
+    # The two task blocks, side by side, sharing one Model column.
+    blocks = [
         ("Sequence Completion", multi_prompts(rsc), gram_value(rsc)),
         ("Transducer", multi_prompts(rt), gram_value(rt)),
     ]
+    models = list(blocks[0][1])
 
+    colspec = "l|" + "|".join(["ccccc"] * len(blocks))
     L = [r"{\renewcommand{\arraystretch}{" + str(stretch) + r"}"
-         + r"\begin{tabular}{l|c|ccc|c}", r"\hline"]
-    header = [r"\bf Model"] + [r"\bf " + c for c in COLUMNS] + [r"\bf " + GRAM]
-    L.append(" & ".join(header) + r" \\")
+         + r"\begin{tabular}{" + colspec + r"}", r"\hline"]
+    # group-spanning header
+    span = [r" "] + [
+        r"\multicolumn{5}{c" + ("|" if i < len(blocks) - 1 else "") + r"}{\bf " + g + r"}"
+        for i, (g, _, _) in enumerate(blocks)
+    ]
+    L.append(" & ".join(span) + r" \\")
+    L.append(r"\hline")
+    # per-column sub-header (prompt names, repeated under each task)
+    sub = [r"\bf Model"] + [r"\bf " + HEAD[c] for _ in blocks for c in COLUMNS]
+    L.append(" & ".join(sub) + r" \\")
+    L.append(r"\hline")
 
-    for group, results, gram in groups:
-        L.append(r"\hline")
-        L.append(r"\multicolumn{6}{l}{ \bf " + group + r"} \\")
-        L.append(r"\hline")
-        models = list(results)
-        for i, name in enumerate(models):
-            row = results[name]
-            # Collapse Basic / Basic-COT into the better-scoring of the two.
-            basic = max((row[b] for b in BASICS if b in row), key=cell_mean,
-                        default=float("nan"))
-            values = {r"\textsc{Basic}": basic, GRAM: gram}
-            for c in COLUMNS[1:]:
-                values[c] = row.get(c, float("nan"))
-            # The 6-Gram baseline competes for "best" too, so a model only takes
-            # the bold when it actually beats the n-gram.
-            best = max(COLUMNS + [GRAM], key=lambda c: cell_mean(values[c]))
-            cells = [name]
-            for c in COLUMNS + [GRAM]:
-                acc = display_acc({best: r"\bf "}, values[c], c)
-                if (group, name, c) in HIGHLIGHT:
-                    acc = SHADE + " " + acc
-                cells.append(acc)
-            L.append(" & ".join(cells) + r" \\")
-            if i != len(models) - 1:
-                L.append(r"\hline")
-        L.append(r"\hline")
+    for i, name in enumerate(models):
+        cells = [name]
+        for group, results, gram in blocks:
+            cells += block_cells(group, name, results[name], gram)
+        L.append(" & ".join(cells) + r" \\")
+        if i != len(models) - 1:
+            L.append(r"\hline")
+    L.append(r"\hline")
 
     L += [r"\end{tabular}", r"}"]
 
