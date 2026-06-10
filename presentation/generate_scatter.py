@@ -48,6 +48,33 @@ CATEGORY_OVERLAY = {
 }
 REGION_OVERLAY = "3-"
 
+# Hand-tuned label offset directions (dirx, diry, rel_dist) copied verbatim from
+# the paper's matplotlib scatter (main_tables.plot_transducer_vs_sequence_-
+# completion), so the static poster reproduces that figure's labels and layout.
+# Offsets are in data units; rel_dist scales the offset distance.
+PAPER_DIRECTIONS = {
+    r"\textsc{BruteForce}": (-1, -1, 0.1),
+    r"6-\textsc{Gram}": (1, -1, 0.1),
+    r"5-\textsc{Gram}": (-1, 1, 0.1),
+    r"4-\textsc{Gram}": (1, -1, 0.1),
+    r"3-\textsc{Gram}": (1, 1, 0.1),
+    r"2-\textsc{Gram}": (1, 1, 0.1),
+    "mistral-nemo-minitron-8B": (-0.0001, 1, 1),
+    "qwen-2.5-coder-7B": (0.0001, -1, 1),
+    "qwen-2.5-coder-instruct-7B": (0.0001, 1, 1),
+    "gpt-3.5-instruct": (-1, 1, 0.1),
+    "gpt-4o-mini": (1, -1, 0.1),
+    "gpt-4o": (1, -1, 0.1),
+    "gemma-7b": (-1, -1, 0.1),
+    "falcon-7b": (-1, -1, 0.1),
+    "starcoder2-15b": (-1, 1, 1),
+    "deepseek-coder-33b-instruct": (1, -0.5, 1),
+    "claude-3.5": (1, -0.5, 1),
+    random_null: (1, 1, 0.1),
+    "gpt-5": (1, -1, 1),
+}
+PAPER_OFF_DIST = 2.5  # data-unit offset scale (matplotlib off_dist)
+
 # canvas size (cm) and approximate \tiny glyph metrics (cm)
 W, H = 12.0, 5.0
 CHAR_W, LINE_H = 0.105, 0.20
@@ -82,10 +109,14 @@ def overlap(a, b):
     return dx * dy if dx > 0 and dy > 0 else 0.0
 
 
-def place_labels(labels, pts, allow):
+def place_labels(labels, pts, allow, obstacles=(), extras=(0.0, 0.12, 0.28, 0.5)):
     """Greedy anchored placement: a label is offset from its point by at least GAP
     (so it always lies outside the marker), in the direction minimizing overlap
-    with other dots, already-placed labels, and the canvas margins."""
+    with other dots, already-placed labels, and the canvas margins.
+
+    ``obstacles`` are fixed boxes (legend, annotations) that labels must also
+    dodge; ``extras`` is the ladder of extra offsets a label may take to escape a
+    crowded region (a leader line is drawn when it ends up far from its point)."""
     ax0, ay0, ax1, ay1 = allow
     dot_xy = list(pts.values())
 
@@ -93,14 +124,14 @@ def place_labels(labels, pts, allow):
         px, py = pts[m]
         return sum(1 for qx, qy in dot_xy if (qx - px) ** 2 + (qy - py) ** 2 < 1.0)
 
-    placed = []
+    placed = list(obstacles)
     out = {}
     for m in sorted(labels, key=crowding, reverse=True):
         px, py = pts[m]
         w = CHAR_W * len(label_for(m)) + 0.06
         h = LINE_H
         best, best_score = None, 1e18
-        for extra in (0.0, 0.12, 0.28, 0.5):
+        for extra in extras:
             for sx, sy in DIRS:
                 ax = px + sx * (GAP + extra)
                 ay = py + sy * (GAP + extra)
@@ -131,7 +162,40 @@ def place_labels(labels, pts, allow):
     return out
 
 
-def main():
+def place_labels_paper(labels, x, y, cx, cy, obstacles=()):
+    """Reproduce the paper figure's label placement: each label is pushed from
+    its point along a hand-tuned direction (PAPER_DIRECTIONS), the offset taken
+    in data units and mapped to cm. Where the slight aspect-ratio difference
+    from the paper's matplotlib figure makes two labels collide, the later one
+    is slid further out along its own direction until clear, so the paper's
+    layout intent is preserved. Returns the same (ax, ay, sx, sy) tuples as
+    place_labels so the emission/bounding-box code is shared."""
+    # Place the isolated baseline frontier first, then the denser LLM cloud, so
+    # the cloud labels yield to the (fixed-looking) frontier ones.
+    order = sorted(labels, key=lambda m: x[m] + y[m], reverse=True)
+    placed = list(obstacles)
+    out = {}
+    for m in order:
+        dirx, diry, rel = PAPER_DIRECTIONS.get(m, (1, 1, 1))
+        base = PAPER_OFF_DIST / math.hypot(dirx, diry)
+        w, h = CHAR_W * len(label_for(m)) + 0.06, LINE_H
+        sx, sy = (1 if dirx >= 0 else -1), (1 if diry >= 0 else -1)
+        chosen = None
+        for mult in (rel, rel + 0.4, rel + 0.9, rel + 1.6, rel + 2.5):
+            r = mult * base
+            ax, ay = cx(x[m] + dirx * r), cy(y[m] + diry * r)
+            box = box_for(ax, ay, w, h, sx, sy)
+            if not any(overlap(box, b) > 0 for b in placed):
+                chosen = (ax, ay, box)
+                break
+        if chosen is None:
+            chosen = (ax, ay, box)
+        out[m] = (chosen[0], chosen[1], sx, sy)
+        placed.append(chosen[2])
+    return out
+
+
+def main(out=OUT, static=False):
     rt = transducer_results()
     rsc = sequence_completion_results()
     summary_t = replace_null_random(best_prompt_among_basics(rt))
@@ -148,14 +212,18 @@ def main():
     x = {m: 100 * float(np.mean(summary_sc[m])) for m in ordered}
     y = {m: 100 * float(np.mean(summary_t[m])) for m in ordered}
 
-    # Label all baselines + proprietary, plus only the *best* model in each
-    # category on each metric (the worst open-source ones just add clutter).
+    # Label all baselines + proprietary, plus the *best* model in each category
+    # on each metric. The talk reveals these in turn, so the worst open-source
+    # ones would just add clutter; the static poster matches the paper figure
+    # instead, which also labels each category's *worst* per metric.
     labelled = {m for m in ordered if models_to_category[m] in ("Baselines", "Proprietary")}
     for members in grouped_models.values():
         ms = [m for m in members if m in ordered]
         for metric in (y, x):
             vals = [metric[m] for m in ms]
             labelled.add(ms[int(np.argmax(vals))])
+            if static:
+                labelled.add(ms[int(np.argmin(vals))])
     to_label = [m for m in ordered if m in labelled]
 
     non_baseline = [m for m in ordered if models_to_category[m] != "Baselines"]
@@ -173,12 +241,23 @@ def main():
         return (v - y_lo) / (y_hi - y_lo) * H
 
     pts = {m: (cx(x[m]), cy(y[m])) for m in ordered}
-    # labels may spill into the right/top margins, but not far off-canvas
-    label_pos = place_labels(to_label, pts, allow=(-0.7, -0.45, W + 1.7, H + 0.55))
-    # Tuck Random/Null into the bottom-left corner (just below its marker).
-    if random_null in pts:
-        rpx, rpy = pts[random_null]
-        label_pos[random_null] = (rpx, rpy - GAP, 0, -1)
+    if static:
+        # Reproduce the paper figure's hand-tuned label layout, keeping labels
+        # clear of the top-left legend and the top-right "better than all" note.
+        legend_box = (cx(x_lo) + 0.30, cy(y_hi) - 0.15 - 3 * 0.34 - 0.13,
+                      cx(x_lo) + 0.30 + 0.13 + 0.135 * len("open-weight code") + 0.1,
+                      cy(y_hi) - 0.15 + 0.13)
+        anno_box = (cx(x_model_max) + 0.05, cy(y_hi) - 0.50,
+                    cx(x_model_max) + 1.7, cy(y_hi) + 0.02)
+        label_pos = place_labels_paper(to_label, x, y, cx, cy,
+                                       obstacles=(legend_box, anno_box))
+    else:
+        # labels may spill into the right/top margins, but not far off-canvas
+        label_pos = place_labels(to_label, pts, allow=(-0.7, -0.45, W + 1.7, H + 0.55))
+        # Tuck Random/Null into the bottom-left corner (just below its marker).
+        if random_null in pts:
+            rpx, rpy = pts[random_null]
+            label_pos[random_null] = (rpx, rpy - GAP, 0, -1)
 
     # Fixed bounding box (covers every label) so the picture never resizes as
     # labels appear/disappear between overlays -- otherwise it jitters.
@@ -189,23 +268,30 @@ def main():
         qx0, qy0, qx1, qy1 = box_for(ax, ay, bw, bh, sx, sy)
         bxs += [qx0, qx1]
         bys += [qy0, qy1]
-    bb = (min(bxs) - 0.05, min(bys) - 0.05, max(bxs) + 0.05, max(bys) + 0.05)
+    # The static poster scales the picture to a tight column width with no slide
+    # margin to spill into, so pad the right edge: the \tiny glyph-width estimate
+    # undershoots, and the far-right "BruteForce" label would otherwise clip.
+    pad_r = 0.6 if static else 0.05
+    bb = (min(bxs) - 0.05, min(bys) - 0.05, max(bxs) + pad_r, max(bys) + 0.05)
 
     L = [r"% Generated by generate_scatter.py -- do not edit by hand.",
          r"\begin{tikzpicture}[font=\scriptsize]",
          rf"  \useasboundingbox ({bb[0]:.2f},{bb[1]:.2f}) rectangle ({bb[2]:.2f},{bb[3]:.2f});"]
+    # Wrap a block of TikZ lines in a beamer overlay spec, except in --static
+    # mode (the poster), where everything is shown at once.
+    def overlay(spec, lines):
+        if static:
+            return list(lines)
+        return [rf"  \only<{spec}>{{"] + lines + [r"  }"]
+
     # "better than all LLMs on both" region + annotation (top-left of the region)
-    L.append(rf"  \only<{REGION_OVERLAY}>{{")
-    L.append(
+    L += overlay(REGION_OVERLAY, [
         rf"    \fill[ecblue!14] ({cx(x_model_max):.3f},{cy(y_model_max):.3f}) "
-        rf"rectangle ({cx(x_hi):.3f},{cy(y_hi):.3f});"
-    )
-    L.append(
+        rf"rectangle ({cx(x_hi):.3f},{cy(y_hi):.3f});",
         rf"    \node[ecblue, anchor=north west, align=left, font=\tiny] "
         rf"at ({cx(x_model_max)+0.08:.3f},{cy(y_hi)-0.06:.3f}) "
-        r"{better than all\\LLMs on both};"
-    )
-    L.append(r"  }")
+        r"{better than all\\LLMs on both};",
+    ])
     # axes (short arrows; labels run alongside each axis, centered)
     L.append(rf"  \draw[->, black!60] (-0.2,0) -- ({W + 0.25:.2f},0);")
     L.append(rf"  \draw[->, black!60] (0,-0.2) -- (0,{H + 0.2:.2f});")
@@ -256,27 +342,34 @@ def main():
         w, h = CHAR_W * len(label_for(m)) + 0.06, LINE_H
         x0, y0, x1, y1 = box_for(ax, ay, w, h, sx, sy)
         nx, ny = min(max(px, x0), x1), min(max(py, y0), y1)
-        L.append(rf"  \only<{CATEGORY_OVERLAY[cat]}>{{")
+        lab = []
         if math.hypot(px - nx, py - ny) > 0.32:
-            L.append(
+            lab.append(
                 rf"    \draw[{color}!50, line width=0.3pt] "
                 rf"({px:.3f},{py:.3f}) -- ({nx:.3f},{ny:.3f});"
             )
-        L.append(
+        lab.append(
             rf"    \node[{color}, anchor={anchor_str(sx, sy)}, inner sep=0.5pt, font=\tiny] "
             rf"at ({ax:.3f},{ay:.3f}) {{{label_for(m)}}};"
         )
-        L.append(r"  }")
+        L += overlay(CATEGORY_OVERLAY[cat], lab)
     L.append(r"\end{tikzpicture}")
 
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w") as f:
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w") as f:
         f.write("\n".join(L) + "\n")
     print(
-        f"wrote {OUT}: {len(ordered)} points, {len(to_label)} labelled; "
+        f"wrote {out}: {len(ordered)} points, {len(to_label)} labelled; "
         f"x_lo={x_lo} y_lo={y_lo} frontier=({x_model_max:.1f},{y_model_max:.1f})"
     )
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--static", action="store_true",
+                    help="emit a single overlay-free picture (for the poster)")
+    ap.add_argument("--out", default=OUT, help="output .tex path")
+    args = ap.parse_args()
+    main(out=args.out, static=args.static)

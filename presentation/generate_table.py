@@ -55,12 +55,22 @@ COLUMNS = PROMPTS + [GRAM]  # the five value columns per task
 MORE_EXPL = r"\textsc{More-Expl}"
 STRUCTURE = (r"\textsc{DFA-COT}", r"\textsc{Red-Green}")
 NONREASONING = ("gpt-4o-mini", "gpt-4o", "claude-3.5")
-GREEN = r"\only<2->{\cellcolor{ecgreen!22}}"           # knowing a grammar exists
-RED = r"\only<3->{\cellcolor{evallmProp!18}}"          # structure does not help
-ORANGE_T = r"\only<4->{\cellcolor{evallmHighlight!22}}"  # o3-mini: helped here
-ORANGE_S = r"\only<5->{\cellcolor{evallmHighlight!22}}"  # o3-mini: not here
-BLUE_S = r"\only<6->{\cellcolor{ecblue!22}}"           # gpt-5: no benefit here
-BLUE_T = r"\only<7->{\cellcolor{ecblue!22}}"           # gpt-5: solves it here
+# Each shading is timed to its bullet via a beamer overlay in the talk; the
+# poster (--static) drops the \only wrappers and shows every shading at once.
+STATIC = "--static" in __import__("sys").argv
+
+
+def _shade(spec, color):
+    cell = rf"\cellcolor{{{color}}}"
+    return cell if STATIC else rf"\only<{spec}>{{{cell}}}"
+
+
+GREEN = _shade("2-", "ecgreen!22")            # knowing a grammar exists
+RED = _shade("3-", "evallmProp!18")           # structure does not help
+ORANGE_T = _shade("4-", "evallmHighlight!22")  # o3-mini: helped here
+ORANGE_S = _shade("5-", "evallmHighlight!22")  # o3-mini: not here
+BLUE_S = _shade("6-", "ecblue!22")            # gpt-5: no benefit here
+BLUE_T = _shade("7-", "ecblue!22")            # gpt-5: solves it here
 SHADES = {}
 for _g in ("Sequence Completion", "Transducer"):
     for _m in NONREASONING:
@@ -117,7 +127,7 @@ def block_cells(group, name, row, gram):
     return cells
 
 
-def main():
+def main(out=OUT):
     rt, rsc = transducer_results(), sequence_completion_results()
     # The two task blocks, side by side, sharing one Model column.
     blocks = [
@@ -152,11 +162,18 @@ def main():
 
     L += [r"\end{tabular}", r"}"]
 
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w") as f:
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    with open(out, "w") as f:
         f.write("\n".join(L) + "\n")
-    print(f"wrote {OUT}")
+    print(f"wrote {out}")
 
 
 if __name__ == "__main__":
-    main()
+    import argparse
+
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--static", action="store_true",
+                    help="show every shading at once (for the poster)")
+    ap.add_argument("--out", default=OUT, help="output .tex path")
+    args = ap.parse_args()
+    main(out=args.out)

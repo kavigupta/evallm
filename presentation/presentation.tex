@@ -74,16 +74,89 @@
 %% ================================================================ QUESTION
 \headerslide{The Question}
 
-%% ---------------------------------------------------------------- motivation
-\begin{frame}{In-context learning}
-  \begin{itemize}[<+->]
-    \item LLMs have a lot of value in \hl{parametric knowledge}
-    \item However, novel situations require \hl{on-the-fly learning}
-    \item But is this \hl{true learning}, or leveraging algorithms it has learned parametrically?
-    \item Existing ICL novelty studies \hl{perturb complex tasks}
-    \item We want to isolate novelty alone, without confounds from task complexity
-  \end{itemize}
+%% ---------------------------------------------------------------- teaser
+%% The conceptual figure: an LLM completes a novel sequence, and there are two
+%% competing explanations for how. Symbol colors tie the raw sequence (top) to
+%% the corpus snippet (right) -- the common symbol is blue, the rare one orange,
+%% in both notations -- making the "same pattern, found verbatim" point visually.
+\newcommand{\sOne}{\textcolor{ecblue}{\texttt{1}}}
+\newcommand{\sTwo}{\textcolor{ecorange}{\texttt{2}}}
+%% The corpus symbols are monochrome (inheriting the faded body color) until the
+%% magnifier appears on overlay 9, when the buried pattern lights up in color.
+\newcommand{\cA}{\alt<9->{\textcolor{ecblue}{\texttt{A}}}{\texttt{A}}}
+\newcommand{\cB}{\alt<9->{\textcolor{ecorange}{\texttt{B}}}{\texttt{B}}}
+\begin{frame}{What is In Context Learning?}
+  \centering
+  \vfill
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+      >=Stealth,
+      seq/.style={font=\ttfamily\Large},
+      llm/.style={draw=evallmText, line width=1.4pt, rounded corners=3pt,
+        fill=evallmHighlight!14, minimum width=22mm, minimum height=14mm,
+        font=\Large\bfseries},
+      arr/.style={->, line width=1.4pt, color=evallmText},
+      ptitle/.style={font=\large\bfseries, text=evallmHighlight},
+    ]
+
+    %% A fixed bounding box (covering the union of every overlay) so \resizebox
+    %% scales the picture identically on every build step -- otherwise elements
+    %% appearing/disappearing would make the figure jump and resize.
+    \useasboundingbox (-9.3,-0.7) rectangle (9.3,6.95);
+
+    %% ---- top row: input -> LLM -> output (revealed one piece at a time).
+    %% Absolute coordinates so every node carries its own overlay spec without a
+    %% separate (always-visible) positioning anchor.
+    \node<1->[seq, anchor=east] (in) at (-2.7,6)
+      {\sOne\,\sTwo\,\sOne\,\sOne\,\sTwo\,\sOne\,\sOne\,\sOne\,\sTwo\,\sOne\,\hl{\texttt{?\,?}}};
+    \node<2->[llm] (llm) at (0,6) {LLM};
+    \node<3->[seq, anchor=west] (out) at (2.7,6) {\sOne\,\sOne\,\sOne\,\sTwo};
+    \draw<2->[arr] (in) -- (llm);
+    \draw<3->[arr] (llm) -- (out);
+
+    %% ---- the question, splitting into two hypotheses
+    \node<4->[font=\large\itshape, anchor=north] (how) at (0,4.6) {How?};
+    \draw<4->[arr] (llm) -- (how);
+
+    %% ---- left panel (arrow + box + title), then the equation
+    \draw<5->[rounded corners=6pt, draw=evallmText!45, line width=1pt, fill=white]
+      (-8.7,-0.5) rectangle (-0.5,3.7);
+    \draw<5->[arr] (how) -- (-4.6,3.7);
+    \node<5->[ptitle] at (-4.6,3.15) {Blank Slate Learning Algorithm};
+    \node<6-> at (-4.6,1.45)
+      {$\displaystyle \operatorname*{arg\,max}_{\,t\text{ a Turing machine}}\;
+        P(\mathrm{trace}\mid t)\,P(t)$};
+
+    %% ---- right panel (arrow + box + title), then the corpus text, then the
+    %% magnifier (which also lights up the buried pattern in color).
+    \draw<7->[rounded corners=6pt, draw=evallmText!45, line width=1pt, fill=white]
+      (0.5,-0.5) rectangle (8.7,3.7);
+    \draw<7->[arr] (how) -- (4.6,3.7);
+    \node<7->[ptitle] at (4.6,3.15) {Leveraging Parametric Knowledge};
+    \node<8->[font=\ttfamily\large, text width=80mm, align=left,
+      text=evallmText!45] (corpus) at (4.6,1.35)
+      {\dots the children chant it before each round of the game. the words run
+       like \cA\,\cB\,\cA\,\cA\,\cB\,\cA\,\cA\,\cA\,\cB\,\cA\,\cA\,\cA\,\cA\,\cB\,\cA\
+       and then the verse repeats, one beat longer than the one that came before
+       it \dots};
+    %% magnifying glass highlighting a small portion of the buried pattern.
+    %% Drawn after the text (lens sits on top); the handle starts on the
+    %% circle's edge (angle anchor) so it connects cleanly.
+    \node<9->[draw=evallmText, line width=1.6pt, circle, minimum size=14mm,
+      fill=evallmHighlight!20, fill opacity=0.4] (lens) at (2.7,1.30) {};
+    \draw<9->[line width=2.4pt, color=evallmText, line cap=round]
+      (lens.-45) -- ++(0.5,-0.5);
+
+    %% the truth sits between the two explanations
+    \node<11->[rotate=90, font=\large\bfseries, text=evallmHighlight]
+      at (0,1.6) {Truth};
+  \end{tikzpicture}}
+  \vfill
+  {\large\onslide<10->{The truth is clearly in the
+    \hl{middle}\onslide<12->{, but \hl{where?}}}\par}
+  \vfill
 \end{frame}
+
 
 %% ---------------------------------------------------------------- the ideal task
 \begin{frame}{The ideal task}
