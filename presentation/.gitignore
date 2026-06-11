@@ -10,3 +10,5 @@ build/
 *.fdb_latexmk
 *.fls
 *.pdf
+# Keep the emoji art (vector PDF converted from the committed SVG)
+!images/*.pdf

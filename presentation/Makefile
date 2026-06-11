@@ -23,13 +23,19 @@ $(SCATTER): generate_scatter.py
 $(TABLE): generate_table.py
 	$(PYTHON) generate_table.py
 
+# Emoji art: a vector PDF converted from the committed Noto SVG. The PDF is
+# committed too, so this only re-runs (needing inkscape) if the SVG changes.
+EMOJI := images/technologist.pdf
+$(EMOJI): images/technologist.svg
+	inkscape $< --export-type=pdf --export-filename=$@
+
 prompts: $(PROMPTS_SENTINEL)
 scatter: $(SCATTER)
 table: $(TABLE)
 generated: $(GENERATED)
 
 # Compile the slides (after ensuring the generated files exist).
-pdf: $(GENERATED)
+pdf: $(GENERATED) $(EMOJI)
 	latexmk
 
 # Recompile on every change.
