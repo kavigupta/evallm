@@ -334,6 +334,94 @@
   \end{tikzpicture}}
 \end{frame}
 
+%% ---------------------------------------------------------------- two tasks
+%% Two ways to probe a sampled DFA. Sequence completion (left): 30 accepted
+%% strings of length 10, complete the held-out last 5. Transducer (right): the
+%% whole symbol+accept-bit prefix, predict the next bit. ? marks what to predict.
+\newcommand{\ob}[1]{\textcolor{evallmHighlight}{\textbf{#1}}} % an accept (output) bit
+\begin{frame}{The tasks}
+  \centering
+  \vfill
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+      >=Stealth,
+      panel/.style={rounded corners=6pt, draw=evallmText!55, line width=1pt, fill=white},
+      htitle/.style={font=\Large\bfseries, text=evallmHighlight},
+      seq/.style={anchor=west, font=\ttfamily\normalsize},
+      tok/.style={font=\ttfamily\normalsize},
+      brm/.style={decorate, decoration={brace, amplitude=5pt, mirror}, line width=1pt, draw=evallmText},
+      cnt/.style={font=\small\bfseries, text=evallmText},
+    ]
+    \useasboundingbox (0,0.4) rectangle (16,8.3);
+
+    
+    %% ===== LEFT: Sequence Completion -- 30 accepted strings (len 10), each ticked
+    \draw[panel] (0.1,0.6) rectangle (7.8,8.1);
+    \node[htitle] at (4.0,7.6) {Sequence Completion};
+
+    \uncover<2->{
+
+      \node[seq] (a1) at (2.5,6.5) {a b c a b c a b c a};
+      \node[seq] (a2) at (2.5,5.95){c a b b a c a b c a};
+      \node[seq] (a3) at (2.5,5.40){b b a c a a b c c a};
+      \node[seq] (a4) at (2.5,4.85){a c c a b a c b a b};
+      \node[seq] (a5) at (2.5,4.30){c a b a c b a c a b};
+      \node[seq] (a6) at (2.5,3.75){b c a a b c a b c a};
+      \foreach \r in {a1,a2,a3,a4,a5,a6}{\node[anchor=west, inner sep=3pt] at (\r.east) {\yes};}
+      %% 30 strings (vertical brace, flipped to embrace the rows)
+      \draw[brm] (2.2,6.75) -- (2.2,3.5);
+      \node[cnt] at (1.6,5.12) {30};
+      %% each is length 10
+      \draw[brm] (a6.south west) -- (a6.south east);
+      \node[cnt] at ($(a6.south)+(0,-0.5)$) {10};
+    }
+    \uncover<3->{
+      %% complete the last 5
+      \node[font=\small, anchor=east] at (2.5,2.5) {complete:};
+      \node[seq] (q1) at (2.6,2.5) {a c b a c~};
+    }
+    \uncover<4->{
+      \node[seq, text=ecgreen] (q2) at (q1.east) {?\,?\,?\,?\,?};
+      \draw[brm] (q2.south west) -- (q2.south east);
+      \node[cnt, text=ecgreen] at ($(q2.south)+(0,-0.5)$) {1-5};
+    }
+
+    %% ===== RIGHT: Transducer -- one example; symbols and accept bits on separate
+    %% lines; the whole length-30 prefix is given, the last bit is the query.
+    \draw[panel] (8.1,0.6) rectangle (15.8,8.1);
+    \node[htitle] at (12.0,7.6) {Transducer};
+    \uncover<5->{
+      \node[cnt] at (12.45,6.0) {30};
+      \draw[brm] (14.75,5.5) -- (10.15,5.5);
+      \node[cnt, anchor=east] at (10.05,5.2) {symbol};
+    }
+    \uncover<6->{
+      \node[cnt, anchor=east] at (10.05,4.5) {accept};
+    }
+    \foreach \x/\s/\o in {10.35/b/0, 10.95/c/1, 11.55/a/1, 12.15/b/0, 12.75/a/0, 13.35/c/1}{
+      \uncover<5->{
+        \node[tok] at (\x,5.2) {\s};
+      }
+      \uncover<6->{
+        \node[tok] at (\x,4.5) {\ob{\o}};
+      }
+    }
+    \uncover<5->{
+      \node[tok] at (13.95,5.2) {$\cdots$};
+    }
+    \uncover<6->{
+      \node[tok] at (13.95,4.5) {$\cdots$};
+    }
+    \uncover<5->{
+      \node[tok] at (14.55,5.2) {c};
+    }
+    \uncover<7->{
+      \node[tok, text=ecgreen] at (14.55,4.5) {\textbf{?}};
+    }
+  \end{tikzpicture}}
+  \vfill
+\end{frame}
+
 %% ================================================================ BASELINES
 \headerslide{Baselines}
 
@@ -517,15 +605,15 @@
     \node<2->[col1] at (2.6,4.0)  {{\color{ecpurple}\textsc{Basic}}\\[4pt] just the sequence; predict the next token};
     \node<3->[col1] at (2.6,1.5)  {{\color{ecpurple}\textsc{Basic-CoT}}\\[4pt] the same, but ``reason step by step''};
 
-    \node<4->[colhead, text=ecgreen]    at (7.5,6.6)  {Some Information};
-    \node<5->[col2] at (7.5,2.75) {{\color{ecgreen}\textsc{More-Expl}}\\[4pt] ``\dots generated from an unknown but consistent grammar''};
+    \node<5->[colhead, text=ecgreen]    at (7.5,6.6)  {Some Information};
+    \node<6->[col2] at (7.5,2.75) {{\color{ecgreen}\textsc{More-Expl}}\\[4pt] ``\dots generated from an unknown but consistent grammar''};
 
-    \node<6->[colhead, text=evallmProp] at (12.4,6.6) {Full Problem Structure};
-    \node<7->[col3] at (12.4,4.0) {{\color{evallmProp}\textsc{DFA-CoT}}\\[4pt] told it is a 3-state DFA; reason it out};
-    \node<8->[col3] at (12.4,1.5) {{\color{evallmProp}\textsc{Red-Green}}\\[4pt] the task retold as a rooms-and-portals word problem};
+    \node<7->[colhead, text=evallmProp] at (12.4,6.6) {Full Problem Structure};
+    \node<8->[col3] at (12.4,4.0) {{\color{evallmProp}\textsc{DFA-CoT}}\\[4pt] told it is a 3-state DFA; reason it out};
+    \node<9->[col3] at (12.4,1.5) {{\color{evallmProp}\textsc{Red-Green}}\\[4pt] the task retold as a rooms-and-portals word problem};
   \end{tikzpicture}}
   \vfill
-  {\small\color{ecpurple}We report the \textbf{max over \textsc{Basic} and
+  \onslide<4->{\small\color{ecpurple}We report the \textbf{max over \textsc{Basic} and
   \textsc{Basic-CoT}}: each model's best pure-ICL shot.}
 \end{frame}
 
