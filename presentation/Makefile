@@ -29,13 +29,20 @@ EMOJI := images/technologist.pdf
 $(EMOJI): images/technologist.svg
 	inkscape $< --export-type=pdf --export-filename=$@
 
+# Appendix sweep figures (examples / states). Both PNGs are written at once and
+# committed; this only re-runs (needing the repo env) if the generator changes.
+APPENDIX := images/more-examples-per-problem.png
+$(APPENDIX): generate_appendix.py
+	$(PYTHON) generate_appendix.py
+
 prompts: $(PROMPTS_SENTINEL)
 scatter: $(SCATTER)
 table: $(TABLE)
+appendix: $(APPENDIX)
 generated: $(GENERATED)
 
 # Compile the slides (after ensuring the generated files exist).
-pdf: $(GENERATED) $(EMOJI)
+pdf: $(GENERATED) $(EMOJI) $(APPENDIX)
 	latexmk
 
 # Recompile on every change.

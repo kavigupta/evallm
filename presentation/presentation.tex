@@ -491,44 +491,45 @@
 % \end{frame}
 
 %% ================================================================ PROMPTS
-\headerslide{Prompts and Models}
+\headerslide{Prompts}
 
 %% ---------------------------------------------------------------- prompt summary
-\begin{frame}{Prompting formats}
-  \textbf{Pure ICL} (no hint about the task's structure):
-  \begin{itemize}
-    \item \hl{\textsc{Basic}}: just the sequence; predict the next token.
-    \item \hl{\textsc{Basic-CoT}}: the same, but ``reason step by step.''
-  \end{itemize}
-  \vspace{0.5em}
-  \textbf{Structure revealed} (controls):
-  \begin{itemize}
-    \item \hl{\textsc{More-Expl}}: ``\dots generated from an unknown but
-          consistent grammar.''
-    \item \hl{\textsc{DFA-CoT}}: told it is a 3-state DFA; reason it out.
-    \item \hl{\textsc{Red-Green}}: the same task retold as a rooms-and-portals
-          word problem.
-  \end{itemize}
+%% Three columns of prompt rectangles, ordered by how much task structure the
+%% prompt reveals: Pure ICL -> Some Information -> Full Problem Structure.
+%% Revealed column by column, one box per beat; box names match the column color.
+\begin{frame}{Prompts}
+  \centering
+  \resizebox{\linewidth}{!}{%
+  \begin{tikzpicture}[
+      prompt/.style={rounded corners=3pt, draw=evallmText, line width=0.9pt,
+        text width=4.0cm, align=center,
+        minimum height=2.1cm, inner sep=6pt, font=\small},
+      col1/.style={prompt, fill=ecpurple!14},
+      col2/.style={prompt, fill=ecgreen!16},
+      col3/.style={prompt, fill=evallmProp!14},
+      colhead/.style={font=\large\bfseries, align=center,
+        text width=4.7cm, anchor=north},
+    ]
+    \useasboundingbox (0,-0.2) rectangle (15.0,6.7);
+
+    %% column headers + boxes revealed column by column, one per beat
+    \node<1->[colhead, text=ecpurple]   at (2.6,6.6)  {Pure ICL};
+    \node<2->[col1] at (2.6,4.0)  {{\color{ecpurple}\textsc{Basic}}\\[4pt] just the sequence; predict the next token};
+    \node<3->[col1] at (2.6,1.5)  {{\color{ecpurple}\textsc{Basic-CoT}}\\[4pt] the same, but ``reason step by step''};
+
+    \node<4->[colhead, text=ecgreen]    at (7.5,6.6)  {Some Information};
+    \node<5->[col2] at (7.5,2.75) {{\color{ecgreen}\textsc{More-Expl}}\\[4pt] ``\dots generated from an unknown but consistent grammar''};
+
+    \node<6->[colhead, text=evallmProp] at (12.4,6.6) {Full Problem Structure};
+    \node<7->[col3] at (12.4,4.0) {{\color{evallmProp}\textsc{DFA-CoT}}\\[4pt] told it is a 3-state DFA; reason it out};
+    \node<8->[col3] at (12.4,1.5) {{\color{evallmProp}\textsc{Red-Green}}\\[4pt] the task retold as a rooms-and-portals word problem};
+  \end{tikzpicture}}
   \vfill
-  {\small We report the \hl{max over \textsc{Basic} and \textsc{Basic-CoT}}:
-  each model's best pure-ICL shot.}
+  {\small\color{ecpurple}We report the \textbf{max over \textsc{Basic} and
+  \textsc{Basic-CoT}}: each model's best pure-ICL shot.}
 \end{frame}
 
 
-%% ---------------------------------------------------------------- models
-\begin{frame}{Models evaluated}
-  \begin{itemize}[<+->]
-    \item \hl{Open-weight:} Llama 3 / 3.1 (8B--70B), Qwen 2.5 (7B--32B), Mistral
-          Nemo, Gemma, Falcon\ldots
-    \item \hl{Open-weight code:} StarCoder2, Codestral, DeepSeek-Coder, Qwen
-          2.5-Coder.
-    \item \hl{Proprietary:} GPT-3.5 / 4o / 5, o3-mini, Claude 3.5 Sonnet.
-  \end{itemize}
-  \vfill
-  \onslide<+->{Open-weight models: \hl{1000} distinct DFAs each; proprietary
-  models: \hl{30 to 100} (API cost). \hl{30} sequences sampled per DFA,
-  temperature 0.}
-\end{frame}
 
 %% ================================================================ RESULTS
 \headerslide{Results}
@@ -572,15 +573,17 @@
 
 %% ---------------------------------------------------------------- can LLMs solve it (setup)
 \begin{frame}{Can LLMs solve this at all?}
-  \begin{itemize}[<+->]
-    \item Wait, is DFA inference just \hl{beyond the capacity} of (these) LLMs?
-    \item Transformers \hl{can represent $n$-grams}\footnote{Svete, Anej, and
+  \centering
+  \vfill
+  \onslide<1->{Wait, is DFA inference just \hl{beyond the capacity} of (these)
+  LLMs?}\par\medskip
+  \onslide<2->{Transformers \hl{can represent $n$-grams}\footnote{Svete, Anej, and
           Ryan Cotterell. ``Transformers can represent $n$-gram language
           models.'' \emph{Proceedings of the 2024 Conference of the North
           American Chapter of the Association for Computational Linguistics:
-          Human Language Technologies (Volume 1: Long Papers)}. 2024.}
-    \item But can (these) LLMs \hl{solve this problem directly}?
-  \end{itemize}
+          Human Language Technologies (Volume 1: Long Papers)}. 2024.}}\par\medskip
+  \onslide<3->{But can (these) LLMs \hl{solve this problem directly}?}\par
+  \vfill
 \end{frame}
 
 %% ---------------------------------------------------------------- can LLMs solve it
@@ -605,6 +608,26 @@
     \item \onslide<8->{So the lack of performance cannot be attributed to an
           underlying task difficulty, at least on transducer.}
   \end{itemize}
+\end{frame}
+
+%% ---------------------------------------------------------------- appendix: examples
+\begin{frame}{Varying the number of examples}
+  \centering
+  \vfill
+  \includegraphics[width=\linewidth]{images/more-examples-per-problem}
+  \vfill
+  {\small More examples help everyone, but \hl{the LLMs never catch the
+  $n$-grams}.}
+\end{frame}
+
+%% ---------------------------------------------------------------- appendix: states
+\begin{frame}{Varying the number of states}
+  \centering
+  \vfill
+  \includegraphics[width=\linewidth]{images/more-states-per-problem}
+  \vfill
+  {\small Accuracy falls as the DFAs grow, and the \hl{gap to the $n$-grams
+  persists}.}
 \end{frame}
 
 % %% ---------------------------------------------------------------- findings
@@ -649,13 +672,6 @@
   \end{itemize}
 \end{frame}
 
-%% ---------------------------------------------------------------- caveats
-\begin{frame}{But we can say this}
-  \begin{itemize}[<+->]
-    \item LLMs have not learned a \hl{general theory of language} in their \hl{parameters} that they can apply \hl{in-context} to an \hl{entirely new} language \hl{without knowing anything} about it.
-  \end{itemize}
-\end{frame}
-
 %% ---------------------------------------------------------------- the claim
 %% One sentence, revealed clause by clause (each clause on its own line).
 \begin{frame}{But we can say this!}
@@ -674,6 +690,22 @@
 
 %% ================================================================ EXTRA SLIDES
 \headerslide{Extra slides}
+
+
+%% ---------------------------------------------------------------- models
+\begin{frame}{Models evaluated}
+  \begin{itemize}[<+->]
+    \item \hl{Open-weight:} Llama 3 / 3.1 (8B--70B), Qwen 2.5 (7B--32B), Mistral
+          Nemo, Gemma, Falcon\ldots
+    \item \hl{Open-weight code:} StarCoder2, Codestral, DeepSeek-Coder, Qwen
+          2.5-Coder.
+    \item \hl{Proprietary:} GPT-3.5 / 4o / 5, o3-mini, Claude 3.5 Sonnet.
+  \end{itemize}
+  \vfill
+  \onslide<+->{Open-weight models: \hl{1000} distinct DFAs each; proprietary
+  models: \hl{30 to 100} (API cost). \hl{30} sequences sampled per DFA,
+  temperature 0.}
+\end{frame}
 
 
 %% A bordered box holding the verbatim prompt the model receives.
