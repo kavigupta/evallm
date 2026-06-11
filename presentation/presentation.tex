@@ -17,7 +17,7 @@
 \newlength{\altwd} % fixed-width slot for the swapped header word (no reflow)
 
 %% A small thumbnail of the baselines spectrum, floated into the top-left corner,
-%% with an arrow pointing at the active band #1 (1 = No information ... 4 =
+%% with an arrow pointing at the active band #1 (1 = No information ... 3 =
 %% Optimal solver). Used to orient each baseline slide on the spectrum.
 \newcommand{\specmini}[1]{%
   \begin{tikzpicture}[remember picture, overlay]
@@ -26,11 +26,10 @@
       \begin{tikzpicture}
         \fill[evallmHighlight!12] (0,0)   rectangle (0.9,0.4);
         \fill[evallmHighlight!28] (0.9,0) rectangle (1.8,0.4);
-        \fill[evallmHighlight!44] (1.8,0) rectangle (2.7,0.4);
-        \fill[evallmHighlight!62] (2.7,0) rectangle (3.6,0.4);
-        \draw[evallmText, line width=0.5pt] (0,0) rectangle (3.6,0.4);
+        \fill[evallmHighlight!62] (1.8,0) rectangle (2.7,0.4);
+        \draw[evallmText, line width=0.5pt] (0,0) rectangle (2.7,0.4);
         \draw[evallmText, line width=0.5pt]
-          (0.9,0)--(0.9,0.4) (1.8,0)--(1.8,0.4) (2.7,0)--(2.7,0.4);
+          (0.9,0)--(0.9,0.4) (1.8,0)--(1.8,0.4);
         \draw[evallmHighlight, line width=1.5pt]
           ({(#1-1)*0.9},0) rectangle ({#1*0.9},0.4);
         \draw[->, evallmHighlight, line width=1.2pt]
@@ -439,35 +438,31 @@
     ]
     \useasboundingbox (0,0.7) rectangle (15.0,5.5);
 
-    %% four segments of increasing capability (left -> right)
-    \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (4.0,4.45);
-    \fill[fill=evallmHighlight!28] (4.0,2.05) rectangle (7.5,4.45);
-    \fill[fill=evallmHighlight!44] (7.5,2.05) rectangle (11.0,4.45);
-    \fill[fill=evallmHighlight!62] (11.0,2.05) rectangle (14.5,4.45);
+    %% three segments of increasing capability (left -> right)
+    \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,4.45);
+    \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,4.45);
+    \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,4.45);
     %% segment dividers + outer frame
     \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,4.45);
-    \draw[evallmText, line width=1.1pt] (4.0,2.05) -- (4.0,4.45);
-    \draw[evallmText, line width=1.1pt] (7.5,2.05) -- (7.5,4.45);
-    \draw[evallmText, line width=1.1pt] (11.0,2.05) -- (11.0,4.45);
+    \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,4.45);
+    \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,4.45);
 
     %% the capability labels marking each segment
-    \node[slab] at (2.25,3.25)  {No information};
-    \node[slab] at (5.75,3.25)  {Copying};
-    \node[slab] at (9.25,3.25)  {Non world-modeling pattern recognition};
-    \node[slab] at (12.75,3.25) {Optimal solver};
+    \node[slab] at (2.8333,3.25)  {No information};
+    \node[slab] at (7.5,3.25)  {Non world-modeling pattern recognition};
+    \node[slab] at (12.1667,3.25) {Optimal solver};
 
     %% which baseline sits in each band
-    \node[bname] at (2.25,4.95)  {\textsc{Random}\,/\,\textsc{Null}};
-    \node[bname] at (5.75,4.95)  {\textsc{Common-Suffix}};
-    \node[bname] at (9.25,4.95)  {\textsc{$n$-Gram}};
-    \node[bname] at (12.75,4.95) {\textsc{Brute-Force}};
+    \node[bname] at (2.8333,4.95)  {\textsc{Random}\,/\,\textsc{Null}};
+    \node[bname] at (7.5,4.95)  {\textsc{$n$-Gram}};
+    \node[bname] at (12.1667,4.95) {\textsc{Brute-Force}};
 
     %% bracket: where we'd expect LLMs to land --- the upper half of the n-Gram
     %% band, reaching a quarter of the way into Brute-Force.
     \draw[evallmHighlight, line width=1.2pt, decorate,
           decoration={brace, amplitude=7pt, mirror, raise=2pt}]
-      (9.25,2.05) -- (11.875,2.05);
-    \node[font=\small\bfseries, text=evallmHighlight] at (10.5625,1.25)
+      (7.5,2.05) -- (11.0,2.05);
+    \node[font=\small\bfseries, text=evallmHighlight] at (9.25,1.25)
       {we'd expect LLMs to be here};
   \end{tikzpicture}}
   \vfill
@@ -481,41 +476,16 @@
   \vfill
 \end{frame}
 
-%% Highlight helpers shared by Common-Suffix and the n-Gram slides:
+%% Highlight helpers shared by the n-Gram slides:
 %%   \mt = matched window, \pulled = pulled/appended output, \qt = query window
 \newcommand{\mt}[1]{\highLight[ecblue!18]{#1}}
 \newcommand{\pulled}[1]{\highLight[ecgreen!28]{\textbf{#1}}}
 \newcommand{\qt}[1]{\highLight[evallmHighlight!30]{#1}}
 \newcommand{\mask}{\textbf{\textcolor{ecgreen}{?}}}
 
-%% ---------------------------------------------------------------- common-suffix
-%% Same example + layout as the n-Gram sequence-completion slide, so the two
-%% heuristics can be compared. Common-Suffix ignores the prefix and appends the
-%% suffix maximizing (#ending in S) x |S|.
-\begin{frame}{Baseline 2: \textsc{Common-Suffix}}
-  \specmini{2}
-  \begin{center}
-  \ttfamily\normalsize
-  \setlength{\tabcolsep}{2em}\renewcommand{\arraystretch}{1.4}
-  \begin{tabular}{@{}ccc@{}}
-    \symA\,\symA\,\symB\,\symB\,\symA\,\symB\,\symB\,\symC & \symA\,\symA\,\symA\,\symB\,\symA\,\symA\,\symC\,\symA & \symC\,\symC\,\symC\,\alt<4->{\mt{\symA\,\symC\,\symA\,\symB\,\symA}}{\symA\,\symC\,\symA\,\symB\,\symA}\\
-    \symC\,\symA\,\symB\,\alt<4->{\mt{\symA\,\symC\,\symA\,\symB\,\symA}}{\symA\,\symC\,\symA\,\symB\,\symA} & \symA\,\symB\,\symC\,\symC\,\symA\,\symA\,\symA\,\symB & \symB\,\symB\,\symB\,\symA\,\symB\,\symB\,\symB\,\symA\\
-  \end{tabular}
-  \end{center}
-  \vspace{0.3em}
-  \small
-  \onslide<1->{\textbf{Prefix:}~{\symA\,\symC\,\symB\,\symA\,\symC\,\mask}}\par\medskip
-  \onslide<2->{\textbf{Ignore the prefix} --- just append the suffix the examples tend to end with.}\par\smallskip
-  \onslide<3->{Pick the suffix $S$ maximizing $(\#\,\text{ending in } S)\times|S|$.}\par\smallskip
-  \onslide<4->{\mt{\symA\symC\symA\symB\symA} ends \textbf{two}%
-    \only<5->{ ($2\times5=10$), beating \,\symB\symA\, ($3\times2=6$)}.}\par\smallskip
-  \onslide<6->{Append it $\Rightarrow$
-  {\symA\,\symC\,\symB\,\symA\,\symC\,\pulled{\symA\,\symC\,\symA\,\symB\,\symA}} \yes}
-\end{frame}
-
 %% ---------------------------------------------------------------- n-gram (seq. completion)
-\begin{frame}{Baseline 3: \textsc{$n$-Gram}}
-  \specmini{3}
+\begin{frame}{Baseline 2: \textsc{$n$-Gram}}
+  \specmini{2}
   \begin{center}
   \ttfamily\normalsize
   \setlength{\tabcolsep}{2em}\renewcommand{\arraystretch}{1.4}
@@ -535,8 +505,8 @@
 \end{frame}
 
 %% ---------------------------------------------------------------- n-gram (transducer)
-\begin{frame}{Baseline 3: \textsc{$n$-Gram}}
-  \specmini{3}
+\begin{frame}{Baseline 2: \textsc{$n$-Gram}}
+  \specmini{2}
   \begin{center}
   \ttfamily\normalsize
   \begin{tabular}{@{}l@{}}
@@ -556,8 +526,8 @@
 \end{frame}
 
 %% ---------------------------------------------------------------- brute force
-\begin{frame}{Baseline 4: \textsc{Brute-Force}}
-  \specmini{4}
+\begin{frame}{Baseline 3: \textsc{Brute-Force}}
+  \specmini{3}
   \vfill
   \begin{center}\large
     We do \hl{exact inference}.\\[0.5em]
@@ -565,18 +535,6 @@
   \end{center}
   \vfill
 \end{frame}
-
-% %% ---------------------------------------------------------------- summary
-% \begin{frame}{Baselines: a spectrum}
-%   \begin{itemize}[<+->]
-%     \item \hl{\textsc{Random} / \textsc{Null}}: a \hl{lower bound} (chance,
-%           no learning at all).
-%     \item \hl{\textsc{Common-Suffix}} and \hl{\textsc{$n$-Gram}}:
-%           \hl{non world-modeling} baselines of varying sophistication.
-%     \item \hl{\textsc{Brute-Force}}: an \hl{upper bound} (the Bayes-optimal
-%           world model).
-%   \end{itemize}
-% \end{frame}
 
 %% ================================================================ PROMPTS
 \headerslide{Prompts}
