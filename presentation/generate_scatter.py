@@ -76,7 +76,9 @@ PAPER_DIRECTIONS = {
 PAPER_OFF_DIST = 2.5  # data-unit offset scale (matplotlib off_dist)
 
 # canvas size (cm) and approximate \tiny glyph metrics (cm)
-W, H = 12.0, 5.0
+# Keep the x/y data scale equal so equal value differences render at the same
+# physical distance on both axes (for example, 80-90 on x and y match).
+W, H = 12.0, 7.2
 CHAR_W, LINE_H = 0.105, 0.20
 
 # 8 placement directions as integer signs (sx, sy)

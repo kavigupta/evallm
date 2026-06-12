@@ -93,7 +93,7 @@ def cell_mean(v):
 def fmt_acc(prefix, v):
     """Mean accuracy only (no bootstrap CI -- too busy for a slide)."""
     if isinstance(v, float) and np.isnan(v):
-        return "N/A"
+        return r"N/A\footnotemark[1]"
     return prefix + f"{100 * np.mean(v):.1f}"
 
 

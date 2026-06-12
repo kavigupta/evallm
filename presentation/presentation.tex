@@ -614,7 +614,7 @@
 %% The tikzpicture is generated from the cached results by generate_scatter.py.
 \begin{frame}{No tested LLM matches \textsc{$n$-Gram} performance}
   \centering
-  \input{generated/scatter.tex}
+  \resizebox{0.92\linewidth}{!}{\input{generated/scatter.tex}}
 \end{frame}
 
 %% ---------------------------------------------------------------- can LLMs solve it (setup)
@@ -638,6 +638,7 @@
   \centering
   \scriptsize
   \resizebox{\linewidth}{!}{\input{generated/prompt_table.tex}}
+  \footnotetext[1]{model provided an invalid (incorrect format) answer at least 25\% of the time}
   \par\vspace{0.6em}
   \small
   \begin{itemize}\setlength{\itemsep}{0.3em}
