@@ -1,0 +1,445 @@
+% !TEX program = lualatex
+%% Randomly Sampled Language Reasoning Problems Elucidate Limitations of
+%% In-Context Learning.  Conference poster (A0 portrait).
+%%
+%% Reuses the talk's beamer theme (../presentation/beamerthemeevallm.sty, found
+%% via TEXINPUTS) and the same result figures, regenerated overlay-free into
+%% generated/ by the talk's generators (see the Makefile). Build with LuaLaTeX:
+%%   latexmk        (uses the bundled latexmkrc)   -- or --   make
+\documentclass[final]{beamer}
+
+%% 4 ft wide x 5 ft tall (121.92 cm x 152.4 cm). scale sets the base font size.
+\usepackage[orientation=portrait, size=custom, width=121.92, height=152.4,
+            scale=1.62]{beamerposter}
+
+%% The shared talk theme (fonts: Futura / Noto Mono; near-white background;
+%% colorblind-safe orange accent; \hl, \codehl, ecblue/orange/purple/green).
+\usepackage{beamerthemeevallm}
+
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{colortbl} % \cellcolor in the results table
+\usepackage{tikz}
+\usetikzlibrary{calc, arrows.meta, positioning, decorations.pathreplacing}
+\usepackage{pifont} % \ding{51} checkmark
+\newcommand{\yes}{\textcolor{ecgreen}{\ding{51}}}
+
+%% Render \textsc (baseline / prompt names) in Computer Modern small caps, since
+%% the body font Futura has no small-caps shape -- identical setup to the talk.
+\usepackage{unicode-math}
+\setmathfont{Latin Modern Math}
+\newfontfamily\cmsc{Latin Modern Roman Caps}
+\renewcommand{\textsc}[1]{\ensuremath{\text{\normalfont\cmsc #1}}}
+
+%% The generated scatter places its labels in cm, calibrated against the ~5pt
+%% \tiny / ~7pt \scriptsize glyphs of a normal-sized document. In beamer those
+%% size commands are managed absolute sizes that beamerposter blows up ~4x, so
+%% the labels overlap. Restore the calibrated point sizes locally (then a
+%% \resizebox scales the correctly-laid-out picture to the wanted width).
+\newcommand{\calibratefigfonts}{%
+  \renewcommand{\tiny}{\fontsize{5pt}{5.5pt}\selectfont}%
+  \renewcommand{\scriptsize}{\fontsize{7pt}{8pt}\selectfont}%
+  \renewcommand{\footnotesize}{\fontsize{8pt}{9.5pt}\selectfont}%
+  \renewcommand{\small}{\fontsize{9pt}{11pt}\selectfont}%
+  \renewcommand{\normalsize}{\fontsize{10pt}{12pt}\selectfont}%
+  \renewcommand{\large}{\fontsize{12pt}{14pt}\selectfont}%
+  \renewcommand{\Large}{\fontsize{14.4pt}{18pt}\selectfont}%
+  \renewcommand{\LARGE}{\fontsize{17.28pt}{22pt}\selectfont}%
+  \renewcommand{\huge}{\fontsize{20.74pt}{25pt}\selectfont}%
+  \normalsize}
+
+%% The three DFA symbols, colored a = blue, b = orange, c = purple (= 0,1,2),
+%% and the "proprietary" point color, matching the talk's figures.
+\newcommand{\symA}{\textcolor{ecblue}{\texttt{a}}}
+\newcommand{\symB}{\textcolor{ecorange}{\texttt{b}}}
+\newcommand{\symC}{\textcolor{ecpurple}{\texttt{c}}}
+\newcommand{\ob}[1]{\textcolor{evallmHighlight}{\textbf{#1}}} % an accept (output) bit
+\definecolor{evallmProp}{RGB}{200,30,60}
+
+\newcommand{\sOne}{\textcolor{ecblue}{\texttt{1}}}
+\newcommand{\sTwo}{\textcolor{ecorange}{\texttt{2}}}
+\newcommand{\cA}{\textcolor{ecblue}{\texttt{A}}}
+\newcommand{\cB}{\textcolor{ecorange}{\texttt{B}}}
+\newcommand{\mt}[1]{\highLight[ecblue!18]{#1}}
+\newcommand{\pulled}[1]{\highLight[ecgreen!28]{\textbf{#1}}}
+\newcommand{\qt}[1]{\highLight[evallmHighlight!30]{#1}}
+\newcommand{\mask}{\textbf{\textcolor{ecgreen}{?}}}
+
+%% ---------------------------------------------------------------- poster sizing
+\setbeamerfont{title}{size=\veryHuge}
+\setbeamerfont{block title}{size=\LARGE}
+\setbeamertemplate{itemize items}[circle]
+\setlength{\columnsep}{2.5cm}
+%% Blocks: a touch of breathing room above each so the column reads as cards.
+\setbeamertemplate{block begin}{
+  \vskip0.7ex
+  \begin{beamercolorbox}[leftskip=1cm,colsep*=.6ex,rounded=true]{block title}
+    \usebeamerfont{block title}\insertblocktitle
+  \end{beamercolorbox}
+  \vskip-1pt
+  \usebeamerfont{block body}
+  \begin{beamercolorbox}[leftskip=1cm,rightskip=1cm,vmode,sep=0.5ex,rounded=true]{block body}
+  \vskip0.3ex
+}
+\setbeamertemplate{block end}{\vskip0.4ex\end{beamercolorbox}\vskip0.7ex}
+
+\setlength{\itemsep}{0.4ex}
+
+%% ---------------------------------------------------------------- metadata
+\title{Randomly Sampled Language Reasoning Problems Elucidate Limitations of In-Context Learning}
+\author{Kavi Gupta\textsuperscript{1} \quad Kate Sanders\textsuperscript{2} \quad Armando Solar-Lezama\textsuperscript{1}}
+\institute{\textsuperscript{1}MIT CSAIL \qquad \textsuperscript{2}Johns Hopkins University}
+\date{NeuS 2026}
+
+\begin{document}
+\begin{frame}[t]
+
+%% ============================================================ title banner
+\begin{center}
+  {\usebeamerfont{title}\usebeamercolor[fg]{title}\inserttitle\par}
+  \vspace{0.4em}
+  {\color{evallmHighlight}\rule{\textwidth}{4pt}}
+  \vspace{0.5em}
+  {\large\insertauthor \quad\textbar\quad \insertinstitute \quad\textbar\quad NeuS 2026\par}
+\end{center}
+\vspace{0.8em}
+
+%% Both columns are set to one fixed height with \vfill glue between their
+%% blocks, so they fill the body evenly and their bottoms line up just above the
+%% takeaway footer. Tune \colht if the title or takeaway height changes.
+\newlength{\colht}\setlength{\colht}{0.73\paperheight}
+
+%% ============================================================ three columns
+\begin{columns}[t, totalwidth=\textwidth]
+
+%% ====================================================== LEFT column: the setup
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\colht][t]{\linewidth}
+
+
+  \begin{block}{What is in-context learning?}
+    {\centering\calibratefigfonts
+    \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        >=Stealth,
+        seq/.style={font=\ttfamily\Large},
+        llm/.style={draw=evallmText, line width=1.4pt, rounded corners=3pt,
+          fill=evallmHighlight!14, minimum width=22mm, minimum height=14mm,
+          font=\Large\bfseries},
+        arr/.style={->, line width=1.4pt, color=evallmText},
+        ptitle/.style={font=\large\bfseries, text=evallmHighlight},
+      ]
+      \useasboundingbox (-9.3,-0.7) rectangle (9.3,6.95);
+      \node[seq, anchor=east] (in) at (-2.7,6)
+        {\sOne\,\sTwo\,\sOne\,\sOne\,\sTwo\,\sOne\,\sOne\,\sOne\,\sTwo\,\sOne\,\hl{\texttt{?\,?}}};
+      \node[llm] (llm) at (0,6) {LLM};
+      \node[seq, anchor=west] (out) at (2.7,6) {\sOne\,\sOne\,\sOne\,\sTwo};
+      \draw[arr] (in) -- (llm);
+      \draw[arr] (llm) -- (out);
+      \node[font=\large\itshape, anchor=north] (how) at (0,4.6) {How?};
+      \draw[arr] (llm) -- (how);
+      \draw[rounded corners=6pt, draw=evallmText!45, line width=1pt, fill=white]
+        (-8.7,-0.5) rectangle (-0.5,3.7);
+      \draw[arr] (how) -- (-4.6,3.7);
+      \node[ptitle] at (-4.6,3.15) {Blank Slate Learning Algorithm};
+      \node at (-4.6,1.45)
+        {$\displaystyle \operatorname*{arg\,max}_{\,t\text{ a Turing machine}}\;
+          P(\mathrm{trace}\mid t)\,P(t)$};
+      \draw[rounded corners=6pt, draw=evallmText!45, line width=1pt, fill=white]
+        (0.5,-0.5) rectangle (8.7,3.7);
+      \draw[arr] (how) -- (4.6,3.7);
+      \node[ptitle] at (4.6,3.15) {Leveraging Parametric Knowledge};
+      \node[font=\ttfamily\large, text width=80mm, align=left,
+        text=evallmText!45] (corpus) at (4.6,1.35)
+        {\dots the children chant it before each round of the game. the words run
+         like \cA\,\cB\,\cA\,\cA\,\cB\,\cA\,\cA\,\cA\,\cB\,\cA\,\cA\,\cA\,\cA\,\cB\,\cA\
+         and then the verse repeats, one beat longer than the one that came before
+         it \dots};
+      \node[draw=evallmText, line width=1.6pt, circle, minimum size=14mm,
+        fill=evallmHighlight!20, fill opacity=0.4] (lens) at (2.7,1.30) {};
+      \draw[line width=2.4pt, color=evallmText, line cap=round]
+        (lens.-45) -- ++(0.5,-0.5);
+      \node[rotate=90, font=\large\bfseries, text=evallmHighlight]
+        at (0,1.6) {Truth};
+    \end{tikzpicture}}\par}
+    \vskip0.2ex
+    {\centering\large The truth is clearly in the \hl{middle}, but \hl{where?}\par}
+  \end{block}
+  \vfill
+
+
+  \begin{block}{The ideal task to investigate ICL}
+    {\centering\calibratefigfonts
+    Want task satisfying one property: no \hl{alternate explanations}\par
+    \vskip0.35ex
+    \resizebox{!}{11.4cm}{%
+    \begin{tikzpicture}[
+        >=Stealth,
+        brick/.style={draw=evallmText, line width=1pt, rounded corners=2.5pt,
+          minimum height=10mm, text width=40mm, align=center, font=\small,
+          inner sep=4pt},
+        easybrick/.style={brick, fill=ecgreen!18},
+        hardbrick/.style={brick, fill=evallmProp!16},
+        easylabel/.style={font=\large\bfseries, text=ecgreen, align=center},
+        hardlabel/.style={font=\large\bfseries, text=evallmProp, align=center},
+      ]
+      \useasboundingbox (-8,-0.85) rectangle (8,6.2);
+      \fill[evallmText] (-1.9,-0.5) -- (1.9,-0.5) -- (1.25,0) -- (0,2.3) -- (-1.25,0) -- cycle;
+      \draw[line width=7pt, evallmText, line cap=round] (-7.4,2.3) -- (7.4,2.3);
+      \node at (-5,1.45) {\includegraphics[height=1.35cm]{../presentation/images/technologist}};
+      \node[easylabel] at (-5,0.05) {``Task too easy!''};
+      \node[font=\footnotesize\itshape, text=ecgreen] at (-5,-0.55)
+        {it's using parametric knowledge};
+      \node at ( 5,1.45) {\includegraphics[height=1.35cm]{../presentation/images/technologist}};
+      \node[hardlabel] at ( 5,0.05) {``Task too hard!''};
+      \node[font=\footnotesize\itshape, text=evallmProp] at ( 5,-0.55)
+        {you're asking too much of the LLM};
+      \node[easybrick] at (-5,5.45) {Drawn at random};
+      \node[easybrick] at (-5,4.20) {Parsimoniously defined space};
+      \node[easybrick] at (-5,2.95) {Non-canonical by construction};
+      \node[hardbrick] at ( 5,5.45) {A language task};
+      \node[hardbrick] at ( 5,4.20) {Baselines that do not model the world};
+      \node[hardbrick] at ( 5,2.95) {Easiest nontrivial task};
+    \end{tikzpicture}}\par}
+  \end{block}
+  \vfill
+
+
+  \begin{block}{Narrowing down the task}
+    {\centering\calibratefigfonts
+    \resizebox{0.98\linewidth}{!}{%
+    \begin{tikzpicture}[
+        >=Stealth,
+        hlbox/.style={rounded corners=3pt, draw=evallmText, line width=0.8pt},
+        head/.style={font=\large\bfseries, text=evallmHighlight},
+        body/.style={font=\small, text=evallmText, align=center},
+      ]
+      \useasboundingbox (0,0) rectangle (16,5.25);
+
+      %% LEFT: Chomsky hierarchy, ending at Regular.
+      \node[head] at (3.25,4.85) {regular languages};
+      \draw[hlbox] (0.55,0.70) rectangle (5.95,4.35);
+      \node[body] at (3.25,4.10) {Recursively enumerable};
+      \draw[hlbox] (1.00,1.10) rectangle (5.50,3.95);
+      \node[body] at (3.25,3.70) {Context-sensitive};
+      \draw[hlbox] (1.45,1.50) rectangle (5.05,3.55);
+      \node[body] at (3.25,3.30) {Context-free};
+      \fill[evallmHighlight, rounded corners=3pt] (1.95,2.05) rectangle (4.55,2.95);
+      \node[font=\small, text=white] at (3.25,2.50) {Regular};
+      \node[body, text width=5.3cm] at (3.25,0.28)
+        {simplest formal languages};
+
+      %% CENTER: why three states.
+      \draw[->, line width=1.2pt, evallmText] (6.75,2.55) -- (9.75,2.55);
+      \node[body, text width=3.0cm] at (8.25,3.45)
+        {2 states are trivial:\ state $=$ output};
+      \node[font=\small\bfseries, text=evallmHighlight] at (8.25,1.80)
+        {first nontrivial case};
+
+      %% RIGHT: representative 3-state DFA.
+      \node[head] at (12.6,4.85) {3-state DFAs};
+      \node at (12.6,2.65) {\resizebox{4.2cm}{!}{%
+        \begin{tikzpicture}[>=Stealth,
+            st/.style={circle, draw=evallmText, line width=0.8pt, minimum size=8mm, font=\small},
+            acc/.style={st, double, double distance=0.8pt}]
+          \node[acc] (s0) at (90:14mm)  {0};
+          \node[st]  (s1) at (210:14mm) {1};
+          \node[st]  (s2) at (-30:14mm) {2};
+          \draw[ecblue,->]   (s0) edge[loop above] node[above]{\symA} (s0);
+          \draw[ecblue,->]   (s1) edge[loop left]  node[left]{\symA}  (s1);
+          \draw[ecblue,->]   (s2) edge[loop right] node[right]{\symA} (s2);
+          \draw[ecorange,->] (s0) to[bend left=16] node[auto,inner sep=1pt]{\symB} (s1);
+          \draw[ecorange,->] (s1) to[bend left=16] node[auto,inner sep=1pt]{\symB} (s2);
+          \draw[ecorange,->] (s2) to[bend left=16] node[auto,inner sep=1pt]{\symB} (s0);
+          \draw[ecpurple,->] (s0) to[bend left=16] node[auto,inner sep=1pt]{\symC} (s2);
+          \draw[ecpurple,->] (s2) to[bend left=16] node[auto,inner sep=1pt]{\symC} (s1);
+          \draw[ecpurple,->] (s1) to[bend left=16] node[auto,inner sep=1pt]{\symC} (s0);
+        \end{tikzpicture}}};
+      \node[body, text width=4.4cm] at (12.6,0.28)
+        {78{,}786 total: exact inference is feasible, novelty is sampled.};
+    \end{tikzpicture}}\par}
+  \end{block}
+  \vfill
+
+  \begin{block}{Two tasks per language}
+    {\centering\calibratefigfonts
+    \resizebox{!}{11cm}{%
+    \begin{tikzpicture}[
+        panel/.style={rounded corners=6pt, draw=evallmText!55, line width=1pt, fill=white},
+        htitle/.style={font=\Large\bfseries, text=evallmHighlight},
+        seq/.style={anchor=west, font=\ttfamily\normalsize},
+        tok/.style={font=\ttfamily\normalsize},
+        brm/.style={decorate, decoration={brace, amplitude=5pt, mirror}, line width=1pt, draw=evallmText},
+        cnt/.style={font=\small\bfseries, text=evallmText},
+      ]
+      \useasboundingbox (0,0.4) rectangle (16,8.3);
+      %% LEFT: Sequence Completion -- 30 ticked strings of length 10
+      \draw[panel] (0.2,0.6) rectangle (7.8,8.1);
+      \node[htitle] at (4.0,7.6) {Sequence Completion};
+      \node[seq] (a1) at (2.0,6.5) {a b c a b c a b c a};
+      \node[seq] (a2) at (2.0,5.95){c a b b a c a b c a};
+      \node[seq] (a3) at (2.0,5.40){b b a c a a b c c a};
+      \node[seq] (a4) at (2.0,4.85){a c c a b a c b a b};
+      \node[seq] (a5) at (2.0,4.30){c a b a c b a c a b};
+      \node[seq] (a6) at (2.0,3.75){b c a a b c a b c a};
+      \foreach \r in {a1,a2,a3,a4,a5,a6}{\node[anchor=west, inner sep=3pt] at (\r.east) {\yes};}
+      \draw[brm] (1.7,6.75) -- (1.7,3.5);
+      \node[cnt] at (1.1,5.12) {30};
+      \draw[brm] (a6.south west) -- (a6.south east);
+      \node[cnt] at ($(a6.south)+(0,-0.5)$) {10};
+      \node[font=\small, anchor=east] at (1.95,2.5) {complete:};
+      \node[seq] (q1) at (2.05,2.5) {a c b a c~};
+      \node[seq, text=ecgreen] (q2) at (q1.east) {?\,?\,?\,?\,?};
+      \draw[brm] (q2.south west) -- (q2.south east);
+      \node[cnt, text=ecgreen] at ($(q2.south)+(0,-0.5)$) {1--5};
+      %% RIGHT: Transducer -- one example, symbols and accept bits on separate lines
+      \draw[panel] (8.2,0.6) rectangle (15.8,8.1);
+      \node[htitle] at (12.0,7.6) {Transducer};
+      \node[cnt, anchor=east] at (9.55,5.2) {symbol};
+      \node[cnt, anchor=east] at (9.55,4.5) {accept};
+      \foreach \x/\s/\o in {9.85/b/0, 10.45/c/1, 11.05/a/1, 11.65/b/0, 12.25/a/0, 12.85/c/1}{
+        \node[tok] at (\x,5.2) {\s};
+        \node[tok] at (\x,4.5) {\ob{\o}};
+      }
+      \node[tok] at (13.45,5.2) {$\cdots$};
+      \node[tok] at (13.45,4.5) {$\cdots$};
+      \node[tok] at (14.05,5.2) {c};
+      \node[tok, text=ecgreen] at (14.05,4.5) {\textbf{?}};
+      \draw[brm] (9.65,4.15) -- (14.25,4.15);
+      \node[cnt] at (11.95,3.55) {30};
+    \end{tikzpicture}}\par}
+    \vskip0.4ex
+    {\small 30 sequences sampled per DFA, temperature 0. Open-weight models:
+    \hl{1000} distinct DFAs each; proprietary models: \hl{30--100} (API cost).}
+  \end{block}
+  \vfill
+
+
+  \begin{block}{Baselines: a spectrum of capability}
+    {\centering\calibratefigfonts
+    \resizebox{!}{6.2cm}{%
+    \begin{tikzpicture}[
+        slab/.style={font=\small, align=center, text=evallmText, text width=3.0cm},
+        bname/.style={font=\small\bfseries, text=evallmHighlight},
+      ]
+      \useasboundingbox (0,0.6) rectangle (15.0,5.6);
+      \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,4.45);
+      \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,4.45);
+      \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,4.45);
+      \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,4.45);
+      \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,4.45);
+      \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,4.45);
+      \node[slab] at (2.8333,3.25)  {No information};
+      \node[slab] at (7.5,3.25)  {Non world-modeling pattern recognition};
+      \node[slab] at (12.1667,3.25) {Optimal solver};
+      \node[bname] at (2.8333,4.95)  {\textsc{Random}\,/\,\textsc{Null}};
+      \node[bname] at (7.5,4.95)  {\textsc{$n$-Gram}};
+      \node[bname] at (12.1667,4.95) {\textsc{Brute-Force}};
+      \draw[evallmHighlight, line width=1.2pt, decorate,
+            decoration={brace, amplitude=7pt, mirror, raise=2pt}]
+        (7.5,2.05) -- (11.0,2.05);
+      \node[font=\small\bfseries, text=evallmHighlight] at (9.25,1.25)
+        {we'd expect LLMs to be here};
+    \end{tikzpicture}}\par
+    \vskip0.6ex
+    \resizebox{0.96\linewidth}{!}{%
+    \begin{minipage}{17cm}
+    \ttfamily\normalsize
+    \setlength{\tabcolsep}{1.1em}\renewcommand{\arraystretch}{1.35}
+    \begin{tabular}{@{}ccc@{}}
+      \symA\,\symA\,\symB\,\symB\,\symA\,\symB\,\symB\,\symC & \symA\,\symA\,\symA\,\symB\,\symA\,\mt{\symA\,\symC}\,\pulled{\symA} & \symC\,\symC\,\symC\,\mt{\symA\,\symC}\,\pulled{\symA\,\symB\,\symA}\\
+      \symC\,\symA\,\symB\,\mt{\symA\,\symC}\,\pulled{\symA\,\symB\,\symA} & \symA\,\symB\,\symC\,\symC\,\symA\,\symA\,\symA\,\symB & \symB\,\symB\,\symB\,\symA\,\symB\,\symB\,\symB\,\symA
+    \end{tabular}
+    \par\vskip0.25em
+    \normalfont\small\textbf{Prefix:}~{\symA\,\symC\,\symB\,\qt{\symA\,\symC}\,\mask}\quad
+    Context $n{-}1=2$: \qt{\symA\,\symC}. Counts: \pulled{aba} twice, \pulled{a} once. Most common $\Rightarrow$ \pulled{aba} \yes
+    \end{minipage}}\par}
+  \end{block}
+
+\end{minipage}
+\end{column}
+
+%% ====================================================== MIDDLE column: models and results
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\colht][t]{\linewidth}
+
+  \begin{block}{Prompts \& models}
+    {\centering\calibratefigfonts
+    \resizebox{\linewidth}{!}{%
+    \begin{tikzpicture}[
+        prompt/.style={rounded corners=3pt, draw=evallmText, line width=0.9pt,
+          text width=4.0cm, align=center,
+          minimum height=2.1cm, inner sep=6pt, font=\small},
+        col1/.style={prompt, fill=ecpurple!14},
+        col2/.style={prompt, fill=ecgreen!16},
+        col3/.style={prompt, fill=evallmProp!14},
+        colhead/.style={font=\large\bfseries, align=center,
+          text width=4.7cm, anchor=north},
+      ]
+      \useasboundingbox (0,-0.2) rectangle (15.0,6.7);
+      \node[colhead, text=ecpurple] at (2.6,6.6) {Pure ICL};
+      \node[col1] at (2.6,4.0) {{\color{ecpurple}\textsc{Basic}}\\[4pt] just the sequence; predict the next token};
+      \node[col1] at (2.6,1.5) {{\color{ecpurple}\textsc{Basic-CoT}}\\[4pt] the same, but ``reason step by step''};
+      \node[colhead, text=ecgreen] at (7.5,6.6) {Some Information};
+      \node[col2] at (7.5,2.75) {{\color{ecgreen}\textsc{More-Expl}}\\[4pt] ``\dots generated from an unknown but consistent grammar''};
+      \node[colhead, text=evallmProp] at (12.4,6.6) {Full Problem Structure};
+      \node[col3] at (12.4,4.0) {{\color{evallmProp}\textsc{DFA-CoT}}\\[4pt] told it is a 3-state DFA; reason it out};
+      \node[col3] at (12.4,1.5) {{\color{evallmProp}\textsc{Red-Green}}\\[4pt] the task retold as a rooms-and-portals word problem};
+    \end{tikzpicture}}\par}
+    \vskip0.35ex
+    {\small We report the \textbf{max over \textsc{Basic} and \textsc{Basic-CoT}} for each model's best pure-ICL shot. Models include open-weight, open-weight code, and proprietary families.}
+  \end{block}
+
+  \vfill
+
+  \begin{block}{No tested LLM matches an \textsc{$n$-Gram}}
+    {\centering\calibratefigfonts
+     \resizebox{0.95\linewidth}{!}{\input{generated/scatter.tex}}\par}
+    \vskip0.35ex
+    {\small Every tested LLM is beaten by a 4-Gram on both tasks; the shaded corner is reached only by $n$-grams and \textsc{Brute-Force}.}
+  \end{block}
+
+  \vfill
+
+\end{minipage}
+\end{column}
+
+%% ====================================================== RIGHT column: examples and follow-up
+\begin{column}{0.31\textwidth}
+\begin{minipage}[t][\colht][t]{\linewidth}
+
+
+  \begin{block}{Can LLMs solve this at all?}
+    {\centering\resizebox{0.82\linewidth}{!}{\input{generated/prompt_table.tex}}\par}
+    {\scriptsize\textsuperscript{*} model did not answer prompt at least 25\% of the time\par}
+    \vskip0.5ex
+    {\small Grammar hints do not help; exact structure helps o3-mini only on transducer, and lets gpt-5 solve transducer perfectly. The gap is therefore not just task difficulty.}
+  \end{block}
+
+  \begin{block}{Varying examples and states}
+    \begin{columns}[c, totalwidth=\linewidth]
+      \begin{column}{0.50\linewidth}
+        \includegraphics[width=\linewidth]{../presentation/images/more-examples-per-problem}
+      \end{column}
+      \begin{column}{0.50\linewidth}
+        \includegraphics[width=\linewidth]{../presentation/images/more-states-per-problem}
+      \end{column}
+    \end{columns}
+    {\small More examples help everyone, but LLMs never catch the $n$-grams; as DFAs grow, the gap persists.}
+  \end{block}
+
+\end{minipage}
+\end{column}
+\end{columns}
+
+%% ============================================================ takeaway (footer)
+\vfill
+{\setbeamercolor{block title}{fg=white, bg=evallmHighlight}
+ \setbeamercolor{block body}{fg=evallmText, bg=evallmHighlight!12}
+\begin{block}{Takeaway}
+  \centering\large
+  LLMs have not learned a \hl{data-efficient} and \hl{general purpose} learning algorithm that they can apply \hl{in-context} to an \hl{entirely new} language \hl{without knowing anything} about it, even when languages are \hl{regular} and the target is an \textsc{$n$-Gram} with \hl{no ability to world model}.
+\end{block}}
+
+\end{frame}
+\end{document}

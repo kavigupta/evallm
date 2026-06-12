@@ -1,0 +1,7 @@
+# Force LuaLaTeX so fontspec / system fonts (Futura, Noto Mono) work, exactly
+# as in the talk. The poster reuses the talk's beamer theme, so add the
+# presentation directory to TEXINPUTS to find beamerthemeevallm.sty.
+$pdf_mode = 1;
+$pdflatex = 'lualatex -interaction=nonstopmode -synctex=1 %O %S';
+ensure_path('TEXINPUTS', '../presentation//');
+@default_files = ('poster.tex');
