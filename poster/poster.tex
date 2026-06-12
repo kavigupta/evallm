@@ -8,9 +8,14 @@
 %%   latexmk        (uses the bundled latexmkrc)   -- or --   make
 \documentclass[final]{beamer}
 
-%% 3.5 ft wide x 5 ft tall (106.68 cm x 152.4 cm). scale sets the base font size.
-\usepackage[orientation=portrait, size=custom, width=106.68, height=152.4,
-            scale=1.42]{beamerposter}
+%% ~3.67 ft wide x 5 ft tall (112 cm x 152.4 cm). scale sets the base font size.
+%% Widened from 106.68 cm and scaled up a touch (1.42 -> 1.43). The empty strip
+%% that was left at the bottom is filled by raising \colht below (the columns now
+%% extend further down toward the takeaway) rather than by over-scaling the fonts
+%% or over-widening: both inflate the \resizebox figures until the columns no
+%% longer fit between the title and the takeaway footer.
+\usepackage[orientation=portrait, size=custom, width=112, height=152.4,
+            scale=1.43]{beamerposter}
 
 %% The shared talk theme (fonts: Futura / Noto Mono; near-white background;
 %% colorblind-safe orange accent; \hl, \codehl, ecblue/orange/purple/green).
@@ -107,7 +112,7 @@
 %% Both columns are set to one fixed height with \vfill glue between their
 %% blocks, so they fill the body evenly and their bottoms line up just above the
 %% takeaway footer. Tune \colht if the title or takeaway height changes.
-\newlength{\colht}\setlength{\colht}{0.73\paperheight}
+\newlength{\colht}\setlength{\colht}{0.80\paperheight}
 
 %% ============================================================ two columns
 \begin{columns}[t, totalwidth=\textwidth]
