@@ -8,9 +8,9 @@
 %%   latexmk        (uses the bundled latexmkrc)   -- or --   make
 \documentclass[final]{beamer}
 
-%% 4 ft wide x 5 ft tall (121.92 cm x 152.4 cm). scale sets the base font size.
-\usepackage[orientation=portrait, size=custom, width=121.92, height=152.4,
-            scale=1.62]{beamerposter}
+%% 3.5 ft wide x 5 ft tall (106.68 cm x 152.4 cm). scale sets the base font size.
+\usepackage[orientation=portrait, size=custom, width=106.68, height=152.4,
+            scale=1.42]{beamerposter}
 
 %% The shared talk theme (fonts: Futura / Noto Mono; near-white background;
 %% colorblind-safe orange accent; \hl, \codehl, ecblue/orange/purple/green).
@@ -73,7 +73,7 @@
 %% Blocks: a touch of breathing room above each so the column reads as cards.
 \setbeamertemplate{block begin}{
   \vskip0.7ex
-  \begin{beamercolorbox}[leftskip=1cm,colsep*=.6ex,rounded=true]{block title}
+  \begin{beamercolorbox}[wd=\linewidth,colsep*=.6ex,center,rounded=true]{block title}
     \usebeamerfont{block title}\insertblocktitle
   \end{beamercolorbox}
   \vskip-1pt
@@ -109,11 +109,11 @@
 %% takeaway footer. Tune \colht if the title or takeaway height changes.
 \newlength{\colht}\setlength{\colht}{0.73\paperheight}
 
-%% ============================================================ three columns
+%% ============================================================ two columns
 \begin{columns}[t, totalwidth=\textwidth]
 
 %% ====================================================== LEFT column: the setup
-\begin{column}{0.31\textwidth}
+\begin{column}{0.485\textwidth}
 \begin{minipage}[t][\colht][t]{\linewidth}
 
 
@@ -170,9 +170,10 @@
 
   \begin{block}{The ideal task to investigate ICL}
     {\centering\calibratefigfonts
-    Want task satisfying one property: no \hl{alternate explanations}\par
+    {\fontsize{30pt}{34pt}\selectfont\bfseries Want task satisfying one property: no \hl{alternate explanations}\par}
     \vskip0.35ex
-    \resizebox{!}{11.4cm}{%
+    % full-width scaling
+    \resizebox{\linewidth}{!}{%
     \begin{tikzpicture}[
         >=Stealth,
         brick/.style={draw=evallmText, line width=1pt, rounded corners=2.5pt,
@@ -231,7 +232,7 @@
 
       %% CENTER: why three states.
       \draw[->, line width=1.2pt, evallmText] (6.75,2.55) -- (9.75,2.55);
-      \node[body, text width=3.0cm] at (8.25,3.45)
+      \node[body, text width=4.15cm] at (8.25,3.45)
         {2 states are trivial:\ state $=$ output};
       \node[font=\small\bfseries, text=evallmHighlight] at (8.25,1.80)
         {first nontrivial case};
@@ -308,62 +309,58 @@
       \draw[brm] (9.65,4.15) -- (14.25,4.15);
       \node[cnt] at (11.95,3.55) {30};
     \end{tikzpicture}}\par}
-    \vskip0.4ex
-    {\small 30 sequences sampled per DFA, temperature 0. Open-weight models:
-    \hl{1000} distinct DFAs each; proprietary models: \hl{30--100} (API cost).}
   \end{block}
   \vfill
 
 
-  \begin{block}{Baselines: a spectrum of capability}
+  \begin{block}{Baselines}
     {\centering\calibratefigfonts
-    \resizebox{!}{6.2cm}{%
+    % full-width scaling
+    \resizebox{\linewidth}{!}{%
     \begin{tikzpicture}[
         slab/.style={font=\small, align=center, text=evallmText, text width=3.0cm},
         bname/.style={font=\small\bfseries, text=evallmHighlight},
       ]
-      \useasboundingbox (0,0.6) rectangle (15.0,5.6);
-      \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,4.45);
-      \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,4.45);
-      \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,4.45);
-      \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,4.45);
-      \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,4.45);
-      \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,4.45);
-      \node[slab] at (2.8333,3.25)  {No information};
-      \node[slab] at (7.5,3.25)  {Non world-modeling pattern recognition};
-      \node[slab] at (12.1667,3.25) {Optimal solver};
-      \node[bname] at (2.8333,4.95)  {\textsc{Random}\,/\,\textsc{Null}};
-      \node[bname] at (7.5,4.95)  {\textsc{$n$-Gram}};
-      \node[bname] at (12.1667,4.95) {\textsc{Brute-Force}};
+      \useasboundingbox (0,0.6) rectangle (15.0,4.9);
+      \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,3.85);
+      \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,3.85);
+      \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,3.85);
+      \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,3.85);
+      \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,3.85);
+      \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,3.85);
+      \node[slab] at (2.8333,2.90)  {No information};
+      \node[slab] at (7.5,2.90)  {\shortstack{Non world-modeling\\pattern recognition}};
+      \node[slab] at (12.1667,2.90) {Optimal solver};
+      \node[bname] at (2.8333,4.10)  {\textsc{Random}\,/\,\textsc{Null}};
+      \node[bname] at (7.5,4.10)  {\textsc{$n$-Gram}};
+      \node[bname] at (12.1667,4.10) {\textsc{Brute-Force}};
       \draw[evallmHighlight, line width=1.2pt, decorate,
-            decoration={brace, amplitude=7pt, mirror, raise=2pt}]
-        (7.5,2.05) -- (11.0,2.05);
-      \node[font=\small\bfseries, text=evallmHighlight] at (9.25,1.25)
+            decoration={brace, amplitude=6pt, mirror, raise=2pt}]
+        (7.5,1.72) -- (11.0,1.72);
+      \node[font=\small\bfseries, text=evallmHighlight] at (9.25,0.95)
         {we'd expect LLMs to be here};
     \end{tikzpicture}}\par
     \vskip0.6ex
-    \resizebox{0.96\linewidth}{!}{%
+    \resizebox{0.98\linewidth}{!}{%
     \begin{minipage}{17cm}
     \ttfamily\normalsize
-    \setlength{\tabcolsep}{1.1em}\renewcommand{\arraystretch}{1.35}
-    \begin{tabular}{@{}ccc@{}}
-      \symA\,\symA\,\symB\,\symB\,\symA\,\symB\,\symB\,\symC & \symA\,\symA\,\symA\,\symB\,\symA\,\mt{\symA\,\symC}\,\pulled{\symA} & \symC\,\symC\,\symC\,\mt{\symA\,\symC}\,\pulled{\symA\,\symB\,\symA}\\
-      \symC\,\symA\,\symB\,\mt{\symA\,\symC}\,\pulled{\symA\,\symB\,\symA} & \symA\,\symB\,\symC\,\symC\,\symA\,\symA\,\symA\,\symB & \symB\,\symB\,\symB\,\symA\,\symB\,\symB\,\symB\,\symA
-    \end{tabular}
-    \par\vskip0.25em
-    \normalfont\small\textbf{Prefix:}~{\symA\,\symC\,\symB\,\qt{\symA\,\symC}\,\mask}\quad
-    Context $n{-}1=2$: \qt{\symA\,\symC}. Counts: \pulled{aba} twice, \pulled{a} once. Most common $\Rightarrow$ \pulled{aba} \yes
+    \begin{center}
+      \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}
+    \end{center}
+    \vskip0.25em
+    \normalfont\small\textbf{Transducer:} the context is \qt{\ob{0}\,\symA\,\ob{0}\,\symB}; counts: \pulled{0} twice, \pulled{1} once. Most common $\Rightarrow$ \pulled{0} \yes
     \end{minipage}}\par}
   \end{block}
 
 \end{minipage}
 \end{column}
 
-%% ====================================================== MIDDLE column: models and results
-\begin{column}{0.31\textwidth}
+%% ====================================================== RIGHT column: results
+\begin{column}{0.485\textwidth}
 \begin{minipage}[t][\colht][t]{\linewidth}
 
-  \begin{block}{Prompts \& models}
+
+  \begin{block}{Experiments}
     {\centering\calibratefigfonts
     \resizebox{\linewidth}{!}{%
     \begin{tikzpicture}[
@@ -388,6 +385,8 @@
     \end{tikzpicture}}\par}
     \vskip0.35ex
     {\small We report the \textbf{max over \textsc{Basic} and \textsc{Basic-CoT}} for each model's best pure-ICL shot. Models include open-weight, open-weight code, and proprietary families.}
+    \vskip0.35ex
+    {\small 30 sequences sampled per DFA, temperature 0. Open-weight models: \hl{1000} distinct DFAs each; proprietary models: \hl{30--100} (API cost).}
   \end{block}
 
   \vfill
@@ -401,20 +400,14 @@
 
   \vfill
 
-\end{minipage}
-\end{column}
-
-%% ====================================================== RIGHT column: examples and follow-up
-\begin{column}{0.31\textwidth}
-\begin{minipage}[t][\colht][t]{\linewidth}
-
-
   \begin{block}{Can LLMs solve this at all?}
-    {\centering\resizebox{0.82\linewidth}{!}{\input{generated/prompt_table.tex}}\par}
+    {\centering\resizebox{\linewidth}{!}{\input{generated/prompt_table.tex}}\par}
     {\scriptsize\textsuperscript{*} model did not answer prompt at least 25\% of the time\par}
     \vskip0.5ex
     {\small Grammar hints do not help; exact structure helps o3-mini only on transducer, and lets gpt-5 solve transducer perfectly. The gap is therefore not just task difficulty.}
   \end{block}
+
+  \vfill
 
   \begin{block}{Varying examples and states}
     \begin{columns}[c, totalwidth=\linewidth]
