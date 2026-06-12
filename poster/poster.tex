@@ -265,7 +265,7 @@
 
   \begin{block}{Two tasks per language}
     \centering\calibratefigfonts
-    \resizebox{0.8\linewidth}{!}{%
+    \resizebox{0.9\linewidth}{!}{%
     \begin{tikzpicture}[%
         panel/.style={rounded corners=6pt, draw=evallmText!55, line width=1pt, fill=white},
         htitle/.style={font=\Large\bfseries, text=evallmHighlight},
@@ -325,6 +325,7 @@
   \begin{block}{Baselines}
     {\centering\calibratefigfonts
     % full-width scaling
+    \vspace{-6em}
     \resizebox{\linewidth}{!}{%
     \begin{tikzpicture}[
         slab/.style={font=\small, align=center, text=evallmText, text width=4.35cm},
@@ -349,13 +350,19 @@
       \node[font=\small\bfseries, text=evallmHighlight] at (9.25,0.95)
         {we'd expect LLMs to be here};
     \end{tikzpicture}}\par
-    \resizebox{0.98\linewidth}{!}{%
-    \begin{minipage}{20cm}
-    \ttfamily\scriptsize
-    \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}\quad
-    \symA\,\ob{0}\,\symC\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\,\symC\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\quad
-    \symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{1}}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\mask
-    \end{minipage}}\par}
+    % {
+    %   \LARGE
+    %   An $n$-$\textsc{Gram}$ example:\\
+    %   {
+    %   \ttfamily
+    %   \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}\quad
+    %   \symA\,\ob{0}\,\symC\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\,\symC\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\quad
+    %   \symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{1}}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\mask
+    %   }\\
+    %   We take the $n-1 = 4$ element suffix (\symA\,\ob{0}\,\symB\,\ob{0}) as context, find all occurrences in the input, and predict the next tokens for each (\ob{1}, \ob{0}, \ob{0}) and return the majority (\ob{0} in this case).
+      
+    % }
+    \par}
   \end{block}
 
 \end{minipage}
