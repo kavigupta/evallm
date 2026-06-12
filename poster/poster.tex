@@ -262,10 +262,11 @@
   \end{block}
   \vfill
 
+
   \begin{block}{Two tasks per language}
-    {\centering\calibratefigfonts
-    \resizebox{!}{11cm}{%
-    \begin{tikzpicture}[
+    \centering\calibratefigfonts
+    \resizebox{0.8\linewidth}{!}{%
+    \begin{tikzpicture}[%
         panel/.style={rounded corners=6pt, draw=evallmText!55, line width=1pt, fill=white},
         htitle/.style={font=\Large\bfseries, text=evallmHighlight},
         seq/.style={anchor=west, font=\ttfamily\normalsize},
@@ -273,9 +274,9 @@
         brm/.style={decorate, decoration={brace, amplitude=5pt, mirror}, line width=1pt, draw=evallmText},
         cnt/.style={font=\small\bfseries, text=evallmText},
       ]
-      \useasboundingbox (0,0.4) rectangle (16,8.3);
+      \useasboundingbox (0,1.3) rectangle (16,8.3);
       %% LEFT: Sequence Completion -- 30 ticked strings of length 10
-      \draw[panel] (0.2,0.6) rectangle (7.8,8.1);
+      \draw[panel] (0.2,1.3) rectangle (7.8,8.1);
       \node[htitle] at (4.0,7.6) {Sequence Completion};
       \node[seq] (a1) at (2.0,6.5) {a b c a b c a b c a};
       \node[seq] (a2) at (2.0,5.95){c a b b a c a b c a};
@@ -294,7 +295,7 @@
       \draw[brm] (q2.south west) -- (q2.south east);
       \node[cnt, text=ecgreen] at ($(q2.south)+(0,-0.5)$) {1--5};
       %% RIGHT: Transducer -- one example, symbols and accept bits on separate lines
-      \draw[panel] (8.2,0.6) rectangle (15.8,8.1);
+      \draw[panel] (8.2,1.3) rectangle (15.8,8.1);
       \node[htitle] at (12.0,7.6) {Transducer};
       \node[cnt, anchor=east] at (9.55,5.2) {symbol};
       \node[cnt, anchor=east] at (9.55,4.5) {accept};
@@ -308,7 +309,15 @@
       \node[tok, text=ecgreen] at (14.05,4.5) {\textbf{?}};
       \draw[brm] (9.65,4.15) -- (14.25,4.15);
       \node[cnt] at (11.95,3.55) {30};
-    \end{tikzpicture}}\par}
+    \end{tikzpicture}}\par
+    % \vskip0.35ex
+    % \resizebox{0.98\linewidth}{!}{%
+    % \begin{minipage}{20cm}
+    % \ttfamily\scriptsize
+    % \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}%
+    % \symA\,\ob{0}\,\symC\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\,\symC\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}%
+    % \symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{1}}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\mask
+    % \end{minipage}}
   \end{block}
   \vfill
 
@@ -318,18 +327,18 @@
     % full-width scaling
     \resizebox{\linewidth}{!}{%
     \begin{tikzpicture}[
-        slab/.style={font=\small, align=center, text=evallmText, text width=3.0cm},
+        slab/.style={font=\small, align=center, text=evallmText, text width=4.35cm},
         bname/.style={font=\small\bfseries, text=evallmHighlight},
       ]
       \useasboundingbox (0,0.6) rectangle (15.0,4.9);
-      \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,3.85);
-      \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,3.85);
-      \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,3.85);
-      \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,3.85);
-      \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,3.85);
-      \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,3.85);
+      \fill[fill=evallmHighlight!12] (0.5,2.05) rectangle (5.1667,3.55);
+      \fill[fill=evallmHighlight!44] (5.1667,2.05) rectangle (9.8333,3.55);
+      \fill[fill=evallmHighlight!62] (9.8333,2.05) rectangle (14.5,3.55);
+      \draw[evallmText, line width=1.1pt] (0.5,2.05) rectangle (14.5,3.55);
+      \draw[evallmText, line width=1.1pt] (5.1667,2.05) -- (5.1667,3.55);
+      \draw[evallmText, line width=1.1pt] (9.8333,2.05) -- (9.8333,3.55);
       \node[slab] at (2.8333,2.90)  {No information};
-      \node[slab] at (7.5,2.90)  {\shortstack{Non world-modeling\\pattern recognition}};
+      \node[slab] at (7.5,2.90)  {Non world-modeling pattern recognition};
       \node[slab] at (12.1667,2.90) {Optimal solver};
       \node[bname] at (2.8333,4.10)  {\textsc{Random}\,/\,\textsc{Null}};
       \node[bname] at (7.5,4.10)  {\textsc{$n$-Gram}};
@@ -340,15 +349,12 @@
       \node[font=\small\bfseries, text=evallmHighlight] at (9.25,0.95)
         {we'd expect LLMs to be here};
     \end{tikzpicture}}\par
-    \vskip0.6ex
     \resizebox{0.98\linewidth}{!}{%
-    \begin{minipage}{17cm}
-    \ttfamily\normalsize
-    \begin{center}
-      \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}
-    \end{center}
-    \vskip0.25em
-    \normalfont\small\textbf{Transducer:} the context is \qt{\ob{0}\,\symA\,\ob{0}\,\symB}; counts: \pulled{0} twice, \pulled{1} once. Most common $\Rightarrow$ \pulled{0} \yes
+    \begin{minipage}{20cm}
+    \ttfamily\scriptsize
+    \symB\,\ob{0}\,\symC\,\ob{1}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\ob{0}\,\symB\,\ob{0}\,\symB\,\ob{1}\,\symC\,\ob{0}\,\symA\,\ob{0}\quad
+    \symA\,\ob{0}\,\symC\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\,\symC\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{0}}\,\symC\,\ob{0}\quad
+    \symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\pulled{\ob{1}}\,\symB\,\ob{0}\,\symC\,\ob{1}\,\symA\,\ob{1}\,\symB\,\qt{\ob{0}\,\symA\,\ob{0}\,\symB}\,\mask
     \end{minipage}}\par}
   \end{block}
 
@@ -401,8 +407,8 @@
   \vfill
 
   \begin{block}{Can LLMs solve this at all?}
-    {\centering\resizebox{\linewidth}{!}{\input{generated/prompt_table.tex}}\par}
-    {\scriptsize\textsuperscript{*} model did not answer prompt at least 25\% of the time\par}
+    \input{generated/prompt_table_stacked.tex}
+    {\scriptsize N/A means invalid or incorrect-format answer at least 25\% of the time\par}
     \vskip0.5ex
     {\small Grammar hints do not help; exact structure helps o3-mini only on transducer, and lets gpt-5 solve transducer perfectly. The gap is therefore not just task difficulty.}
   \end{block}
